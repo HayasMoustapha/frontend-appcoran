@@ -535,6 +535,7 @@ export function RecitationPlayer() {
           ref={audioRef}
           src={recitation.streamUrl || recitation.downloadUrl}
           preload="metadata"
+          crossOrigin="anonymous"
           onError={() => {
             if (conversionTimerRef.current) {
               window.clearTimeout(conversionTimerRef.current);
