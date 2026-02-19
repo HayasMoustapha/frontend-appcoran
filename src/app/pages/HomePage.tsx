@@ -12,6 +12,15 @@ import {
   Chip,
   Snackbar,
   Alert,
+  ToggleButton,
+  ToggleButtonGroup,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper
 } from "@mui/material";
 import { Search, TrendingUp, AccessTime, Star } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
@@ -21,10 +30,12 @@ import { isNetworkError } from "../api/client";
 import { getPublicProfile } from "../api/profile";
 import { mapAudioToRecitation, mapPublicProfile } from "../api/mappers";
 import type { ImamProfile, Recitation } from "../domain/types";
+import { useNavigate } from "react-router";
 
 export function HomePage() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [allRecitations, setAllRecitations] = useState<Recitation[]>([]);
   const [recentRecitations, setRecentRecitations] = useState<Recitation[]>([]);
   const [popularRecitations, setPopularRecitations] = useState<Recitation[]>([]);
@@ -41,7 +52,7 @@ export function HomePage() {
     phone: "",
     avatar: ""
   });
-  const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -60,11 +71,14 @@ export function HomePage() {
         setSearchResults(mappedAll);
         setRecentRecitations(recent.map(mapAudioToRecitation));
         setPopularRecitations(popular.map(mapAudioToRecitation));
-        setError("");
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
-        setError(err instanceof Error ? err.message : "Erreur lors du chargement");
+        const message = err instanceof Error ? err.message : "Erreur lors du chargement";
+        if (message === "Profile not found") {
+          return;
+        }
+        return;
       }
     };
     loadData();
@@ -84,11 +98,14 @@ export function HomePage() {
         const result = await searchAudios({ query: searchQuery, page: 1, limit: 20 });
         if (!active) return;
         setSearchResults(result.data.map(mapAudioToRecitation));
-        setError("");
+        setToast({ message: "Recherche mise à jour.", severity: "success" });
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
-        setError(err instanceof Error ? err.message : "Recherche impossible");
+        setToast({
+          message: err instanceof Error ? err.message : "Recherche impossible",
+          severity: "error"
+        });
       }
     }, 300);
     return () => {
@@ -103,6 +120,8 @@ export function HomePage() {
       : selectedTab === 1
       ? recentRecitations
       : popularRecitations;
+
+  const navigate = useNavigate();
 
   return (
     <Box sx={{ minHeight: "100vh", background: "#F9FAFB" }}>
@@ -382,7 +401,7 @@ export function HomePage() {
 
               {/* Formation et Parcours en colonnes */}
               <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Box
                     sx={{
                       p: 2.5,
@@ -416,7 +435,7 @@ export function HomePage() {
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Box
                     sx={{
                       p: 2.5,
@@ -454,8 +473,17 @@ export function HomePage() {
           </Box>
         </Box>
 
-        {/* Tabs */}
-        <Box sx={{ mb: 4 }}>
+        {/* Tabs + Affichage */}
+        <Box
+          sx={{
+            mb: 4,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 2,
+            flexWrap: "wrap"
+          }}
+        >
           <Tabs
             value={selectedTab}
             onChange={(_, newValue) => setSelectedTab(newValue)}
@@ -501,19 +529,109 @@ export function HomePage() {
               }}
             />
           </Tabs>
+
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={(_, value) => {
+              if (value) setViewMode(value);
+            }}
+            size="small"
+            sx={{
+              background: "white",
+              borderRadius: 3,
+              boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+              "& .MuiToggleButton-root": {
+                px: 3,
+                textTransform: "none",
+                fontWeight: 600,
+                border: "none"
+              }
+            }}
+          >
+            <ToggleButton value="cards">Cartes</ToggleButton>
+            <ToggleButton value="list">Liste</ToggleButton>
+          </ToggleButtonGroup>
         </Box>
-        {/* Recitations Grid */}
+
         {displayedRecitations.length > 0 ? (
-          <Grid container spacing={3}>
-            {displayedRecitations.map((recitation, index) => (
-              <Grid item xs={12} sm={6} md={4} key={recitation.id}>
-                <RecitationCard
-                  recitation={recitation}
-                  featured={index === 0 && selectedTab === 2}
-                />
-              </Grid>
-            ))}
-          </Grid>
+          viewMode === "cards" ? (
+            <Grid container spacing={3}>
+              {displayedRecitations.map((recitation, index) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={recitation.id}>
+                  <RecitationCard
+                    recitation={recitation}
+                    featured={index === 0 && selectedTab === 2}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <TableContainer
+              component={Paper}
+              elevation={2}
+              sx={{
+                borderRadius: 4,
+                overflow: "hidden",
+                border: "1px solid rgba(15, 118, 110, 0.1)"
+              }}
+            >
+              <Table>
+                <TableHead>
+                  <TableRow
+                    sx={{
+                      background:
+                        "linear-gradient(135deg, rgba(4,120,87,0.08) 0%, rgba(5,150,105,0.08) 100%)"
+                    }}
+                  >
+                    <TableCell sx={{ fontWeight: 800 }}>Récitation</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }}>Sourate</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }}>Versets</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }}>Écoutes</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }}>Téléchargements</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 800 }}>
+                      Action
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {displayedRecitations.map((recitation) => (
+                    <TableRow key={recitation.id} hover>
+                      <TableCell>
+                        <Typography fontWeight={700}>{recitation.title}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {recitation.description || "Récitation sacrée"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{recitation.surah}</TableCell>
+                      <TableCell>{recitation.ayatRange}</TableCell>
+                      <TableCell>{recitation.date}</TableCell>
+                      <TableCell>{recitation.listens.toLocaleString()}</TableCell>
+                      <TableCell>{recitation.downloads.toLocaleString()}</TableCell>
+                      <TableCell align="right">
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() =>
+                            navigate(`/recitation/${recitation.slug || recitation.id}`)
+                          }
+                          sx={{
+                            borderRadius: 2,
+                            textTransform: "none",
+                            fontWeight: 700,
+                            background: "linear-gradient(135deg, #047857 0%, #059669 100%)"
+                          }}
+                        >
+                          Écouter
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )
         ) : (
           <Box
             sx={{
@@ -557,14 +675,16 @@ export function HomePage() {
       </Box>
 
       <Snackbar
-        open={Boolean(error)}
-        autoHideDuration={6000}
-        onClose={() => setError("")}
+        open={Boolean(toast)}
+        autoHideDuration={4000}
+        onClose={() => setToast(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
-          {error}
-        </Alert>
+        {toast ? (
+          <Alert severity={toast.severity} onClose={() => setToast(null)} sx={{ borderRadius: 2 }}>
+            {toast.message}
+          </Alert>
+        ) : null}
       </Snackbar>
     </Box>
   );

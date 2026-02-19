@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Container,
   Box,
@@ -33,17 +33,8 @@ import { Navbar } from "../components/Navbar";
 import { useNavigate } from "react-router";
 import { uploadAudio } from "../api/audios";
 import { isNetworkError } from "../api/client";
-
-const surahs = [
-  { number: 1, name: "الفاتحة", transliteration: "Al-Fatiha" },
-  { number: 2, name: "البقرة", transliteration: "Al-Baqarah" },
-  { number: 36, name: "يس", transliteration: "Yasin" },
-  { number: 55, name: "الرحمن", transliteration: "Ar-Rahman" },
-  { number: 67, name: "الملك", transliteration: "Al-Mulk" },
-  { number: 112, name: "الإخلاص", transliteration: "Al-Ikhlas" },
-  { number: 113, name: "الفلق", transliteration: "Al-Falaq" },
-  { number: 114, name: "الناس", transliteration: "An-Nas" }
-];
+import { getSurahReference } from "../api/surahReference";
+import type { SurahReference } from "../domain/types";
 
 type RecordingState = "idle" | "recording" | "recorded" | "uploading" | "success";
 
@@ -59,10 +50,52 @@ export function RecordPage() {
 
   const [title, setTitle] = useState("");
   const [selectedSurah, setSelectedSurah] = useState("");
-  const [ayatRange, setAyatRange] = useState("");
+  const [verseStart, setVerseStart] = useState<number | "">("");
+  const [verseEnd, setVerseEnd] = useState<number | "">("");
   const [description, setDescription] = useState("");
   const [withBasmala, setWithBasmala] = useState(true);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
+  const [surahReference, setSurahReference] = useState<SurahReference[]>([]);
+  const [surahLoading, setSurahLoading] = useState(true);
+  const [surahError, setSurahError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    const loadSurahReference = async () => {
+      try {
+        const data = await getSurahReference();
+        if (!active) return;
+        setSurahReference(data);
+        setSurahError("");
+      } catch (err) {
+        if (!active) return;
+        if (isNetworkError(err)) return;
+        setSurahError(err instanceof Error ? err.message : "Référentiel indisponible");
+      } finally {
+        if (active) setSurahLoading(false);
+      }
+    };
+    loadSurahReference();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    setVerseStart("");
+    setVerseEnd("");
+  }, [selectedSurah]);
+
+  useEffect(() => {
+    if (verseStart === "") {
+      setVerseEnd("");
+      return;
+    }
+    if (verseEnd !== "" && Number(verseEnd) < Number(verseStart)) {
+      setVerseEnd(verseStart);
+    }
+  }, [verseStart, verseEnd]);
 
   const handleStartRecording = async () => {
     setError("");
@@ -87,6 +120,7 @@ export function RecordPage() {
         const file = new File([blob], `recitation-${Date.now()}.webm`, { type: blob.type });
         setUploadedFile(file);
         setRecordingState("recorded");
+        setToast({ message: "Enregistrement prêt.", severity: "success" });
         stream.getTracks().forEach((track) => track.stop());
         mediaStreamRef.current = null;
       };
@@ -123,6 +157,7 @@ export function RecordPage() {
     setRecordingState("idle");
     setRecordingTime(0);
     setUploadedFile(null);
+    setToast({ message: "Enregistrement supprimé.", severity: "success" });
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,18 +167,8 @@ export function RecordPage() {
       setRecordingState("recorded");
       setRecordingTime(180);
       setError("");
+      setToast({ message: "Fichier importé.", severity: "success" });
     }
-  };
-
-  const parseAyatRange = () => {
-    const parts = ayatRange.split("-").map((item) => item.trim()).filter(Boolean);
-    if (!parts.length) return { versetStart: undefined, versetEnd: undefined };
-    const start = Number(parts[0]);
-    const end = Number(parts[1] ?? parts[0]);
-    return {
-      versetStart: Number.isFinite(start) ? start : undefined,
-      versetEnd: Number.isFinite(end) ? end : undefined
-    };
   };
 
   const handlePublish = async () => {
@@ -155,15 +180,23 @@ export function RecordPage() {
     setUploadProgress(10);
     setError("");
 
-    const selected = surahs.find((surah) => surah.number.toString() === selectedSurah);
-    const { versetStart, versetEnd } = parseAyatRange();
+    const selected = surahReference.find((surah) => surah.number.toString() === selectedSurah);
+    if (!selected) {
+      setRecordingState("recorded");
+      setUploadProgress(0);
+      setError("Veuillez sélectionner une sourate valide.");
+      return;
+    }
+    const normalizedStart = verseStart === "" ? undefined : Number(verseStart);
+    const normalizedEnd =
+      verseEnd === "" ? normalizedStart : Number(verseEnd);
     const formData = new FormData();
     formData.append("file", uploadedFile);
     formData.append("title", title);
-    formData.append("sourate", selected?.name || "");
+    formData.append("sourate", selected?.name_ar || "");
     formData.append("numeroSourate", selectedSurah);
-    if (versetStart !== undefined) formData.append("versetStart", String(versetStart));
-    if (versetEnd !== undefined) formData.append("versetEnd", String(versetEnd));
+    if (normalizedStart !== undefined) formData.append("versetStart", String(normalizedStart));
+    if (normalizedEnd !== undefined) formData.append("versetEnd", String(normalizedEnd));
     formData.append("description", description);
     formData.append("addBasmala", String(withBasmala));
 
@@ -171,6 +204,7 @@ export function RecordPage() {
       await uploadAudio(formData);
       setUploadProgress(100);
       setRecordingState("success");
+      setToast({ message: "Récitation publiée avec succès.", severity: "success" });
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
@@ -187,6 +221,15 @@ export function RecordPage() {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  const selectedSurahEntry = surahReference.find(
+    (surah) => surah.number.toString() === selectedSurah
+  );
+  const verseOptions = selectedSurahEntry
+    ? Array.from({ length: selectedSurahEntry.verses }, (_, i) => i + 1)
+    : [];
+  const verseEndOptions =
+    verseStart !== "" ? verseOptions.filter((value) => value >= Number(verseStart)) : verseOptions;
 
   return (
     <Box sx={{ minHeight: "100vh", background: "#F9FAFB" }}>
@@ -462,31 +505,88 @@ export function RecordPage() {
                 disabled={recordingState === "uploading"}
               />
 
-              <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-                <FormControl fullWidth disabled={recordingState === "uploading"}>
+              <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+                <FormControl
+                  data-testid="surah-select"
+                  fullWidth
+                  disabled={recordingState === "uploading" || surahLoading || Boolean(surahError)}
+                >
                   <InputLabel>Sourate</InputLabel>
                   <Select
                     value={selectedSurah}
                     label="Sourate"
                     onChange={(e) => setSelectedSurah(e.target.value)}
                   >
-                    {surahs.map((surah) => (
+                    {surahReference.map((surah) => (
                       <MenuItem key={surah.number} value={surah.number.toString()}>
-                        {surah.number}. {surah.name} - {surah.transliteration}
+                        {surah.number}. {surah.name_fr} • {surah.name_ar} ({surah.name_phonetic})
                       </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
 
-                <TextField
-                  label="Versets"
-                  value={ayatRange}
-                  onChange={(e) => setAyatRange(e.target.value)}
-                  placeholder="Ex: 1-7"
-                  sx={{ minWidth: 150 }}
-                  disabled={recordingState === "uploading"}
-                />
+                <FormControl
+                  data-testid="verse-start-select"
+                  sx={{ minWidth: 160 }}
+                  disabled={
+                    recordingState === "uploading" ||
+                    !selectedSurah ||
+                    surahLoading ||
+                    Boolean(surahError)
+                  }
+                >
+                  <InputLabel>Verset début</InputLabel>
+                  <Select
+                    value={verseStart}
+                    label="Verset début"
+                    onChange={(e) => {
+                      const next =
+                        e.target.value === "" ? "" : Number(e.target.value);
+                      setVerseStart(next);
+                    }}
+                  >
+                    {verseOptions.map((value) => (
+                      <MenuItem key={value} value={value}>
+                        {value}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl
+                  data-testid="verse-end-select"
+                  sx={{ minWidth: 160 }}
+                  disabled={
+                    recordingState === "uploading" ||
+                    !selectedSurah ||
+                    surahLoading ||
+                    Boolean(surahError)
+                  }
+                >
+                  <InputLabel>Verset fin</InputLabel>
+                  <Select
+                    value={verseEnd}
+                    label="Verset fin"
+                    onChange={(e) => {
+                      const next =
+                        e.target.value === "" ? "" : Number(e.target.value);
+                      setVerseEnd(next);
+                    }}
+                  >
+                    {verseEndOptions.map((value) => (
+                      <MenuItem key={value} value={value}>
+                        {value}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Box>
+
+              {surahError && (
+                <Typography variant="caption" color="error" sx={{ display: "block", mb: 2 }}>
+                  {surahError}
+                </Typography>
+              )}
 
               <TextField
                 fullWidth
@@ -595,13 +695,26 @@ export function RecordPage() {
 
       <Snackbar
         open={Boolean(error)}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={() => setError("")}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
           {error}
         </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={Boolean(toast)}
+        autoHideDuration={4000}
+        onClose={() => setToast(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        {toast ? (
+          <Alert severity={toast.severity} onClose={() => setToast(null)} sx={{ borderRadius: 2 }}>
+            {toast.message}
+          </Alert>
+        ) : null}
       </Snackbar>
     </Box>
   );

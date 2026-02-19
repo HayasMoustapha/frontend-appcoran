@@ -61,3 +61,14 @@ export interface DashboardPeriodStat {
   downloads: number;
   shares: number;
 }
+
+export interface SurahReference {
+  number: number;
+  name_fr: string;
+  name_phonetic: string;
+  name_ar: string;
+  revelation: number;
+  verses: number;
+  words: number;
+  letters: number;
+}

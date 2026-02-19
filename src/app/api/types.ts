@@ -49,3 +49,14 @@ export interface ApiPublicProfile {
   email?: string | null;
   phone?: string | null;
 }
+
+export interface ApiSurahReference {
+  number: number;
+  name_fr: string;
+  name_phonetic: string;
+  name_ar: string;
+  revelation: number;
+  verses: number;
+  words: number;
+  letters: number;
+}

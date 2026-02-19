@@ -57,7 +57,7 @@ export function ImamProfilePage() {
   const [originalProfile, setOriginalProfile] = useState<ImamProfile | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [profileExists, setProfileExists] = useState(false);
-  const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -70,14 +70,14 @@ export function ImamProfilePage() {
         setProfile(mapped);
         setOriginalProfile(mapped);
         setProfileExists(true);
-        setError("");
+        setToast(null);
       } else {
         setProfileExists(false);
       }
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
-        setError(err instanceof Error ? err.message : "Chargement impossible");
+        return;
       }
     };
     loadProfile();
@@ -87,7 +87,6 @@ export function ImamProfilePage() {
   }, []);
 
   const handleSave = async () => {
-    setError("");
     const formData = new FormData();
     formData.append("name", profile.name || "");
     formData.append("biography", profile.bio || "");
@@ -113,10 +112,10 @@ export function ImamProfilePage() {
       setProfileExists(true);
       setPhotoFile(null);
       setIsEditing(false);
-      setError("");
+      setToast({ message: "Profil enregistré avec succès.", severity: "success" });
     } catch (err) {
       if (isNetworkError(err)) return;
-      setError(err instanceof Error ? err.message : "Enregistrement impossible");
+      setToast({ message: err instanceof Error ? err.message : "Enregistrement impossible", severity: "error" });
     }
   };
 
@@ -645,14 +644,16 @@ export function ImamProfilePage() {
       </Container>
 
       <Snackbar
-        open={Boolean(error)}
-        autoHideDuration={6000}
-        onClose={() => setError("")}
+        open={Boolean(toast)}
+        autoHideDuration={4000}
+        onClose={() => setToast(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
-          {error}
-        </Alert>
+        {toast ? (
+          <Alert severity={toast.severity} onClose={() => setToast(null)} sx={{ borderRadius: 2 }}>
+            {toast.message}
+          </Alert>
+        ) : null}
       </Snackbar>
     </Box>
   );

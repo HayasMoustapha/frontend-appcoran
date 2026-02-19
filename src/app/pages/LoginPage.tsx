@@ -22,6 +22,7 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -36,7 +37,10 @@ export function LoginPage() {
     try {
       setLoading(true);
       await login(email, password);
-      navigate("/dashboard");
+      setToast({ message: "Connexion réussie.", severity: "success" });
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 600);
     } catch (err) {
       if (isNetworkError(err)) return;
       setError(err instanceof Error ? err.message : "Connexion impossible");
@@ -202,13 +206,26 @@ export function LoginPage() {
 
       <Snackbar
         open={Boolean(error)}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={() => setError("")}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
           {error}
         </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={Boolean(toast)}
+        autoHideDuration={3000}
+        onClose={() => setToast(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        {toast ? (
+          <Alert severity={toast.severity} onClose={() => setToast(null)} sx={{ borderRadius: 2 }}>
+            {toast.message}
+          </Alert>
+        ) : null}
       </Snackbar>
     </Box>
   );

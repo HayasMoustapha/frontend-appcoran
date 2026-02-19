@@ -51,10 +51,13 @@ export function RecitationPlayer() {
   const [volume, setVolume] = useState(80);
   const [isFavorite, setIsFavorite] = useState(false);
   const [error, setError] = useState("");
+  const [audioLoadError, setAudioLoadError] = useState("");
+  const [hasTriedPlay, setHasTriedPlay] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [conversionOpen, setConversionOpen] = useState(false);
   const [showConversionBadge, setShowConversionBadge] = useState(false);
+  const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
   const conversionTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -67,7 +70,12 @@ export function RecitationPlayer() {
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
-        setError(err instanceof Error ? err.message : "Chargement impossible");
+        const message = err instanceof Error ? err.message : "Chargement impossible";
+        if (message === "Audio not found") {
+          setError(message);
+          return;
+        }
+        setError(message);
       }
     };
     loadRecitations();
@@ -87,7 +95,8 @@ export function RecitationPlayer() {
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
-        setError(err instanceof Error ? err.message : "Récitation introuvable");
+        const message = err instanceof Error ? err.message : "Récitation introuvable";
+        setError(message);
       }
     };
     loadRecitation();
@@ -110,6 +119,7 @@ export function RecitationPlayer() {
       }
       setConversionOpen(false);
       setShowConversionBadge(false);
+      setAudioLoadError("");
     };
     const onLoadStart = () => {
       if (conversionTimerRef.current) {
@@ -146,6 +156,11 @@ export function RecitationPlayer() {
     }
   }, [volume]);
 
+  useEffect(() => {
+    setAudioLoadError("");
+    setHasTriedPlay(false);
+  }, [recitation?.slug]);
+
   const currentIndex = allRecitations.findIndex(
     (item) => item.slug === recitation?.slug || item.id === recitation?.id
   );
@@ -165,6 +180,11 @@ export function RecitationPlayer() {
     const audio = audioRef.current;
     if (!audio) return;
     try {
+      setHasTriedPlay(true);
+      if (audioLoadError) {
+        setToast({ message: audioLoadError, severity: "error" });
+        return;
+      }
       if (isPlaying) {
         audio.pause();
         setIsPlaying(false);
@@ -174,7 +194,7 @@ export function RecitationPlayer() {
       }
     } catch (err) {
       if (isNetworkError(err)) return;
-      setError(err instanceof Error ? err.message : "Lecture impossible");
+      setToast({ message: err instanceof Error ? err.message : "Lecture impossible", severity: "error" });
     }
   };
 
@@ -197,6 +217,7 @@ export function RecitationPlayer() {
   const handleDownload = () => {
     if (!recitation?.downloadUrl) return;
     window.open(recitation.downloadUrl, "_blank", "noopener");
+    setToast({ message: "Téléchargement démarré.", severity: "success" });
   };
 
   const handleShare = async () => {
@@ -212,6 +233,7 @@ export function RecitationPlayer() {
             text: `Écoutez ${recitation.title}`,
             url
           });
+          setToast({ message: "Partage lancé.", severity: "success" });
         } catch (shareErr) {
           setShareOpen(true);
         }
@@ -220,10 +242,11 @@ export function RecitationPlayer() {
       }
       if (!navigator.share && navigator.clipboard) {
         await navigator.clipboard.writeText(url);
+        setToast({ message: "Lien copié.", severity: "success" });
       }
     } catch (err) {
       if (isNetworkError(err)) return;
-      setError(err instanceof Error ? err.message : "Partage impossible");
+      setToast({ message: err instanceof Error ? err.message : "Partage impossible", severity: "error" });
     }
   };
 
@@ -518,7 +541,11 @@ export function RecitationPlayer() {
               conversionTimerRef.current = null;
             }
             setConversionOpen(false);
-            setError("Lecture audio impossible. Format non supporté ou fichier manquant.");
+            const message = "Lecture audio impossible. Format non supporté ou fichier manquant.";
+            setAudioLoadError(message);
+            if (hasTriedPlay) {
+              setToast({ message, severity: "error" });
+            }
           }}
         />
       </Container>
@@ -533,6 +560,7 @@ export function RecitationPlayer() {
             onClick={async () => {
               if (navigator.clipboard && shareUrl) {
                 await navigator.clipboard.writeText(shareUrl);
+                setToast({ message: "Lien copié.", severity: "success" });
               }
             }}
           >
@@ -543,14 +571,16 @@ export function RecitationPlayer() {
       </Dialog>
 
       <Snackbar
-        open={Boolean(error)}
-        autoHideDuration={6000}
-        onClose={() => setError("")}
+        open={Boolean(toast)}
+        autoHideDuration={4000}
+        onClose={() => setToast(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
-          {error}
-        </Alert>
+        {toast ? (
+          <Alert severity={toast.severity} onClose={() => setToast(null)} sx={{ borderRadius: 2 }}>
+            {toast.message}
+          </Alert>
+        ) : null}
       </Snackbar>
 
       <Snackbar

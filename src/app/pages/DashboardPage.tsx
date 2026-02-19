@@ -52,7 +52,7 @@ export function DashboardPage() {
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [performance, setPerformance] = useState<DashboardPerformanceItem[]>([]);
   const [recitations, setRecitations] = useState<Recitation[]>([]);
-  const [error, setError] = useState("");
+  const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportStats, setReportStats] = useState<{ day: string; listens: number; downloads: number; shares: number }[]>([]);
@@ -80,11 +80,10 @@ export function DashboardPage() {
         setOverview(overviewData);
         setPerformance(performanceData.slice(0, 3));
         setRecitations(all.map(mapAudioToRecitation));
-        setError("");
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
-        setError(err instanceof Error ? err.message : "Chargement impossible");
+        return;
       }
     };
     loadDashboard();
@@ -105,10 +104,10 @@ export function DashboardPage() {
     try {
       const stats = await getDashboardStats("7d");
       setReportStats(stats);
-      setError("");
+      setToast({ message: "Rapport chargé avec succès.", severity: "success" });
     } catch (err) {
       if (!isNetworkError(err)) {
-        setError(err instanceof Error ? err.message : "Chargement impossible");
+        setToast({ message: err instanceof Error ? err.message : "Chargement impossible", severity: "error" });
       }
     } finally {
       setReportLoading(false);
@@ -195,7 +194,7 @@ export function DashboardPage() {
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Statistics Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 borderRadius: 3,
@@ -218,7 +217,7 @@ export function DashboardPage() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 borderRadius: 3,
@@ -241,7 +240,7 @@ export function DashboardPage() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 borderRadius: 3,
@@ -264,7 +263,7 @@ export function DashboardPage() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
               sx={{
                 borderRadius: 3,
@@ -329,7 +328,7 @@ export function DashboardPage() {
               const engagementRate = Math.round((recitation.engagement_ratio || 0) * 100);
 
               return (
-                <Grid item xs={12} key={recitation.id}>
+                <Grid size={{ xs: 12 }} key={recitation.id}>
                   <Box
                     sx={{
                       p: 2,
@@ -412,7 +411,7 @@ export function DashboardPage() {
 
           <Grid container spacing={2}>
             {recitations.map((recitation) => (
-              <Grid item xs={12} key={recitation.id}>
+              <Grid size={{ xs: 12 }} key={recitation.id}>
                 <Box
                   sx={{
                     p: 2.5,
@@ -548,14 +547,16 @@ export function DashboardPage() {
       </Dialog>
 
       <Snackbar
-        open={Boolean(error)}
-        autoHideDuration={6000}
-        onClose={() => setError("")}
+        open={Boolean(toast)}
+        autoHideDuration={4000}
+        onClose={() => setToast(null)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
-          {error}
-        </Alert>
+        {toast ? (
+          <Alert severity={toast.severity} onClose={() => setToast(null)} sx={{ borderRadius: 2 }}>
+            {toast.message}
+          </Alert>
+        ) : null}
       </Snackbar>
     </Box>
   );
