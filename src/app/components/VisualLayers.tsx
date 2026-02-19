@@ -3,6 +3,7 @@ import * as THREE from "three";
 
 export function VisualLayers() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const pointerRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -53,6 +54,53 @@ export function VisualLayers() {
     const stars = new THREE.Points(starsGeometry, starsMaterial);
     scene.add(stars);
 
+    const deepStarsGeometry = new THREE.BufferGeometry();
+    const deepCount = 220;
+    const deepPositions = new Float32Array(deepCount * 3);
+    for (let i = 0; i < deepCount; i++) {
+      const idx = i * 3;
+      deepPositions[idx] = (Math.random() - 0.5) * 24;
+      deepPositions[idx + 1] = (Math.random() - 0.5) * 14;
+      deepPositions[idx + 2] = -6 - Math.random() * 8;
+    }
+    deepStarsGeometry.setAttribute("position", new THREE.BufferAttribute(deepPositions, 3));
+    const deepStarsMaterial = new THREE.PointsMaterial({
+      size: 0.02,
+      color: new THREE.Color(0xf8f6f1),
+      transparent: true,
+      opacity: 0.4
+    });
+    const deepStars = new THREE.Points(deepStarsGeometry, deepStarsMaterial);
+    scene.add(deepStars);
+
+    const haloTexture = (() => {
+      const size = 256;
+      const c = document.createElement("canvas");
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext("2d");
+      if (ctx) {
+        const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+        gradient.addColorStop(0, "rgba(212,175,55,0.6)");
+        gradient.addColorStop(0.4, "rgba(212,175,55,0.15)");
+        gradient.addColorStop(1, "rgba(212,175,55,0)");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, size, size);
+      }
+      return new THREE.CanvasTexture(c);
+    })();
+
+    const haloMaterial = new THREE.SpriteMaterial({
+      map: haloTexture,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending
+    });
+    const halo = new THREE.Sprite(haloMaterial);
+    halo.scale.set(6, 6, 1);
+    halo.position.set(2.5, 1.2, -3);
+    scene.add(halo);
+
     const dunesGeometry = new THREE.PlaneGeometry(20, 6, 64, 16);
     const dunesMaterial = new THREE.MeshBasicMaterial({
       color: 0x0f2f3b,
@@ -66,6 +114,21 @@ export function VisualLayers() {
     scene.add(dunes);
 
     let frameId: number;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+
+    const handlePointer = (event: MouseEvent) => {
+      const x = (event.clientX / window.innerWidth) * 2 - 1;
+      const y = (event.clientY / window.innerHeight) * 2 - 1;
+      pointerRef.current = { x, y };
+      targetX = x * 0.3;
+      targetY = y * 0.2;
+      canvas.style.setProperty("--mouse-x", `${event.clientX}px`);
+      canvas.style.setProperty("--mouse-y", `${event.clientY}px`);
+    };
+
     const resize = () => {
       const { innerWidth, innerHeight } = window;
       renderer.setSize(innerWidth, innerHeight);
@@ -76,8 +139,17 @@ export function VisualLayers() {
 
     const animate = () => {
       const time = performance.now() * 0.0003;
+      currentX += (targetX - currentX) * 0.04;
+      currentY += (targetY - currentY) * 0.04;
       stars.rotation.y = time * 0.4;
       stars.rotation.x = Math.sin(time) * 0.08;
+      stars.position.x = currentX * 0.6;
+      stars.position.y = currentY * 0.6;
+      deepStars.position.x = currentX * 0.2;
+      deepStars.position.y = currentY * 0.2;
+      halo.position.x = 2.5 + currentX * 1.2;
+      halo.position.y = 1.2 + currentY * 1.2;
+      halo.material.opacity = 0.7 + Math.sin(time * 4) * 0.1;
 
       const pos = dunesGeometry.attributes.position as THREE.BufferAttribute;
       for (let i = 0; i < pos.count; i++) {
@@ -94,12 +166,18 @@ export function VisualLayers() {
 
     animate();
     window.addEventListener("resize", resize);
+    window.addEventListener("mousemove", handlePointer);
 
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handlePointer);
       starsGeometry.dispose();
       starsMaterial.dispose();
+      deepStarsGeometry.dispose();
+      deepStarsMaterial.dispose();
+      haloTexture.dispose();
+      haloMaterial.dispose();
       dunesGeometry.dispose();
       dunesMaterial.dispose();
       renderer.dispose();
@@ -124,7 +202,9 @@ export function VisualLayers() {
           position: "fixed",
           inset: 0,
           zIndex: 1,
-          pointerEvents: "none"
+          pointerEvents: "none",
+          background:
+            "radial-gradient(200px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(212,175,55,0.18), transparent 70%)"
         }}
       >
         <svg
@@ -133,7 +213,7 @@ export function VisualLayers() {
           style={{
             width: "100%",
             height: "100%",
-            opacity: 0.25,
+            opacity: 0.22,
             filter: "drop-shadow(0 0 12px rgba(212,175,55,0.2))"
           }}
         >
@@ -142,16 +222,22 @@ export function VisualLayers() {
               <path
                 d="M60 10 L75 45 L110 60 L75 75 L60 110 L45 75 L10 60 L45 45 Z"
                 fill="none"
-                stroke="rgba(212,175,55,0.45)"
-                strokeWidth="1.5"
+                stroke="rgba(212,175,55,0.5)"
+                strokeWidth="1.4"
                 strokeDasharray="6 10"
                 strokeLinecap="round"
               />
-              <circle cx="60" cy="60" r="18" fill="none" stroke="rgba(248,246,241,0.25)" strokeWidth="1" />
+              <circle cx="60" cy="60" r="18" fill="none" stroke="rgba(248,246,241,0.3)" strokeWidth="1" />
+              <path
+                d="M60 22 C80 40 80 80 60 98 C40 80 40 40 60 22 Z"
+                fill="none"
+                stroke="rgba(212,175,55,0.35)"
+                strokeWidth="1"
+              />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#arabesque)">
-            <animate attributeName="opacity" values="0.12;0.22;0.12" dur="12s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.12;0.26;0.12" dur="14s" repeatCount="indefinite" />
           </rect>
         </svg>
         {[

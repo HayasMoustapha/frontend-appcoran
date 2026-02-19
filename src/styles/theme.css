@@ -4,11 +4,11 @@
   --font-size: 16px;
   --background: #0b1f2a;
   --foreground: #f8f6f1;
-  --app-bg: radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.16), transparent 40%),
-    radial-gradient(circle at 80% 12%, rgba(4, 120, 87, 0.18), transparent 45%),
-    radial-gradient(circle at 80% 80%, rgba(5, 150, 105, 0.14), transparent 40%),
+  --app-bg: radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.1), transparent 40%),
+    radial-gradient(circle at 80% 12%, rgba(4, 120, 87, 0.12), transparent 45%),
+    radial-gradient(circle at 80% 80%, rgba(5, 150, 105, 0.08), transparent 40%),
     linear-gradient(180deg, #0b1f2a 0%, #0e2a36 55%, #0b1f2a 100%);
-  --app-pattern: radial-gradient(circle, rgba(212, 175, 55, 0.12) 1px, transparent 1px);
+  --app-pattern: radial-gradient(circle, rgba(212, 175, 55, 0.08) 1px, transparent 1px);
   --card: rgba(255, 255, 255, 0.04);
   --card-foreground: #f8f6f1;
   --popover: oklch(1 0 0);
@@ -136,6 +136,14 @@
     background-size: auto, 26px 26px;
     background-position: center, 0 0;
     background-attachment: fixed;
+  }
+
+  body.night-mode {
+    --app-bg: radial-gradient(circle at 18% 18%, rgba(212, 175, 55, 0.22), transparent 45%),
+      radial-gradient(circle at 78% 10%, rgba(4, 120, 87, 0.22), transparent 50%),
+      radial-gradient(circle at 78% 78%, rgba(5, 150, 105, 0.2), transparent 45%),
+      linear-gradient(180deg, #0b1f2a 0%, #102f3d 55%, #0b1f2a 100%);
+    --app-pattern: radial-gradient(circle, rgba(212, 175, 55, 0.14) 1px, transparent 1px);
   }
 
   @keyframes floatY {
