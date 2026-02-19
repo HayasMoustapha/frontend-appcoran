@@ -25,10 +25,12 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
         overflow: "hidden",
         transition: "all 0.3s ease",
         position: "relative",
-        background: "white",
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        backdropFilter: "blur(10px)",
         "&:hover": {
           transform: "translateY(-6px)",
-          boxShadow: "0 18px 36px rgba(4, 120, 87, 0.14)",
+          boxShadow: "0 18px 36px rgba(212, 175, 55, 0.18)",
         },
         "&::before": {
           content: '""',
@@ -151,22 +153,22 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
           gap: 1.25
         }}
       >
-        <Typography
-          variant="h6"
-          gutterBottom
-          sx={{
-            fontWeight: 700,
-            color: "text.primary",
-            mb: 0,
-            lineHeight: 1.25
-          }}
-        >
-          {recitation.title}
-        </Typography>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.92)",
+              mb: 0,
+              lineHeight: 1.25
+            }}
+          >
+            {recitation.title}
+          </Typography>
 
         <Typography
           variant="body2"
-          color="text.secondary"
+          color="rgba(255,255,255,0.65)"
           sx={{
             lineHeight: 1.6,
             display: "-webkit-box",
@@ -192,20 +194,20 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
         >
           <Box sx={{ display: "flex", gap: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Visibility sx={{ fontSize: 16, color: "text.secondary" }} />
-              <Typography variant="caption" color="text.secondary">
+              <Visibility sx={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }} />
+              <Typography variant="caption" color="rgba(255,255,255,0.7)">
                 {recitation.listens.toLocaleString()}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Download sx={{ fontSize: 16, color: "text.secondary" }} />
-              <Typography variant="caption" color="text.secondary">
+              <Download sx={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }} />
+              <Typography variant="caption" color="rgba(255,255,255,0.7)">
                 {recitation.downloads.toLocaleString()}
               </Typography>
             </Box>
           </Box>
 
-          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+          <Typography variant="caption" color="rgba(255,255,255,0.7)" fontWeight={600}>
             {recitation.duration || "—"}
           </Typography>
         </Box>
