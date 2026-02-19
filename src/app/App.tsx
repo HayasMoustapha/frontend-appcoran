@@ -5,30 +5,31 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { router } from "./routes";
 import { checkHealth } from "./api/health";
 import { isNetworkError } from "./api/client";
+import { VisualLayers } from "./components/VisualLayers";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#047857",
-      light: "#059669",
-      dark: "#065f46",
-    },
-    secondary: {
       main: "#D4AF37",
-      light: "#F59E0B",
+      light: "#F5D76E",
       dark: "#B8860B",
     },
+    secondary: {
+      main: "#0F766E",
+      light: "#14B8A6",
+      dark: "#0B4F4A",
+    },
     background: {
-      default: "#F9FAFB",
-      paper: "#FFFFFF",
+      default: "#0B1F2A",
+      paper: "rgba(255,255,255,0.04)",
     },
     text: {
-      primary: "#1F2937",
-      secondary: "#6B7280",
+      primary: "#F8F6F1",
+      secondary: "rgba(248,246,241,0.7)",
     },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Amiri", "Cormorant Garamond", "Noto Naskh Arabic", serif',
     h1: {
       fontWeight: 700,
     },
@@ -60,6 +61,7 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <VisualLayers />
       <RouterProvider router={router} />
     </ThemeProvider>
   );

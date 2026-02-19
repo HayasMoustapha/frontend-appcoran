@@ -172,6 +172,9 @@ export function HomePage() {
       ? recentRecitations
       : popularRecitations;
 
+  const constellationRecitations =
+    popularRecitations.length > 0 ? popularRecitations : allRecitations.slice(0, 8);
+
   const navigate = useNavigate();
 
   return (
@@ -182,12 +185,34 @@ export function HomePage() {
       <Box
         sx={{
           position: "relative",
-          background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
+          background:
+            "linear-gradient(135deg, rgba(11,31,42,0.96) 0%, rgba(8,48,60,0.96) 50%, rgba(11,31,42,0.98) 100%)",
           color: "white",
           py: { xs: 6, md: 10 },
           overflow: "hidden",
         }}
       >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at 20% 20%, rgba(212,175,55,0.35), transparent 45%), radial-gradient(circle at 80% 15%, rgba(4,120,87,0.35), transparent 50%), radial-gradient(circle at 75% 80%, rgba(5,150,105,0.3), transparent 50%)",
+            animation: "shimmer 14s ease-in-out infinite",
+            opacity: 0.9
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+            opacity: 0.25,
+            animation: "starDrift 20s ease-in-out infinite"
+          }}
+        />
         <Box
           sx={{
             position: "absolute",
@@ -266,7 +291,7 @@ export function HomePage() {
                 mx: "auto",
                 animation: "fadeUp 0.85s ease both",
                 "& .MuiOutlinedInput-root": {
-                  background: "white",
+                  background: "rgba(255,255,255,0.92)",
                   borderRadius: 3,
                   fontSize: "1.1rem",
                   "& fieldset": {
@@ -326,6 +351,104 @@ export function HomePage() {
           </Box>
         </Container>
       </Box>
+
+      <Container maxWidth="lg" sx={{ mt: { xs: 6, md: 8 }, mb: 6 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 2
+          }}
+        >
+          <Box>
+            <Typography variant="h5" fontWeight={800} sx={{ color: "rgba(248,246,241,0.95)" }}>
+              Constellations sacrées
+            </Typography>
+            <Typography variant="body2" sx={{ color: "rgba(248,246,241,0.7)" }}>
+              Les récitations les plus lumineuses, alignées comme des étoiles
+            </Typography>
+          </Box>
+          <Chip
+            label="En direct"
+            sx={{
+              background: "rgba(212,175,55,0.2)",
+              color: "#F8F6F1",
+              border: "1px solid rgba(212,175,55,0.35)"
+            }}
+          />
+        </Box>
+
+        <Box
+          sx={{
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 4,
+            border: "1px solid rgba(255,255,255,0.08)",
+            background:
+              "linear-gradient(135deg, rgba(15,23,42,0.6) 0%, rgba(15,118,110,0.18) 45%, rgba(212,175,55,0.18) 100%)",
+            backdropFilter: "blur(12px)",
+            py: 3
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              gap: 3,
+              width: "max-content",
+              px: 3,
+              animation: "orbitScroll 26s linear infinite"
+            }}
+          >
+            {[...constellationRecitations, ...constellationRecitations].map((recitation, index) => (
+              <Box
+                key={`${recitation.id}-${index}`}
+                sx={{
+                  minWidth: 240,
+                  maxWidth: 260,
+                  p: 2,
+                  borderRadius: 3,
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  backdropFilter: "blur(10px)",
+                  boxShadow: "0 10px 24px rgba(0,0,0,0.35)",
+                  cursor: "pointer",
+                  transition: "transform 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-6px)"
+                  }
+                }}
+                onClick={() => navigate(`/recitation/${recitation.slug || recitation.id}`)}
+              >
+                <Typography fontWeight={700} sx={{ color: "#F8F6F1", mb: 1 }}>
+                  {recitation.title}
+                </Typography>
+                <Typography variant="caption" sx={{ color: "rgba(248,246,241,0.7)" }}>
+                  {recitation.surah} • {recitation.ayatRange || "—"}
+                </Typography>
+                <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+                  <Chip
+                    size="small"
+                    label={`${recitation.listens.toLocaleString()} écoutes`}
+                    sx={{
+                      background: "rgba(4,120,87,0.25)",
+                      color: "#F8F6F1"
+                    }}
+                  />
+                  <Chip
+                    size="small"
+                    label={`${recitation.downloads.toLocaleString()} dl`}
+                    sx={{
+                      background: "rgba(212,175,55,0.25)",
+                      color: "#F8F6F1"
+                    }}
+                  />
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      </Container>
 
       {/* Content Section */}
       <Container maxWidth="lg" sx={{ py: 6 }}>

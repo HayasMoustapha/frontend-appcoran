@@ -25,10 +25,12 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
         overflow: "hidden",
         transition: "all 0.3s ease",
         position: "relative",
-        background: "white",
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        backdropFilter: "blur(10px)",
         "&:hover": {
           transform: "translateY(-6px)",
-          boxShadow: "0 18px 36px rgba(4, 120, 87, 0.14)",
+          boxShadow: "0 18px 36px rgba(212, 175, 55, 0.18)",
         },
         "&::before": {
           content: '""',
@@ -46,14 +48,14 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
         },
       }}
     >
-      <Box
-        sx={{
-          position: "relative",
-          paddingTop: "42%",
-          background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
-          overflow: "hidden",
-        }}
-      >
+        <Box
+          sx={{
+            position: "relative",
+            paddingTop: "42%",
+            background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
+            overflow: "hidden",
+          }}
+        >
         <Box
           sx={{
             position: "absolute",
@@ -86,10 +88,40 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
               textShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
               fontFamily: "Arial, sans-serif",
               mb: 1,
+              transition: "color 0.3s ease, text-shadow 0.3s ease",
+              "div:hover &": {
+                color: "#F5D76E",
+                textShadow: "0 0 18px rgba(212,175,55,0.8)"
+              }
             }}
           >
             {recitation.surah}
           </Typography>
+          <Box
+            sx={{
+              width: 140,
+              height: 18,
+              mx: "auto",
+              "& path": {
+                strokeDashoffset: 280,
+                transition: "stroke-dashoffset 1.2s ease"
+              },
+              "div:hover & path": {
+                strokeDashoffset: 0
+              }
+            }}
+          >
+            <svg viewBox="0 0 240 24" width="140" height="18">
+              <path
+                d="M4 12 C18 4, 32 20, 48 12 C64 4, 80 20, 96 12 C112 4, 128 20, 144 12 C160 4, 176 20, 192 12 C208 4, 220 18, 236 12"
+                fill="none"
+                stroke="rgba(212,175,55,0.75)"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeDasharray="280"
+              />
+            </svg>
+          </Box>
           <Typography
             variant="body2"
             sx={{
@@ -151,22 +183,22 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
           gap: 1.25
         }}
       >
-        <Typography
-          variant="h6"
-          gutterBottom
-          sx={{
-            fontWeight: 700,
-            color: "text.primary",
-            mb: 0,
-            lineHeight: 1.25
-          }}
-        >
-          {recitation.title}
-        </Typography>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.92)",
+              mb: 0,
+              lineHeight: 1.25
+            }}
+          >
+            {recitation.title}
+          </Typography>
 
         <Typography
           variant="body2"
-          color="text.secondary"
+          color="rgba(255,255,255,0.65)"
           sx={{
             lineHeight: 1.6,
             display: "-webkit-box",
@@ -192,20 +224,20 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
         >
           <Box sx={{ display: "flex", gap: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Visibility sx={{ fontSize: 16, color: "text.secondary" }} />
-              <Typography variant="caption" color="text.secondary">
+              <Visibility sx={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }} />
+              <Typography variant="caption" color="rgba(255,255,255,0.7)">
                 {recitation.listens.toLocaleString()}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Download sx={{ fontSize: 16, color: "text.secondary" }} />
-              <Typography variant="caption" color="text.secondary">
+              <Download sx={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }} />
+              <Typography variant="caption" color="rgba(255,255,255,0.7)">
                 {recitation.downloads.toLocaleString()}
               </Typography>
             </Box>
           </Box>
 
-          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+          <Typography variant="caption" color="rgba(255,255,255,0.7)" fontWeight={600}>
             {recitation.duration || "—"}
           </Typography>
         </Box>

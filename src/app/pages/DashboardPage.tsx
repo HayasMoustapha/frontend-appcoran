@@ -213,13 +213,35 @@ export function DashboardPage() {
       {/* Hero Section */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
+          background:
+            "linear-gradient(135deg, rgba(11,31,42,0.96) 0%, rgba(8,48,60,0.96) 50%, rgba(11,31,42,0.98) 100%)",
           color: "white",
           py: 6,
           position: "relative",
           overflow: "hidden"
         }}
       >
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at 20% 20%, rgba(212,175,55,0.35), transparent 45%), radial-gradient(circle at 80% 15%, rgba(4,120,87,0.35), transparent 50%), radial-gradient(circle at 75% 80%, rgba(5,150,105,0.3), transparent 50%)",
+            animation: "shimmer 14s ease-in-out infinite",
+            opacity: 0.9
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+            opacity: 0.25,
+            animation: "starDrift 20s ease-in-out infinite"
+          }}
+        />
         <Box
           sx={{
             position: "absolute",
@@ -315,9 +337,11 @@ export function DashboardPage() {
             <Card
               sx={{
                 borderRadius: 3,
-                background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
+                background: "linear-gradient(135deg, rgba(4,120,87,0.75) 0%, rgba(5,150,105,0.75) 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(4, 120, 87, 0.2)",
+                boxShadow: "0 14px 32px rgba(4, 120, 87, 0.3)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                backdropFilter: "blur(10px)",
                 animation: "fadeUp 0.6s ease both"
               }}
             >
@@ -339,9 +363,11 @@ export function DashboardPage() {
             <Card
               sx={{
                 borderRadius: 3,
-                background: "linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%)",
+                background: "linear-gradient(135deg, rgba(212,175,55,0.85) 0%, rgba(245,158,11,0.85) 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(212, 175, 55, 0.2)",
+                boxShadow: "0 14px 32px rgba(212, 175, 55, 0.3)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                backdropFilter: "blur(10px)",
                 animation: "fadeUp 0.7s ease both"
               }}
             >
@@ -363,9 +389,11 @@ export function DashboardPage() {
             <Card
               sx={{
                 borderRadius: 3,
-                background: "linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)",
+                background: "linear-gradient(135deg, rgba(30,58,138,0.8) 0%, rgba(67,56,202,0.8) 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(139, 92, 246, 0.2)",
+                boxShadow: "0 14px 32px rgba(67, 56, 202, 0.3)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                backdropFilter: "blur(10px)",
                 animation: "fadeUp 0.8s ease both"
               }}
             >
@@ -387,9 +415,11 @@ export function DashboardPage() {
             <Card
               sx={{
                 borderRadius: 3,
-                background: "linear-gradient(135deg, #EC4899 0%, #F43F5E 100%)",
+                background: "linear-gradient(135deg, rgba(236,72,153,0.8) 0%, rgba(244,63,94,0.8) 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(236, 72, 153, 0.2)",
+                boxShadow: "0 14px 32px rgba(236, 72, 153, 0.3)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                backdropFilter: "blur(10px)",
                 animation: "fadeUp 0.9s ease both"
               }}
             >
