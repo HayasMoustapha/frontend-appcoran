@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Container,
   Box,
@@ -109,16 +109,21 @@ export function RecordPage() {
     setVerseEnd("");
   }, [selectedSurah]);
 
+  const sortedSurahs = useMemo(
+    () => [...surahReference].sort((a, b) => a.number - b.number),
+    [surahReference]
+  );
+
   useEffect(() => {
     if (!selectedSurah) {
       setTitle("");
       return;
     }
-    const selected = surahReference.find((surah) => surah.number.toString() === selectedSurah);
+    const selected = sortedSurahs.find((surah) => surah.number.toString() === selectedSurah);
     if (selected) {
       setTitle(`${selected.number}. ${selected.name_fr} (${selected.name_phonetic})`);
     }
-  }, [selectedSurah, surahReference]);
+  }, [selectedSurah, sortedSurahs]);
 
   useEffect(() => {
     if (!title) return;
@@ -249,7 +254,7 @@ export function RecordPage() {
     setUploadProgress(10);
     setError("");
 
-    const selected = surahReference.find((surah) => surah.number.toString() === selectedSurah);
+    const selected = sortedSurahs.find((surah) => surah.number.toString() === selectedSurah);
     if (!selected) {
       setRecordingState("recorded");
       setUploadProgress(0);
@@ -291,7 +296,7 @@ export function RecordPage() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const selectedSurahEntry = surahReference.find(
+  const selectedSurahEntry = sortedSurahs.find(
     (surah) => surah.number.toString() === selectedSurah
   );
   const verseOptions = selectedSurahEntry
@@ -586,7 +591,7 @@ export function RecordPage() {
                     setTitle(next);
                   }}
                 >
-                  {surahReference.map((surah) => {
+                  {sortedSurahs.map((surah) => {
                     const fullTitle = `${surah.number}. ${surah.name_fr} (${surah.name_phonetic})`;
                     return (
                       <MenuItem key={surah.number} value={fullTitle}>
@@ -609,7 +614,7 @@ export function RecordPage() {
                     label="Sourate"
                     onChange={(e) => setSelectedSurah(e.target.value)}
                   >
-                    {surahReference.map((surah) => (
+                    {sortedSurahs.map((surah) => (
                       <MenuItem key={surah.number} value={surah.number.toString()}>
                         {surah.number}. {surah.name_fr} • {surah.name_ar} ({surah.name_phonetic})
                       </MenuItem>
