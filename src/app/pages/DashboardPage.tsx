@@ -24,7 +24,8 @@ import {
   CircularProgress,
   List,
   ListItem,
-  ListItemText
+  ListItemText,
+  TextField
 } from "@mui/material";
 import {
   TrendingUp,
@@ -41,14 +42,14 @@ import { Navbar } from "../components/Navbar";
 import { useNavigate } from "react-router";
 import { getDashboardOverview, getDashboardPerformance, getDashboardStats } from "../api/dashboard";
 import { isNetworkError } from "../api/client";
-import { listAudios } from "../api/audios";
+import { deleteAudio, listAudios, updateAudio } from "../api/audios";
 import { mapAudioToRecitation } from "../api/mappers";
 import type { DashboardOverview, Recitation, DashboardPerformanceItem } from "../domain/types";
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedRecitationId, setSelectedRecitationId] = useState<string | null>(null);
+  const [selectedRecitation, setSelectedRecitation] = useState<Recitation | null>(null);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [performance, setPerformance] = useState<DashboardPerformanceItem[]>([]);
   const [recitations, setRecitations] = useState<Recitation[]>([]);
@@ -56,15 +57,20 @@ export function DashboardPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportStats, setReportStats] = useState<{ day: string; listens: number; downloads: number; shares: number }[]>([]);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: string) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, recitation: Recitation) => {
     setAnchorEl(event.currentTarget);
-    setSelectedRecitationId(id);
+    setSelectedRecitation(recitation);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedRecitationId(null);
+    setSelectedRecitation(null);
   };
 
   useEffect(() => {
@@ -111,6 +117,51 @@ export function DashboardPage() {
       }
     } finally {
       setReportLoading(false);
+    }
+  };
+
+  const openEditDialog = () => {
+    if (!selectedRecitation) return;
+    setEditTitle(selectedRecitation.title);
+    setEditDescription(selectedRecitation.description || "");
+    setEditOpen(true);
+    setAnchorEl(null);
+  };
+
+  const handleEditSave = async () => {
+    if (!selectedRecitation) return;
+    setEditSaving(true);
+    try {
+      const updated = await updateAudio(selectedRecitation.id, {
+        title: editTitle,
+        description: editDescription
+      });
+      const mapped = mapAudioToRecitation(updated);
+      setRecitations((prev) => prev.map((item) => (item.id === mapped.id ? mapped : item)));
+      setToast({ message: "Récitation mise à jour.", severity: "success" });
+      setEditOpen(false);
+      handleMenuClose();
+    } catch (err) {
+      if (!isNetworkError(err)) {
+        setToast({ message: err instanceof Error ? err.message : "Mise à jour impossible", severity: "error" });
+      }
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedRecitation) return;
+    try {
+      await deleteAudio(selectedRecitation.id);
+      setRecitations((prev) => prev.filter((item) => item.id !== selectedRecitation.id));
+      setToast({ message: "Récitation supprimée.", severity: "success" });
+      setDeleteOpen(false);
+      handleMenuClose();
+    } catch (err) {
+      if (!isNetworkError(err)) {
+        setToast({ message: err instanceof Error ? err.message : "Suppression impossible", severity: "error" });
+      }
     }
   };
 
@@ -472,7 +523,7 @@ export function DashboardPage() {
                   </Box>
 
                   <IconButton
-                    onClick={(e) => handleMenuOpen(e, recitation.slug || recitation.id)}
+                    onClick={(e) => handleMenuOpen(e, recitation)}
                     sx={{ ml: 1 }}
                   >
                     <MoreVert />
@@ -498,23 +549,80 @@ export function DashboardPage() {
       >
         <MenuItem
           onClick={() => {
-            navigate(`/recitation/${selectedRecitationId}`);
+            if (selectedRecitation) {
+              navigate(`/recitation/${selectedRecitation.slug || selectedRecitation.id}`);
+            }
             handleMenuClose();
           }}
         >
           <Visibility sx={{ mr: 1, fontSize: 20 }} />
           Voir
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem
+          onClick={() => {
+            openEditDialog();
+          }}
+        >
           <Edit sx={{ mr: 1, fontSize: 20 }} />
           Modifier
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleMenuClose} sx={{ color: "error.main" }}>
+        <MenuItem
+          onClick={() => {
+            setDeleteOpen(true);
+            setAnchorEl(null);
+          }}
+          sx={{ color: "error.main" }}
+        >
           <Delete sx={{ mr: 1, fontSize: 20 }} />
           Supprimer
         </MenuItem>
       </Menu>
+
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Modifier la récitation</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+            <TextField
+              label="Titre"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              fullWidth
+            />
+            <TextField
+              label="Description"
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              fullWidth
+              multiline
+              minRows={3}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditOpen(false)} disabled={editSaving}>
+            Annuler
+          </Button>
+          <Button onClick={handleEditSave} variant="contained" disabled={editSaving || !editTitle.trim()}>
+            {editSaving ? "Enregistrement..." : "Enregistrer"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Supprimer la récitation ?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            Cette action est irréversible.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteOpen(false)}>Annuler</Button>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+            Supprimer
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={reportOpen} onClose={() => setReportOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>Rapport complet (7 derniers jours)</DialogTitle>

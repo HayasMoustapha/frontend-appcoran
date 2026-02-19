@@ -52,3 +52,7 @@ export async function uploadAudio(formData: FormData) {
 export async function deleteAudio(id: string) {
   return del<{ status: string }>(`/api/audios/${id}`, { auth: true });
 }
+
+export async function updateAudio(id: string, payload: Partial<ApiAudio>) {
+  return put<ApiAudio>(`/api/audios/${id}`, payload, { auth: true });
+}
