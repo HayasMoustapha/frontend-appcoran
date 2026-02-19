@@ -111,7 +111,12 @@ export function RecitationPlayer() {
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime || 0);
     const onLoaded = () => setDuration(audio.duration || 0);
-    const onEnded = () => setIsPlaying(false);
+    const onEnded = () => {
+      setIsPlaying(false);
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.playbackState = "paused";
+      }
+    };
     const onCanPlay = () => {
       if (conversionTimerRef.current) {
         window.clearTimeout(conversionTimerRef.current);
@@ -157,6 +162,48 @@ export function RecitationPlayer() {
   }, [volume]);
 
   useEffect(() => {
+    if (!recitation || !("mediaSession" in navigator)) return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: recitation.title,
+      artist: recitation.surah,
+      album: "AppCoran",
+      artwork: [
+        { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { src: "/icon-512.png", sizes: "512x512", type: "image/png" }
+      ]
+    });
+
+    navigator.mediaSession.setActionHandler("play", async () => {
+      try {
+        await audioRef.current?.play();
+        setIsPlaying(true);
+        navigator.mediaSession.playbackState = "playing";
+      } catch {
+        // ignore
+      }
+    });
+    navigator.mediaSession.setActionHandler("pause", () => {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+      navigator.mediaSession.playbackState = "paused";
+    });
+    navigator.mediaSession.setActionHandler("seekto", (event) => {
+      if (!audioRef.current || event.seekTime === undefined) return;
+      audioRef.current.currentTime = event.seekTime;
+    });
+    navigator.mediaSession.setActionHandler("previoustrack", () => {
+      if (previousRecitation) {
+        navigate(`/recitation/${previousRecitation.slug || previousRecitation.id}`);
+      }
+    });
+    navigator.mediaSession.setActionHandler("nexttrack", () => {
+      if (nextRecitation) {
+        navigate(`/recitation/${nextRecitation.slug || nextRecitation.id}`);
+      }
+    });
+  }, [recitation, previousRecitation, nextRecitation, navigate]);
+
+  useEffect(() => {
     setAudioLoadError("");
     setHasTriedPlay(false);
   }, [recitation?.slug]);
@@ -188,9 +235,15 @@ export function RecitationPlayer() {
       if (isPlaying) {
         audio.pause();
         setIsPlaying(false);
+        if ("mediaSession" in navigator) {
+          navigator.mediaSession.playbackState = "paused";
+        }
       } else {
         await audio.play();
         setIsPlaying(true);
+        if ("mediaSession" in navigator) {
+          navigator.mediaSession.playbackState = "playing";
+        }
       }
     } catch (err) {
       if (isNetworkError(err)) return;

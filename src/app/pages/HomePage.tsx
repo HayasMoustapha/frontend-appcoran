@@ -25,12 +25,13 @@ import {
 import { Search, TrendingUp, AccessTime, Star } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { RecitationCard } from "../components/RecitationCard";
-import { getPopular, getRecent, listAudios, searchAudios } from "../api/audios";
+import { getPopular, getRecent, listAudios } from "../api/audios";
 import { isNetworkError } from "../api/client";
 import { getPublicProfile } from "../api/profile";
 import { mapAudioToRecitation, mapPublicProfile } from "../api/mappers";
-import type { ImamProfile, Recitation } from "../domain/types";
+import type { ImamProfile, Recitation, SurahReference } from "../domain/types";
 import { useNavigate } from "react-router";
+import { getSurahReference } from "../api/surahReference";
 
 export function HomePage() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -40,6 +41,7 @@ export function HomePage() {
   const [recentRecitations, setRecentRecitations] = useState<Recitation[]>([]);
   const [popularRecitations, setPopularRecitations] = useState<Recitation[]>([]);
   const [searchResults, setSearchResults] = useState<Recitation[]>([]);
+  const [surahReference, setSurahReference] = useState<SurahReference[]>([]);
   const [imamProfile, setImamProfile] = useState<ImamProfile>({
     name: "",
     arabicName: "",
@@ -58,11 +60,12 @@ export function HomePage() {
     let active = true;
     const loadData = async () => {
       try {
-        const [profileResult, allResult, recentResult, popularResult] = await Promise.allSettled([
+        const [profileResult, allResult, recentResult, popularResult, surahResult] = await Promise.allSettled([
           getPublicProfile(),
           listAudios(),
           getRecent(6),
-          getPopular(6)
+          getPopular(6),
+          getSurahReference()
         ]);
         if (!active) return;
 
@@ -102,6 +105,11 @@ export function HomePage() {
             popularResult.reason instanceof Error ? popularResult.reason.message : "Erreur lors du chargement";
           setToast({ message, severity: "error" });
         }
+
+        if (surahResult.status === "fulfilled") {
+          const sorted = [...surahResult.value].sort((a, b) => a.number - b.number);
+          setSurahReference(sorted);
+        }
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
@@ -119,31 +127,43 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
-    let active = true;
-    if (!searchQuery.trim()) {
+    const query = searchQuery.trim();
+    if (!query) {
       setSearchResults(allRecitations);
       return;
     }
-    const timeout = setTimeout(async () => {
-      try {
-        const result = await searchAudios({ query: searchQuery, page: 1, limit: 20 });
-        if (!active) return;
-        setSearchResults(result.data.map(mapAudioToRecitation));
-        setToast({ message: "Recherche mise à jour.", severity: "success" });
-      } catch (err) {
-        if (!active) return;
-        if (isNetworkError(err)) return;
-        setToast({
-          message: err instanceof Error ? err.message : "Recherche impossible",
-          severity: "error"
-        });
-      }
-    }, 300);
-    return () => {
-      active = false;
-      clearTimeout(timeout);
-    };
-  }, [searchQuery, allRecitations]);
+
+    const normalize = (value: string) =>
+      value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\\u0300-\\u036f]/g, "")
+        .replace(/[’']/g, "")
+        .replace(/\\s+/g, " ")
+        .trim();
+
+    const normalizedQuery = normalize(query);
+    const numberMatch = normalizedQuery.match(/\\b(\\d{1,3})\\b/);
+    const numberCandidate = numberMatch ? Number(numberMatch[1]) : undefined;
+
+    const surahMatch = surahReference.find((surah) => {
+      const names = [surah.name_fr, surah.name_phonetic, surah.name_ar];
+      return names.some((name) => name && normalize(name).includes(normalizedQuery));
+    });
+    const matchedNumber =
+      surahMatch?.number ??
+      (numberCandidate && numberCandidate >= 1 && numberCandidate <= 114 ? numberCandidate : undefined);
+
+    const matches = allRecitations.filter((recitation) => {
+      if (matchedNumber && recitation.surahNumber === matchedNumber) return true;
+      const haystack = normalize(
+        `${recitation.title} ${recitation.surah} ${recitation.description ?? ""}`
+      );
+      return haystack.includes(normalizedQuery);
+    });
+
+    setSearchResults(matches);
+  }, [searchQuery, allRecitations, surahReference]);
 
   const displayedRecitations =
     selectedTab === 0
