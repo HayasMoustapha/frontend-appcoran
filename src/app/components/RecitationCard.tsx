@@ -48,14 +48,14 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
         },
       }}
     >
-      <Box
-        sx={{
-          position: "relative",
-          paddingTop: "42%",
-          background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
-          overflow: "hidden",
-        }}
-      >
+        <Box
+          sx={{
+            position: "relative",
+            paddingTop: "42%",
+            background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
+            overflow: "hidden",
+          }}
+        >
         <Box
           sx={{
             position: "absolute",
@@ -88,10 +88,40 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
               textShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
               fontFamily: "Arial, sans-serif",
               mb: 1,
+              transition: "color 0.3s ease, text-shadow 0.3s ease",
+              "div:hover &": {
+                color: "#F5D76E",
+                textShadow: "0 0 18px rgba(212,175,55,0.8)"
+              }
             }}
           >
             {recitation.surah}
           </Typography>
+          <Box
+            sx={{
+              width: 140,
+              height: 18,
+              mx: "auto",
+              "& path": {
+                strokeDashoffset: 280,
+                transition: "stroke-dashoffset 1.2s ease"
+              },
+              "div:hover & path": {
+                strokeDashoffset: 0
+              }
+            }}
+          >
+            <svg viewBox="0 0 240 24" width="140" height="18">
+              <path
+                d="M4 12 C18 4, 32 20, 48 12 C64 4, 80 20, 96 12 C112 4, 128 20, 144 12 C160 4, 176 20, 192 12 C208 4, 220 18, 236 12"
+                fill="none"
+                stroke="rgba(212,175,55,0.75)"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeDasharray="280"
+              />
+            </svg>
+          </Box>
           <Typography
             variant="body2"
             sx={{

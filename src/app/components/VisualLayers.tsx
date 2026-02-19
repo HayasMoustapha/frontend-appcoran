@@ -3,7 +3,6 @@ import * as THREE from "three";
 
 export function VisualLayers() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const pointerRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -73,31 +72,35 @@ export function VisualLayers() {
     const deepStars = new THREE.Points(deepStarsGeometry, deepStarsMaterial);
     scene.add(deepStars);
 
-    const haloTexture = (() => {
-      const size = 256;
-      const c = document.createElement("canvas");
-      c.width = size;
-      c.height = size;
-      const ctx = c.getContext("2d");
-      if (ctx) {
-        const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-        gradient.addColorStop(0, "rgba(212,175,55,0.6)");
-        gradient.addColorStop(0.4, "rgba(212,175,55,0.15)");
-        gradient.addColorStop(1, "rgba(212,175,55,0)");
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, size, size);
-      }
-      return new THREE.CanvasTexture(c);
-    })();
-
-    const haloMaterial = new THREE.SpriteMaterial({
-      map: haloTexture,
+    const haloMaterial = new THREE.ShaderMaterial({
       transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        uTime: { value: 0 },
+        uColor: { value: new THREE.Color(0xd4af37) }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uColor;
+        varying vec2 vUv;
+        void main() {
+          vec2 uv = vUv - 0.5;
+          float dist = length(uv) * 2.0;
+          float glow = smoothstep(1.0, 0.0, dist);
+          float pulse = 0.65 + 0.35 * sin(uTime * 2.0);
+          float alpha = glow * pulse;
+          gl_FragColor = vec4(uColor, alpha);
+        }
+      `
     });
-    const halo = new THREE.Sprite(haloMaterial);
-    halo.scale.set(6, 6, 1);
+    const halo = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), haloMaterial);
     halo.position.set(2.5, 1.2, -3);
     scene.add(halo);
 
@@ -122,11 +125,17 @@ export function VisualLayers() {
     const handlePointer = (event: MouseEvent) => {
       const x = (event.clientX / window.innerWidth) * 2 - 1;
       const y = (event.clientY / window.innerHeight) * 2 - 1;
-      pointerRef.current = { x, y };
       targetX = x * 0.3;
       targetY = y * 0.2;
       canvas.style.setProperty("--mouse-x", `${event.clientX}px`);
       canvas.style.setProperty("--mouse-y", `${event.clientY}px`);
+    };
+
+    const handleScroll = () => {
+      const scroll = window.scrollY / (window.innerHeight || 1);
+      const depth = Math.min(scroll * 0.3, 1.2);
+      camera.position.z = 8 + depth;
+      dunes.position.y = -3.5 - depth * 0.6;
     };
 
     const resize = () => {
@@ -149,7 +158,7 @@ export function VisualLayers() {
       deepStars.position.y = currentY * 0.2;
       halo.position.x = 2.5 + currentX * 1.2;
       halo.position.y = 1.2 + currentY * 1.2;
-      halo.material.opacity = 0.7 + Math.sin(time * 4) * 0.1;
+      haloMaterial.uniforms.uTime.value = time * 4.0;
 
       const pos = dunesGeometry.attributes.position as THREE.BufferAttribute;
       for (let i = 0; i < pos.count; i++) {
@@ -167,16 +176,17 @@ export function VisualLayers() {
     animate();
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", handlePointer);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", handlePointer);
+      window.removeEventListener("scroll", handleScroll);
       starsGeometry.dispose();
       starsMaterial.dispose();
       deepStarsGeometry.dispose();
       deepStarsMaterial.dispose();
-      haloTexture.dispose();
       haloMaterial.dispose();
       dunesGeometry.dispose();
       dunesMaterial.dispose();
@@ -214,7 +224,8 @@ export function VisualLayers() {
             width: "100%",
             height: "100%",
             opacity: 0.22,
-            filter: "drop-shadow(0 0 12px rgba(212,175,55,0.2))"
+            filter: "drop-shadow(0 0 12px rgba(212,175,55,0.2))",
+            transform: `translate(calc(var(--mouse-x, 50%) * 0.002), calc(var(--mouse-y, 50%) * 0.002))`
           }}
         >
           <defs>
@@ -239,6 +250,34 @@ export function VisualLayers() {
           <rect width="100%" height="100%" fill="url(#arabesque)">
             <animate attributeName="opacity" values="0.12;0.26;0.12" dur="14s" repeatCount="indefinite" />
           </rect>
+        </svg>
+        <svg
+          viewBox="0 0 800 600"
+          preserveAspectRatio="xMidYMid slice"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            opacity: 0.15,
+            filter: "drop-shadow(0 0 8px rgba(248,246,241,0.2))",
+            animation: "starDrift 22s ease-in-out infinite reverse",
+            transform: `translate(calc(var(--mouse-x, 50%) * -0.0015), calc(var(--mouse-y, 50%) * -0.0015))`
+          }}
+        >
+          <defs>
+            <pattern id="arabesque2" width="160" height="160" patternUnits="userSpaceOnUse">
+              <path
+                d="M80 12 L98 56 L148 80 L98 104 L80 148 L62 104 L12 80 L62 56 Z"
+                fill="none"
+                stroke="rgba(248,246,241,0.25)"
+                strokeWidth="1"
+                strokeDasharray="8 12"
+              />
+              <circle cx="80" cy="80" r="22" fill="none" stroke="rgba(212,175,55,0.2)" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#arabesque2)" />
         </svg>
         {[
           { text: "ٱلْحَمْدُ لِلَّٰهِ", top: "18%", left: "12%" },
