@@ -1,0 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap");
+
+:root {
+  --font-body: "Source Serif 4", "Amiri", "Noto Naskh Arabic", serif;
+  --font-display: "Cormorant Garamond", "Amiri", "Noto Naskh Arabic", serif;
+  --font-arabic: "Amiri", "Noto Naskh Arabic", serif;
+}

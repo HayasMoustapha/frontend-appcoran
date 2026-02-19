@@ -174,7 +174,7 @@ export function VisualLayers() {
               left: item.left,
               color: "rgba(212,175,55,0.3)",
               fontSize: "clamp(18px, 2.6vw, 36px)",
-              fontFamily: "'Amiri', 'Noto Naskh Arabic', serif",
+              fontFamily: "var(--font-arabic)",
               letterSpacing: "0.08em",
               animation: `floatY ${10 + index * 3}s ease-in-out infinite`,
               mixBlendMode: "screen"

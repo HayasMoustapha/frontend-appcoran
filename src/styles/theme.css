@@ -131,11 +131,25 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Amiri", "Cormorant Garamond", "Noto Naskh Arabic", serif;
+    font-family: var(--font-body);
     background-image: var(--app-bg), var(--app-pattern);
     background-size: auto, 26px 26px;
     background-position: center, 0 0;
     background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .heading-font {
+    font-family: var(--font-display);
+    letter-spacing: 0.2px;
+  }
+
+  .arabic-text {
+    font-family: var(--font-arabic);
+    letter-spacing: 0.05em;
   }
 
   body.night-mode {

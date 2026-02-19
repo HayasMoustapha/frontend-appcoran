@@ -29,16 +29,27 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Amiri", "Cormorant Garamond", "Noto Naskh Arabic", serif',
+    fontFamily: '"Source Serif 4", "Amiri", "Noto Naskh Arabic", serif',
     h1: {
       fontWeight: 700,
+      fontFamily: '"Cormorant Garamond", "Amiri", "Noto Naskh Arabic", serif'
     },
     h2: {
       fontWeight: 700,
+      fontFamily: '"Cormorant Garamond", "Amiri", "Noto Naskh Arabic", serif'
     },
     h3: {
       fontWeight: 600,
+      fontFamily: '"Cormorant Garamond", "Amiri", "Noto Naskh Arabic", serif'
     },
+    h4: {
+      fontWeight: 600,
+      fontFamily: '"Cormorant Garamond", "Amiri", "Noto Naskh Arabic", serif'
+    },
+    h5: {
+      fontWeight: 600,
+      fontFamily: '"Cormorant Garamond", "Amiri", "Noto Naskh Arabic", serif'
+    }
   },
   shape: {
     borderRadius: 12,
