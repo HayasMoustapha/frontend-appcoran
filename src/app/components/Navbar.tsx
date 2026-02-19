@@ -31,9 +31,10 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
       position="sticky" 
       elevation={0}
       sx={{
-        background: "linear-gradient(135deg, rgba(11,31,42,0.92) 0%, rgba(8,48,60,0.92) 100%)",
+        background:
+          "linear-gradient(135deg, rgba(11,31,42,0.92) 0%, rgba(15,28,39,0.92) 55%, rgba(12,35,45,0.92) 100%)",
         borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-        backdropFilter: "blur(10px)"
+        backdropFilter: "blur(12px)"
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
@@ -61,14 +62,15 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
                 width: 40,
                 height: 40,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%)",
+                background:
+                  "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "1.5rem",
                 fontWeight: "bold",
-                color: "white",
-                boxShadow: "0 4px 12px rgba(212, 175, 55, 0.3)",
+                color: "#0B1F2A",
+                boxShadow: "0 6px 14px rgba(0, 0, 0, 0.3)",
               }}
             >
               ق
@@ -79,6 +81,8 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
               sx={{ 
                 fontWeight: 700,
                 letterSpacing: 0.5,
+                color: "rgba(248, 246, 241, 0.95)",
+                textShadow: "0 2px 8px rgba(0, 0, 0, 0.45)",
                 display: { xs: "none", sm: "block" }
               }}
             >
@@ -94,7 +98,8 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
               onClick={() => setNightMode((prev) => !prev)}
               sx={{
                 border: "1px solid rgba(255,255,255,0.2)",
-                background: nightMode ? "rgba(212,175,55,0.15)" : "transparent"
+                color: "text.primary",
+                background: nightMode ? "rgba(212,175,55,0.18)" : "rgba(255,255,255,0.04)"
               }}
             >
               <NightsStay />
@@ -108,9 +113,10 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
                 borderRadius: 2,
                 px: 3,
                 fontWeight: 600,
-                border: "1px solid rgba(255, 255, 255, 0.3)",
+                border: "1px solid rgba(212, 175, 55, 0.4)",
+                color: "text.primary",
                 "&:hover": {
-                  background: "rgba(255, 255, 255, 0.1)",
+                  background: "rgba(212, 175, 55, 0.12)",
                 },
               }}
             >
@@ -127,10 +133,13 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
                   borderRadius: 2,
                   px: 3,
                   fontWeight: 600,
-                  background: "rgba(212, 175, 55, 0.2)",
-                  border: "1px solid rgba(212, 175, 55, 0.5)",
+                  color: "#0B1F2A",
+                  background:
+                    "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
                   "&:hover": {
-                    background: "rgba(212, 175, 55, 0.3)",
+                    background:
+                      "linear-gradient(135deg, rgba(245, 215, 110, 0.98) 0%, rgba(15, 118, 110, 1) 100%)",
                   },
                   display: { xs: "none", md: "flex" }
                 }}
@@ -146,8 +155,8 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
                   sx={{ 
                     width: 36, 
                     height: 36,
-                    bgcolor: "rgba(212, 175, 55, 0.3)",
-                    border: "2px solid rgba(255, 255, 255, 0.5)"
+                    bgcolor: "rgba(212, 175, 55, 0.25)",
+                    border: "2px solid rgba(255, 255, 255, 0.25)"
                   }}
                   src="https://images.unsplash.com/photo-1756412066387-2b518da6a7d6?w=100"
                 >

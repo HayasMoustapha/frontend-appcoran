@@ -59,6 +59,7 @@ export function HomePage() {
 
   useEffect(() => {
     let active = true;
+    let intervalId: number | null = null;
     const loadData = async () => {
       try {
         const [profileResult, allResult, recentResult, popularResult, surahResult] = await Promise.allSettled([
@@ -122,8 +123,17 @@ export function HomePage() {
       }
     };
     loadData();
+    intervalId = window.setInterval(loadData, 30000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        loadData();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       active = false;
+      if (intervalId) window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 

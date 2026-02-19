@@ -31,6 +31,10 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const headers: Record<string, string> = {
     ...(options.headers ?? {})
   };
+  if ((options.method ?? "GET") === "GET") {
+    headers["Cache-Control"] = "no-cache";
+    headers.Pragma = "no-cache";
+  }
 
   if (options.auth) {
     const token = getAuthToken();
@@ -44,7 +48,8 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     response = await fetch(url, {
       method: options.method ?? "GET",
       headers,
-      body: options.body ?? null
+      body: options.body ?? null,
+      cache: (options.method ?? "GET") === "GET" ? "no-store" : "default"
     });
   } catch (err) {
     throw new NetworkError();

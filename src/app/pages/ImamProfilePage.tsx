@@ -61,6 +61,7 @@ export function ImamProfilePage() {
 
   useEffect(() => {
     let active = true;
+    let intervalId: number | null = null;
     const loadProfile = async () => {
       try {
         const data = await getProfile();
@@ -81,8 +82,17 @@ export function ImamProfilePage() {
       }
     };
     loadProfile();
+    intervalId = window.setInterval(loadProfile, 30000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        loadProfile();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       active = false;
+      if (intervalId) window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 

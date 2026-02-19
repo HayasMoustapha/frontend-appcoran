@@ -82,6 +82,7 @@ export function DashboardPage() {
 
   useEffect(() => {
     let active = true;
+    let intervalId: number | null = null;
     const loadDashboard = async () => {
       try {
         const [overviewData, performanceData, all] = await Promise.all([
@@ -100,8 +101,17 @@ export function DashboardPage() {
       }
     };
     loadDashboard();
+    intervalId = window.setInterval(loadDashboard, 30000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        loadDashboard();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       active = false;
+      if (intervalId) window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 
