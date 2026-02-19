@@ -13,7 +13,9 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon
+  ListItemIcon,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import {
   Edit,
@@ -33,6 +35,7 @@ import { Navbar } from "../components/Navbar";
 import { useNavigate } from "react-router";
 import type { ImamProfile } from "../domain/types";
 import { createProfile, getProfile, updateProfile } from "../api/profile";
+import { isNetworkError } from "../api/client";
 import { mapPublicProfile } from "../api/mappers";
 
 export function ImamProfilePage() {
@@ -73,6 +76,7 @@ export function ImamProfilePage() {
       }
       } catch (err) {
         if (!active) return;
+        if (isNetworkError(err)) return;
         setError(err instanceof Error ? err.message : "Chargement impossible");
       }
     };
@@ -111,6 +115,7 @@ export function ImamProfilePage() {
       setIsEditing(false);
       setError("");
     } catch (err) {
+      if (isNetworkError(err)) return;
       setError(err instanceof Error ? err.message : "Enregistrement impossible");
     }
   };
@@ -209,12 +214,6 @@ export function ImamProfilePage() {
         >
           Retour au tableau de bord
         </Button>
-
-        {error && (
-          <Typography color="error" sx={{ mb: 2 }}>
-            {error}
-          </Typography>
-        )}
 
         <Paper
           elevation={3}
@@ -644,6 +643,17 @@ export function ImamProfilePage() {
           </Box>
         </Paper>
       </Container>
+
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => setError("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

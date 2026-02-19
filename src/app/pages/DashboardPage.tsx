@@ -14,7 +14,17 @@ import {
   MenuItem,
   Avatar,
   Divider,
-  LinearProgress
+  LinearProgress,
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText
 } from "@mui/material";
 import {
   TrendingUp,
@@ -29,7 +39,8 @@ import {
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { useNavigate } from "react-router";
-import { getDashboardOverview, getDashboardPerformance } from "../api/dashboard";
+import { getDashboardOverview, getDashboardPerformance, getDashboardStats } from "../api/dashboard";
+import { isNetworkError } from "../api/client";
 import { listAudios } from "../api/audios";
 import { mapAudioToRecitation } from "../api/mappers";
 import type { DashboardOverview, Recitation, DashboardPerformanceItem } from "../domain/types";
@@ -42,6 +53,9 @@ export function DashboardPage() {
   const [performance, setPerformance] = useState<DashboardPerformanceItem[]>([]);
   const [recitations, setRecitations] = useState<Recitation[]>([]);
   const [error, setError] = useState("");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportStats, setReportStats] = useState<{ day: string; listens: number; downloads: number; shares: number }[]>([]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: string) => {
     setAnchorEl(event.currentTarget);
@@ -69,6 +83,7 @@ export function DashboardPage() {
         setError("");
       } catch (err) {
         if (!active) return;
+        if (isNetworkError(err)) return;
         setError(err instanceof Error ? err.message : "Chargement impossible");
       }
     };
@@ -82,6 +97,23 @@ export function DashboardPage() {
   const totalListens = overview?.totalListens ?? 0;
   const totalDownloads = overview?.totalDownloads ?? 0;
   const averageListens = overview?.averageListensPerRecitation ?? 0;
+
+  const handleOpenReport = async () => {
+    setReportOpen(true);
+    if (reportStats.length) return;
+    setReportLoading(true);
+    try {
+      const stats = await getDashboardStats("7d");
+      setReportStats(stats);
+      setError("");
+    } catch (err) {
+      if (!isNetworkError(err)) {
+        setError(err instanceof Error ? err.message : "Chargement impossible");
+      }
+    } finally {
+      setReportLoading(false);
+    }
+  };
 
   return (
     <Box sx={{ minHeight: "100vh", background: "#F9FAFB" }}>
@@ -161,12 +193,6 @@ export function DashboardPage() {
       </Box>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        {error && (
-          <Typography color="error" sx={{ mb: 2 }}>
-            {error}
-          </Typography>
-        )}
-
         {/* Statistics Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} md={3}>
@@ -284,6 +310,7 @@ export function DashboardPage() {
             <Button
               startIcon={<Assessment />}
               variant="outlined"
+              onClick={handleOpenReport}
               sx={{
                 borderRadius: 2,
                 fontWeight: 600,
@@ -489,6 +516,47 @@ export function DashboardPage() {
           Supprimer
         </MenuItem>
       </Menu>
+
+      <Dialog open={reportOpen} onClose={() => setReportOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Rapport complet (7 derniers jours)</DialogTitle>
+        <DialogContent dividers>
+          {reportLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <List>
+              {reportStats.map((item) => (
+                <ListItem key={item.day} divider>
+                  <ListItemText
+                    primary={item.day}
+                    secondary={`Écoutes: ${item.listens} • Téléchargements: ${item.downloads} • Partages: ${item.shares}`}
+                  />
+                </ListItem>
+              ))}
+              {!reportStats.length && (
+                <ListItem>
+                  <ListItemText primary="Aucune donnée disponible." />
+                </ListItem>
+              )}
+            </List>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReportOpen(false)}>Fermer</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => setError("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

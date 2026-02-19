@@ -8,11 +8,13 @@ import {
   Typography,
   InputAdornment,
   IconButton,
-  Alert
+  Alert,
+  Snackbar
 } from "@mui/material";
 import { Visibility, VisibilityOff, Login as LoginIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router";
 import { login } from "../api/auth";
+import { isNetworkError } from "../api/client";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ export function LoginPage() {
       await login(email, password);
       navigate("/dashboard");
     } catch (err) {
+      if (isNetworkError(err)) return;
       setError(err instanceof Error ? err.message : "Connexion impossible");
     } finally {
       setLoading(false);
@@ -107,12 +110,6 @@ export function LoginPage() {
               Connectez-vous pour gérer vos récitations sacrées
             </Typography>
           </Box>
-
-          {error && (
-            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-              {error}
-            </Alert>
-          )}
 
           <form onSubmit={handleLogin}>
             <TextField
@@ -202,6 +199,17 @@ export function LoginPage() {
           </Box>
         </Paper>
       </Container>
+
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => setError("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

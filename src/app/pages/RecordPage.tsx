@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Container,
   Box,
@@ -11,6 +11,7 @@ import {
   LinearProgress,
   IconButton,
   Alert,
+  Snackbar,
   MenuItem,
   Select,
   FormControl,
@@ -31,6 +32,7 @@ import {
 import { Navbar } from "../components/Navbar";
 import { useNavigate } from "react-router";
 import { uploadAudio } from "../api/audios";
+import { isNetworkError } from "../api/client";
 
 const surahs = [
   { number: 1, name: "الفاتحة", transliteration: "Al-Fatiha" },
@@ -47,6 +49,9 @@ type RecordingState = "idle" | "recording" | "recorded" | "uploading" | "success
 
 export function RecordPage() {
   const navigate = useNavigate();
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<BlobPart[]>([]);
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [recordingTime, setRecordingTime] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -59,21 +64,62 @@ export function RecordPage() {
   const [withBasmala, setWithBasmala] = useState(true);
   const [error, setError] = useState("");
 
-  const handleStartRecording = () => {
-    setRecordingState("recording");
-    setRecordingTime(0);
-    const interval = setInterval(() => {
-      setRecordingTime((prev) => prev + 1);
-    }, 1000);
-    (window as any).recordingInterval = interval;
+  const handleStartRecording = async () => {
+    setError("");
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError("Enregistrement audio non supporté sur ce navigateur.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      chunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        const file = new File([blob], `recitation-${Date.now()}.webm`, { type: blob.type });
+        setUploadedFile(file);
+        setRecordingState("recorded");
+        stream.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      };
+
+      recorder.start();
+      setRecordingState("recording");
+      setRecordingTime(0);
+      const interval = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+      (window as any).recordingInterval = interval;
+    } catch (err) {
+      setError("Impossible d'accéder au micro.");
+    }
   };
 
   const handleStopRecording = () => {
     clearInterval((window as any).recordingInterval);
-    setRecordingState("recorded");
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      recorder.stop();
+    } else {
+      setRecordingState("recorded");
+    }
   };
 
   const handleDeleteRecording = () => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+    mediaRecorderRef.current = null;
+    chunksRef.current = [];
     setRecordingState("idle");
     setRecordingTime(0);
     setUploadedFile(null);
@@ -81,7 +127,7 @@ export function RecordPage() {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type.startsWith("audio/")) {
+    if (file) {
       setUploadedFile(file);
       setRecordingState("recorded");
       setRecordingTime(180);
@@ -102,7 +148,7 @@ export function RecordPage() {
 
   const handlePublish = async () => {
     if (!uploadedFile) {
-      setError("Veuillez importer un fichier audio.");
+      setError("Veuillez importer ou enregistrer un fichier audio.");
       return;
     }
     setRecordingState("uploading");
@@ -131,6 +177,7 @@ export function RecordPage() {
     } catch (err) {
       setRecordingState("recorded");
       setUploadProgress(0);
+      if (isNetworkError(err)) return;
       setError(err instanceof Error ? err.message : "Publication impossible");
     }
   };
@@ -193,12 +240,6 @@ export function RecordPage() {
               Enregistrez et publiez votre récitation sacrée
             </Typography>
           </Box>
-
-          {error && (
-            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-              {error}
-            </Alert>
-          )}
 
           {recordingState === "success" && (
             <Alert severity="success" icon={<Check />} sx={{ mb: 3, borderRadius: 2 }}>
@@ -287,7 +328,12 @@ export function RecordPage() {
                     }}
                   >
                     Importer un fichier
-                    <input type="file" accept="audio/*" hidden onChange={handleFileUpload} />
+                    <input
+                      type="file"
+                      accept="audio/*,video/*,.mp4"
+                      hidden
+                      onChange={handleFileUpload}
+                    />
                   </Button>
                 </Box>
 
@@ -522,7 +568,6 @@ export function RecordPage() {
                 disabled={
                   !title ||
                   !selectedSurah ||
-                  !ayatRange ||
                   recordingState === "uploading" ||
                   !uploadedFile
                 }
@@ -547,6 +592,17 @@ export function RecordPage() {
           )}
         </Paper>
       </Container>
+
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => setError("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

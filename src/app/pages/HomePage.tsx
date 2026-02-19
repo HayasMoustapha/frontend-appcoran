@@ -10,11 +10,14 @@ import {
   Tabs,
   Tab,
   Chip,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Search, TrendingUp, AccessTime, Star } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { RecitationCard } from "../components/RecitationCard";
 import { getPopular, getRecent, listAudios, searchAudios } from "../api/audios";
+import { isNetworkError } from "../api/client";
 import { getPublicProfile } from "../api/profile";
 import { mapAudioToRecitation, mapPublicProfile } from "../api/mappers";
 import type { ImamProfile, Recitation } from "../domain/types";
@@ -60,6 +63,7 @@ export function HomePage() {
         setError("");
       } catch (err) {
         if (!active) return;
+        if (isNetworkError(err)) return;
         setError(err instanceof Error ? err.message : "Erreur lors du chargement");
       }
     };
@@ -83,6 +87,7 @@ export function HomePage() {
         setError("");
       } catch (err) {
         if (!active) return;
+        if (isNetworkError(err)) return;
         setError(err instanceof Error ? err.message : "Recherche impossible");
       }
     }, 300);
@@ -497,14 +502,6 @@ export function HomePage() {
             />
           </Tabs>
         </Box>
-        {error && (
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="body2" color="error">
-              {error}
-            </Typography>
-          </Box>
-        )}
-
         {/* Recitations Grid */}
         {displayedRecitations.length > 0 ? (
           <Grid container spacing={3}>
@@ -558,6 +555,17 @@ export function HomePage() {
           </Box>
         </Container>
       </Box>
+
+      <Snackbar
+        open={Boolean(error)}
+        autoHideDuration={6000}
+        onClose={() => setError("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setError("")} sx={{ borderRadius: 2 }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

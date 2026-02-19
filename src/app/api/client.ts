@@ -2,6 +2,17 @@ import { getAuthToken } from "./storage";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
+export class NetworkError extends Error {
+  constructor(message = "Network error") {
+    super(message);
+    this.name = "NetworkError";
+  }
+}
+
+export function isNetworkError(error: unknown) {
+  return error instanceof NetworkError;
+}
+
 type RequestOptions = {
   method?: HttpMethod;
   body?: BodyInit | null;
@@ -28,11 +39,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     }
   }
 
-  const response = await fetch(url, {
-    method: options.method ?? "GET",
-    headers,
-    body: options.body ?? null
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: options.method ?? "GET",
+      headers,
+      body: options.body ?? null
+    });
+  } catch (err) {
+    throw new NetworkError();
+  }
 
   const contentType = response.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");

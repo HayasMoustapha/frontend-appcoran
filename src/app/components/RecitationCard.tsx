@@ -17,7 +17,7 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
     <Card
       onClick={() => navigate(`/recitation/${targetId}`)}
       sx={{
-        height: "100%",
+        height: "100px",
         width: "300px",
         display: "flex",
         flexDirection: "column",
