@@ -322,10 +322,10 @@ export function ImamProfilePage() {
                           position: "absolute",
                           bottom: 0,
                           right: 0,
-                          background: "white",
-                          color: "primary.main",
+                          background: "rgba(11, 31, 42, 0.9)",
+                          color: "#F8F6F1",
                           "&:hover": {
-                            background: "rgba(255, 255, 255, 0.9)"
+                            background: "rgba(11, 31, 42, 1)"
                           }
                         }}
                         size="small"

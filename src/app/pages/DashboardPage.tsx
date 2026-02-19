@@ -286,8 +286,8 @@ export function DashboardPage() {
               sx={{
                 width: 80,
                 height: 80,
-                bgcolor: "rgba(212, 175, 55, 0.3)",
-                border: "3px solid white",
+                bgcolor: "rgba(212, 175, 55, 0.25)",
+                border: "3px solid rgba(255, 255, 255, 0.2)",
                 fontSize: "2rem"
               }}
             >
@@ -313,12 +313,12 @@ export function DashboardPage() {
               px: 4,
               py: 1.5,
               fontWeight: 700,
-              background: "rgba(212, 175, 55, 0.95)",
-              color: "white",
-              border: "2px solid rgba(255, 255, 255, 0.3)",
+              background: "linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(15, 118, 110, 0.9))",
+              color: "#0B1F2A",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
               animation: "glowPulse 3s ease-in-out infinite",
               "&:hover": {
-                background: "rgba(212, 175, 55, 1)",
+                background: "linear-gradient(135deg, rgba(245, 215, 110, 0.98), rgba(15, 118, 110, 1))",
                 transform: "translateY(-2px)",
                 boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)"
               },
@@ -337,10 +337,10 @@ export function DashboardPage() {
             <Card
               sx={{
                 borderRadius: 3,
-                background: "linear-gradient(135deg, rgba(4,120,87,0.75) 0%, rgba(5,150,105,0.75) 100%)",
-                color: "white",
-                boxShadow: "0 14px 32px rgba(4, 120, 87, 0.3)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(15, 28, 39, 0.85)",
+                color: "text.primary",
+                boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
+                border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(10px)",
                 animation: "fadeUp 0.6s ease both"
               }}
@@ -363,10 +363,10 @@ export function DashboardPage() {
             <Card
               sx={{
                 borderRadius: 3,
-                background: "linear-gradient(135deg, rgba(212,175,55,0.85) 0%, rgba(245,158,11,0.85) 100%)",
-                color: "white",
-                boxShadow: "0 14px 32px rgba(212, 175, 55, 0.3)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(15, 28, 39, 0.85)",
+                color: "text.primary",
+                boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
+                border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(10px)",
                 animation: "fadeUp 0.7s ease both"
               }}
@@ -389,10 +389,10 @@ export function DashboardPage() {
             <Card
               sx={{
                 borderRadius: 3,
-                background: "linear-gradient(135deg, rgba(30,58,138,0.8) 0%, rgba(67,56,202,0.8) 100%)",
-                color: "white",
-                boxShadow: "0 14px 32px rgba(67, 56, 202, 0.3)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(15, 28, 39, 0.85)",
+                color: "text.primary",
+                boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
+                border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(10px)",
                 animation: "fadeUp 0.8s ease both"
               }}
@@ -415,10 +415,10 @@ export function DashboardPage() {
             <Card
               sx={{
                 borderRadius: 3,
-                background: "linear-gradient(135deg, rgba(236,72,153,0.8) 0%, rgba(244,63,94,0.8) 100%)",
-                color: "white",
-                boxShadow: "0 14px 32px rgba(236, 72, 153, 0.3)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(15, 28, 39, 0.85)",
+                color: "text.primary",
+                boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
+                border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(10px)",
                 animation: "fadeUp 0.9s ease both"
               }}
@@ -445,7 +445,9 @@ export function DashboardPage() {
             p: 3,
             borderRadius: 3,
             mb: 4,
-            background: "white"
+            background: "rgba(15, 28, 39, 0.9)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 18px 40px rgba(0,0,0,0.35)"
           }}
         >
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
@@ -465,6 +467,8 @@ export function DashboardPage() {
                 borderRadius: 2,
                 fontWeight: 600,
                 borderWidth: 2,
+                borderColor: "rgba(212, 175, 55, 0.5)",
+                color: "text.primary",
                 "&:hover": {
                   borderWidth: 2
                 }
@@ -480,19 +484,19 @@ export function DashboardPage() {
 
               return (
                 <Grid size={{ xs: 12 }} key={recitation.id}>
-                  <Box
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: "1px solid",
-                      borderColor: "divider",
-                      "&:hover": {
-                        background: "rgba(4, 120, 87, 0.02)",
-                        borderColor: "primary.main"
-                      },
-                      transition: "all 0.2s"
-                    }}
-                  >
+                    <Box
+                      sx={{
+                        p: 2,
+                        borderRadius: 2,
+                        border: "1px solid",
+                        borderColor: "rgba(255,255,255,0.08)",
+                        "&:hover": {
+                          background: "rgba(255, 255, 255, 0.04)",
+                          borderColor: "rgba(212,175,55,0.35)"
+                        },
+                        transition: "all 0.2s"
+                      }}
+                    >
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="h6" fontWeight={700} gutterBottom>
@@ -503,11 +507,13 @@ export function DashboardPage() {
                             icon={<Visibility />}
                             label={`${recitation.listen_count.toLocaleString()} écoutes`}
                             size="small"
+                            sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
                           />
                           <Chip
                             icon={<Download />}
                             label={`${recitation.download_count.toLocaleString()} téléchargements`}
                             size="small"
+                            sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
                           />
                         </Box>
                         <Box>
@@ -525,10 +531,11 @@ export function DashboardPage() {
                             sx={{
                               height: 6,
                               borderRadius: 3,
-                              background: "rgba(4, 120, 87, 0.1)",
+                              background: "rgba(8, 18, 25, 0.6)",
                               "& .MuiLinearProgress-bar": {
                                 borderRadius: 3,
-                                background: "linear-gradient(90deg, #047857 0%, #D4AF37 100%)"
+                                background:
+                                  "linear-gradient(90deg, rgba(15, 118, 110, 0.9) 0%, rgba(212, 175, 55, 0.9) 100%)"
                               }
                             }}
                           />
@@ -548,7 +555,9 @@ export function DashboardPage() {
           sx={{
             p: 3,
             borderRadius: 3,
-            background: "white"
+            background: "rgba(15, 28, 39, 0.9)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 18px 40px rgba(0,0,0,0.35)"
           }}
         >
           <Typography variant="h5" fontWeight={800} gutterBottom>
@@ -568,13 +577,13 @@ export function DashboardPage() {
                     p: 2.5,
                     borderRadius: 2,
                     border: "1px solid",
-                    borderColor: "divider",
+                    borderColor: "rgba(255,255,255,0.08)",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     "&:hover": {
-                      background: "rgba(4, 120, 87, 0.02)",
-                      borderColor: "primary.main"
+                      background: "rgba(255, 255, 255, 0.04)",
+                      borderColor: "rgba(212,175,55,0.35)"
                     },
                     transition: "all 0.2s"
                   }}
@@ -585,11 +594,12 @@ export function DashboardPage() {
                         width: 60,
                         height: 60,
                         borderRadius: 2,
-                        background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
+                        background:
+                          "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "white",
+                        color: "#0B1F2A",
                         fontSize: "1.5rem",
                         fontWeight: 700
                       }}
@@ -606,9 +616,22 @@ export function DashboardPage() {
                       </Typography>
                       <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
                         {recitation.withBasmala && (
-                          <Chip label="Avec Basmala" size="small" color="primary" />
+                          <Chip
+                            label="Avec Basmala"
+                            size="small"
+                            sx={{
+                              background: "rgba(212, 175, 55, 0.2)",
+                              color: "text.primary",
+                              border: "1px solid rgba(212, 175, 55, 0.4)"
+                            }}
+                          />
                         )}
-                        <Chip label={recitation.date} size="small" variant="outlined" />
+                        <Chip
+                          label={recitation.date}
+                          size="small"
+                          variant="outlined"
+                          sx={{ color: "text.primary", borderColor: "rgba(255,255,255,0.2)" }}
+                        />
                       </Box>
                     </Box>
 
@@ -643,7 +666,9 @@ export function DashboardPage() {
         PaperProps={{
           sx: {
             borderRadius: 2,
-            minWidth: 180
+            minWidth: 180,
+            background: "rgba(15, 28, 39, 0.95)",
+            border: "1px solid rgba(255,255,255,0.08)"
           }
         }}
       >
@@ -679,16 +704,32 @@ export function DashboardPage() {
         </MenuItem>
       </Menu>
 
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
+      <Dialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            background: "rgba(15, 28, 39, 0.95)",
+            border: "1px solid rgba(255,255,255,0.08)"
+          }
+        }}
+      >
         <DialogTitle>Modifier la récitation</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             <FormControl fullWidth disabled={surahLoading}>
-              <InputLabel>Titre de la sourate</InputLabel>
+              <InputLabel sx={{ color: "text.secondary" }}>Titre de la sourate</InputLabel>
               <Select
                 value={editSurahNumber}
                 label="Titre de la sourate"
                 onChange={(e) => setEditSurahNumber(Number(e.target.value))}
+                sx={{
+                  background: "rgba(8, 18, 25, 0.7)",
+                  color: "text.primary",
+                  ".MuiSvgIcon-root": { color: "text.secondary" }
+                }}
               >
                 {surahReference.map((surah) => (
                   <MenuItem key={surah.number} value={surah.number}>
@@ -704,6 +745,12 @@ export function DashboardPage() {
               fullWidth
               multiline
               minRows={3}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  background: "rgba(8, 18, 25, 0.7)",
+                  color: "#F8F6F1"
+                }
+              }}
             />
           </Box>
         </DialogContent>
@@ -721,7 +768,18 @@ export function DashboardPage() {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} fullWidth maxWidth="xs">
+      <Dialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            background: "rgba(15, 28, 39, 0.95)",
+            border: "1px solid rgba(255,255,255,0.08)"
+          }
+        }}
+      >
         <DialogTitle>Supprimer la récitation ?</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
@@ -736,7 +794,18 @@ export function DashboardPage() {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={reportOpen} onClose={() => setReportOpen(false)} fullWidth maxWidth="sm">
+      <Dialog
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            background: "rgba(15, 28, 39, 0.95)",
+            border: "1px solid rgba(255,255,255,0.08)"
+          }
+        }}
+      >
         <DialogTitle>Rapport complet (7 derniers jours)</DialogTitle>
         <DialogContent dividers>
           {reportLoading ? (

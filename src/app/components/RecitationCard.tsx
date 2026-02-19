@@ -52,7 +52,8 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
           sx={{
             position: "relative",
             paddingTop: "42%",
-            background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
+            background:
+              "linear-gradient(135deg, rgba(15, 118, 110, 0.9) 0%, rgba(212, 175, 55, 0.85) 100%)",
             overflow: "hidden",
           }}
         >

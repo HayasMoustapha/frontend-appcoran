@@ -474,8 +474,9 @@ export function HomePage() {
             mb: 6,
             p: { xs: 3, md: 5 },
             borderRadius: 4,
-            background: "white",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+            background: "rgba(15, 28, 39, 0.9)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            boxShadow: "0 18px 40px rgba(0, 0, 0, 0.35)",
             position: "relative",
             overflow: "hidden",
           }}
@@ -517,8 +518,8 @@ export function HomePage() {
                   borderRadius: "50%",
                   overflow: "hidden",
                   border: "5px solid",
-                  borderColor: "primary.main",
-                  boxShadow: "0 12px 40px rgba(4, 120, 87, 0.3)",
+                  borderColor: "rgba(212, 175, 55, 0.6)",
+                  boxShadow: "0 12px 40px rgba(0, 0, 0, 0.35)",
                   background: `url('https://images.unsplash.com/photo-1756412066387-2b518da6a7d6?w=400') center/cover`,
                 }}
               />
@@ -528,14 +529,15 @@ export function HomePage() {
                   bottom: { xs: -10, md: -15 },
                   left: "50%",
                   transform: "translateX(-50%)",
-                  background: "linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%)",
-                  color: "white",
+                  background:
+                    "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
+                  color: "#0B1F2A",
                   px: { xs: 2, md: 3 },
                   py: 1,
                   borderRadius: 3,
                   fontWeight: 700,
                   fontSize: { xs: "0.875rem", md: "1rem" },
-                  boxShadow: "0 6px 20px rgba(212, 175, 55, 0.5)",
+                  boxShadow: "0 10px 24px rgba(0, 0, 0, 0.35)",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -565,8 +567,7 @@ export function HomePage() {
                 variant="h4"
                 sx={{
                   mb: 2,
-                  fontFamily: "Arial, sans-serif",
-                  color: "secondary.main",
+                  color: "text.primary",
                   fontWeight: 700,
                   fontSize: { xs: "1.5rem", md: "2rem" },
                 }}
@@ -606,10 +607,10 @@ export function HomePage() {
                     key={index}
                     label={specialty}
                     sx={{
-                      background: "linear-gradient(135deg, rgba(4, 120, 87, 0.1) 0%, rgba(212, 175, 55, 0.1) 100%)",
-                      border: "1px solid",
-                      borderColor: "primary.main",
-                      color: "primary.main",
+                      background:
+                        "linear-gradient(135deg, rgba(15, 118, 110, 0.18) 0%, rgba(212, 175, 55, 0.18) 100%)",
+                      border: "1px solid rgba(212, 175, 55, 0.4)",
+                      color: "text.primary",
                       fontWeight: 600,
                     }}
                   />
@@ -623,8 +624,8 @@ export function HomePage() {
                     sx={{
                       p: 2.5,
                       borderRadius: 3,
-                      background: "rgba(4, 120, 87, 0.03)",
-                      border: "1px solid rgba(4, 120, 87, 0.1)",
+                      background: "rgba(15, 28, 39, 0.8)",
+                      border: "1px solid rgba(255, 255, 255, 0.08)",
                     }}
                   >
                     <Typography
@@ -657,8 +658,8 @@ export function HomePage() {
                     sx={{
                       p: 2.5,
                       borderRadius: 3,
-                      background: "rgba(212, 175, 55, 0.05)",
-                      border: "1px solid rgba(212, 175, 55, 0.2)",
+                      background: "rgba(15, 28, 39, 0.8)",
+                      border: "1px solid rgba(255, 255, 255, 0.08)",
                     }}
                   >
                     <Typography
@@ -755,14 +756,20 @@ export function HomePage() {
             }}
             size="small"
             sx={{
-              background: "white",
+              background: "rgba(15, 28, 39, 0.9)",
               borderRadius: 3,
-              boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
               "& .MuiToggleButton-root": {
                 px: 3,
                 textTransform: "none",
                 fontWeight: 600,
-                border: "none"
+                border: "none",
+                color: "text.secondary"
+              },
+              "& .Mui-selected": {
+                color: "text.primary",
+                background: "rgba(212, 175, 55, 0.2)"
               }
             }}
           >
@@ -790,7 +797,8 @@ export function HomePage() {
               sx={{
                 borderRadius: 4,
                 overflow: "hidden",
-                border: "1px solid rgba(15, 118, 110, 0.1)"
+                background: "rgba(15, 28, 39, 0.9)",
+                border: "1px solid rgba(255, 255, 255, 0.08)"
               }}
             >
               <Table>
@@ -798,34 +806,42 @@ export function HomePage() {
                   <TableRow
                     sx={{
                       background:
-                        "linear-gradient(135deg, rgba(4,120,87,0.08) 0%, rgba(5,150,105,0.08) 100%)"
+                        "linear-gradient(135deg, rgba(15,118,110,0.18) 0%, rgba(212,175,55,0.18) 100%)"
                     }}
                   >
-                    <TableCell sx={{ fontWeight: 800 }}>Récitation</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Sourate</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Versets</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Date</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Écoutes</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Téléchargements</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 800 }}>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Récitation</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Sourate</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Versets</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Écoutes</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Téléchargements</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 800, color: "text.primary" }}>
                       Action
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {displayedRecitations.map((recitation) => (
-                    <TableRow key={recitation.id} hover>
+                    <TableRow
+                      key={recitation.id}
+                      hover
+                      sx={{
+                        "&:hover": {
+                          background: "rgba(255,255,255,0.04)"
+                        }
+                      }}
+                    >
                       <TableCell>
                         <Typography fontWeight={700}>{recitation.title}</Typography>
                         <Typography variant="caption" color="text.secondary">
                           {recitation.description || "Récitation sacrée"}
                         </Typography>
                       </TableCell>
-                      <TableCell>{recitation.surah}</TableCell>
-                      <TableCell>{recitation.ayatRange}</TableCell>
-                      <TableCell>{recitation.date}</TableCell>
-                      <TableCell>{recitation.listens.toLocaleString()}</TableCell>
-                      <TableCell>{recitation.downloads.toLocaleString()}</TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>{recitation.surah}</TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>{recitation.ayatRange}</TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>{recitation.date}</TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>{recitation.listens.toLocaleString()}</TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>{recitation.downloads.toLocaleString()}</TableCell>
                       <TableCell align="right">
                         <Button
                           variant="contained"
@@ -837,7 +853,9 @@ export function HomePage() {
                             borderRadius: 2,
                             textTransform: "none",
                             fontWeight: 700,
-                            background: "linear-gradient(135deg, #047857 0%, #059669 100%)"
+                            color: "#0B1F2A",
+                            background:
+                              "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)"
                           }}
                         >
                           Écouter
@@ -870,8 +888,9 @@ export function HomePage() {
       {/* Footer */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
-          color: "white",
+          background:
+            "linear-gradient(135deg, rgba(11, 31, 42, 0.95) 0%, rgba(15, 118, 110, 0.5) 100%)",
+          color: "#F8F6F1",
           py: 4,
           mt: 8,
         }}
