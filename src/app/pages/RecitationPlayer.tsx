@@ -161,6 +161,15 @@ export function RecitationPlayer() {
     }
   }, [volume]);
 
+  const currentIndex = allRecitations.findIndex(
+    (item) => item.slug === recitation?.slug || item.id === recitation?.id
+  );
+  const previousRecitation = currentIndex > 0 ? allRecitations[currentIndex - 1] : null;
+  const nextRecitation =
+    currentIndex >= 0 && currentIndex < allRecitations.length - 1
+      ? allRecitations[currentIndex + 1]
+      : null;
+
   useEffect(() => {
     if (!recitation || !("mediaSession" in navigator)) return;
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -207,15 +216,6 @@ export function RecitationPlayer() {
     setAudioLoadError("");
     setHasTriedPlay(false);
   }, [recitation?.slug]);
-
-  const currentIndex = allRecitations.findIndex(
-    (item) => item.slug === recitation?.slug || item.id === recitation?.id
-  );
-  const previousRecitation = currentIndex > 0 ? allRecitations[currentIndex - 1] : null;
-  const nextRecitation =
-    currentIndex >= 0 && currentIndex < allRecitations.length - 1
-      ? allRecitations[currentIndex + 1]
-      : null;
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
