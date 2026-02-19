@@ -22,7 +22,7 @@ Run `npm run dev` to start the development server.
 
 ## Docker (Full Stack)
 
-Use the root compose file to run frontend and backend with custom domains.
+Use the compose file in this folder to run frontend and backend with custom domains.
 
 1. Add local domain mapping:
 
@@ -30,7 +30,7 @@ Use the root compose file to run frontend and backend with custom domains.
 127.0.0.1 appcoran.com api.appcoran.com
 ```
 
-2. Start from the repo root:
+2. Start from this folder:
 
 ```bash
 docker compose up --build
