@@ -44,10 +44,13 @@ export function RecordPage() {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const recordingIntervalRef = useRef<number | null>(null);
+  const previewRef = useRef<HTMLAudioElement | null>(null);
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [recordingTime, setRecordingTime] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [isPreviewing, setIsPreviewing] = useState(false);
 
   const [title, setTitle] = useState("");
   const [selectedSurah, setSelectedSurah] = useState("");
@@ -82,6 +85,23 @@ export function RecordPage() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!uploadedFile) {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      setPreviewUrl("");
+      setIsPreviewing(false);
+      return;
+    }
+    const nextUrl = URL.createObjectURL(uploadedFile);
+    setPreviewUrl(nextUrl);
+    setIsPreviewing(false);
+    return () => {
+      URL.revokeObjectURL(nextUrl);
+    };
+  }, [uploadedFile]);
 
   useEffect(() => {
     setVerseStart("");
@@ -186,6 +206,10 @@ export function RecordPage() {
     setRecordingState("idle");
     setRecordingTime(0);
     setUploadedFile(null);
+    if (previewRef.current) {
+      previewRef.current.pause();
+      previewRef.current.currentTime = 0;
+    }
     setToast({ message: "Enregistrement supprimé.", severity: "success" });
   };
 
@@ -197,6 +221,21 @@ export function RecordPage() {
       setRecordingTime(180);
       setError("");
       setToast({ message: "Fichier importé.", severity: "success" });
+    }
+  };
+
+  const handlePreviewToggle = async () => {
+    if (!previewRef.current || !previewUrl) return;
+    try {
+      if (isPreviewing) {
+        previewRef.current.pause();
+        setIsPreviewing(false);
+      } else {
+        await previewRef.current.play();
+        setIsPreviewing(true);
+      }
+    } catch (err) {
+      setError("Lecture impossible. Vérifiez le fichier audio.");
     }
   };
 
@@ -497,13 +536,15 @@ export function RecordPage() {
                 <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 3 }}>
                   <IconButton
                     size="large"
+                    onClick={handlePreviewToggle}
+                    disabled={!previewUrl}
                     sx={{
                       border: "2px solid",
                       borderColor: "primary.main",
                       color: "primary.main"
                     }}
                   >
-                    <PlayArrow />
+                    {isPreviewing ? <Stop /> : <PlayArrow />}
                   </IconButton>
                   <IconButton
                     size="large"
@@ -520,6 +561,12 @@ export function RecordPage() {
               </>
             )}
           </Box>
+
+          <audio
+            ref={previewRef}
+            src={previewUrl}
+            onEnded={() => setIsPreviewing(false)}
+          />
 
           {/* Form Fields */}
           {(recordingState === "recorded" || recordingState === "uploading") && (
