@@ -207,7 +207,7 @@ export function DashboardPage() {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "#F9FAFB" }}>
+    <Box sx={{ minHeight: "100vh", background: "transparent" }}>
       <Navbar isImam />
 
       {/* Hero Section */}
@@ -223,6 +223,30 @@ export function DashboardPage() {
         <Box
           sx={{
             position: "absolute",
+            width: 260,
+            height: 260,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(212,175,55,0.35), transparent 60%)",
+            top: -110,
+            right: -80,
+            animation: "floatY 9s ease-in-out infinite"
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            width: 200,
+            height: 200,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(255,255,255,0.2), transparent 60%)",
+            bottom: -90,
+            left: -60,
+            animation: "floatY 11s ease-in-out infinite"
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
             top: 0,
             left: 0,
             right: 0,
@@ -235,7 +259,7 @@ export function DashboardPage() {
         />
 
         <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 4 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 4, animation: "fadeUp 0.6s ease both" }}>
             <Avatar
               sx={{
                 width: 80,
@@ -270,6 +294,7 @@ export function DashboardPage() {
               background: "rgba(212, 175, 55, 0.95)",
               color: "white",
               border: "2px solid rgba(255, 255, 255, 0.3)",
+              animation: "glowPulse 3s ease-in-out infinite",
               "&:hover": {
                 background: "rgba(212, 175, 55, 1)",
                 transform: "translateY(-2px)",
@@ -292,7 +317,8 @@ export function DashboardPage() {
                 borderRadius: 3,
                 background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(4, 120, 87, 0.2)"
+                boxShadow: "0 8px 24px rgba(4, 120, 87, 0.2)",
+                animation: "fadeUp 0.6s ease both"
               }}
             >
               <CardContent>
@@ -315,7 +341,8 @@ export function DashboardPage() {
                 borderRadius: 3,
                 background: "linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(212, 175, 55, 0.2)"
+                boxShadow: "0 8px 24px rgba(212, 175, 55, 0.2)",
+                animation: "fadeUp 0.7s ease both"
               }}
             >
               <CardContent>
@@ -338,7 +365,8 @@ export function DashboardPage() {
                 borderRadius: 3,
                 background: "linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(139, 92, 246, 0.2)"
+                boxShadow: "0 8px 24px rgba(139, 92, 246, 0.2)",
+                animation: "fadeUp 0.8s ease both"
               }}
             >
               <CardContent>
@@ -361,7 +389,8 @@ export function DashboardPage() {
                 borderRadius: 3,
                 background: "linear-gradient(135deg, #EC4899 0%, #F43F5E 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(236, 72, 153, 0.2)"
+                boxShadow: "0 8px 24px rgba(236, 72, 153, 0.2)",
+                animation: "fadeUp 0.9s ease both"
               }}
             >
               <CardContent>

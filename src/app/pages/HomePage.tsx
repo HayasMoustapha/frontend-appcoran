@@ -175,7 +175,7 @@ export function HomePage() {
   const navigate = useNavigate();
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "#F9FAFB" }}>
+    <Box sx={{ minHeight: "100vh", background: "transparent" }}>
       <Navbar />
 
       {/* Hero Section */}
@@ -188,6 +188,30 @@ export function HomePage() {
           overflow: "hidden",
         }}
       >
+        <Box
+          sx={{
+            position: "absolute",
+            width: 320,
+            height: 320,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(212,175,55,0.35), transparent 60%)",
+            top: -120,
+            right: -80,
+            animation: "floatY 8s ease-in-out infinite"
+          }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            width: 220,
+            height: 220,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent 60%)",
+            bottom: -120,
+            left: -60,
+            animation: "floatY 10s ease-in-out infinite"
+          }}
+        />
         <Box
           sx={{
             position: "absolute",
@@ -211,6 +235,7 @@ export function HomePage() {
                 mb: 2,
                 fontSize: { xs: "2rem", md: "3rem" },
                 textShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                animation: "fadeUp 0.6s ease both"
               }}
             >
               Écoutez la Parole Divine
@@ -224,6 +249,7 @@ export function HomePage() {
                 mb: 4,
                 lineHeight: 1.7,
                 fontSize: { xs: "1rem", md: "1.25rem" },
+                animation: "fadeUp 0.7s ease both"
               }}
             >
               Plongez dans l'océan des récitations sacrées de notre imam, où chaque
@@ -238,6 +264,7 @@ export function HomePage() {
               sx={{
                 maxWidth: 600,
                 mx: "auto",
+                animation: "fadeUp 0.85s ease both",
                 "& .MuiOutlinedInput-root": {
                   background: "white",
                   borderRadius: 3,
