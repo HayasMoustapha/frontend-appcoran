@@ -1,6 +1,6 @@
 import { Card, CardContent, CardMedia, Typography, Box, IconButton, Chip } from "@mui/material";
 import { PlayArrow, Download, Visibility } from "@mui/icons-material";
-import { Recitation } from "../data/mockData";
+import type { Recitation } from "../domain/types";
 import { useNavigate } from "react-router";
 
 interface RecitationCardProps {
@@ -11,11 +11,14 @@ interface RecitationCardProps {
 export function RecitationCard({ recitation, featured = false }: RecitationCardProps) {
   const navigate = useNavigate();
 
+  const targetId = recitation.slug || recitation.id;
+
   return (
     <Card
-      onClick={() => navigate(`/recitation/${recitation.id}`)}
+      onClick={() => navigate(`/recitation/${targetId}`)}
       sx={{
         height: "100%",
+        width: "300px",
         display: "flex",
         flexDirection: "column",
         cursor: "pointer",
@@ -194,7 +197,7 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
           </Box>
 
           <Typography variant="caption" color="text.secondary" fontWeight={600}>
-            {recitation.duration}
+            {recitation.duration || "—"}
           </Typography>
         </Box>
       </CardContent>

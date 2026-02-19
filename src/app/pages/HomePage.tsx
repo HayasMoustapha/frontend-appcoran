@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Typography,
@@ -11,24 +11,90 @@ import {
   Tab,
   Chip,
 } from "@mui/material";
-import { Search, FilterList, TrendingUp, AccessTime, Star } from "@mui/icons-material";
+import { Search, TrendingUp, AccessTime, Star } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { RecitationCard } from "../components/RecitationCard";
-import { mockRecitations, recentRecitations, popularRecitations, imamProfile } from "../data/mockData";
+import { getPopular, getRecent, listAudios, searchAudios } from "../api/audios";
+import { getPublicProfile } from "../api/profile";
+import { mapAudioToRecitation, mapPublicProfile } from "../api/mappers";
+import type { ImamProfile, Recitation } from "../domain/types";
 
 export function HomePage() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [allRecitations, setAllRecitations] = useState<Recitation[]>([]);
+  const [recentRecitations, setRecentRecitations] = useState<Recitation[]>([]);
+  const [popularRecitations, setPopularRecitations] = useState<Recitation[]>([]);
+  const [searchResults, setSearchResults] = useState<Recitation[]>([]);
+  const [imamProfile, setImamProfile] = useState<ImamProfile>({
+    name: "",
+    arabicName: "",
+    title: "",
+    bio: "",
+    education: [],
+    experience: [],
+    specialties: [],
+    email: "",
+    phone: "",
+    avatar: ""
+  });
+  const [error, setError] = useState("");
 
-  const filteredRecitations = mockRecitations.filter((rec) =>
-    rec.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    rec.surah.includes(searchQuery) ||
-    rec.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    let active = true;
+    const loadData = async () => {
+      try {
+        const [profile, all, recent, popular] = await Promise.all([
+          getPublicProfile(),
+          listAudios(),
+          getRecent(6),
+          getPopular(6)
+        ]);
+        if (!active) return;
+        setImamProfile(mapPublicProfile(profile));
+        const mappedAll = all.map(mapAudioToRecitation);
+        setAllRecitations(mappedAll);
+        setSearchResults(mappedAll);
+        setRecentRecitations(recent.map(mapAudioToRecitation));
+        setPopularRecitations(popular.map(mapAudioToRecitation));
+        setError("");
+      } catch (err) {
+        if (!active) return;
+        setError(err instanceof Error ? err.message : "Erreur lors du chargement");
+      }
+    };
+    loadData();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    if (!searchQuery.trim()) {
+      setSearchResults(allRecitations);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      try {
+        const result = await searchAudios({ query: searchQuery, page: 1, limit: 20 });
+        if (!active) return;
+        setSearchResults(result.data.map(mapAudioToRecitation));
+        setError("");
+      } catch (err) {
+        if (!active) return;
+        setError(err instanceof Error ? err.message : "Recherche impossible");
+      }
+    }, 300);
+    return () => {
+      active = false;
+      clearTimeout(timeout);
+    };
+  }, [searchQuery, allRecitations]);
 
   const displayedRecitations =
     selectedTab === 0
-      ? filteredRecitations
+      ? searchResults
       : selectedTab === 1
       ? recentRecitations
       : popularRecitations;
@@ -133,7 +199,7 @@ export function HomePage() {
           >
             <Box sx={{ textAlign: "center" }}>
               <Typography variant="h3" fontWeight={800}>
-                {mockRecitations.length}
+                {allRecitations.length}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
                 Récitations
@@ -141,7 +207,7 @@ export function HomePage() {
             </Box>
             <Box sx={{ textAlign: "center" }}>
               <Typography variant="h3" fontWeight={800}>
-                {mockRecitations.reduce((acc, r) => acc + r.listens, 0).toLocaleString()}
+                {allRecitations.reduce((acc, r) => acc + r.listens, 0).toLocaleString()}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
                 Écoutes
@@ -149,7 +215,7 @@ export function HomePage() {
             </Box>
             <Box sx={{ textAlign: "center" }}>
               <Typography variant="h3" fontWeight={800}>
-                {mockRecitations.reduce((acc, r) => acc + r.downloads, 0).toLocaleString()}
+                {allRecitations.reduce((acc, r) => acc + r.downloads, 0).toLocaleString()}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
                 Téléchargements
@@ -431,6 +497,13 @@ export function HomePage() {
             />
           </Tabs>
         </Box>
+        {error && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" color="error">
+              {error}
+            </Typography>
+          </Box>
+        )}
 
         {/* Recitations Grid */}
         {displayedRecitations.length > 0 ? (

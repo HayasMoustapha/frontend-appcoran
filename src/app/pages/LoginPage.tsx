@@ -8,10 +8,11 @@ import {
   Typography,
   InputAdornment,
   IconButton,
-  Alert,
+  Alert
 } from "@mui/material";
 import { Visibility, VisibilityOff, Login as LoginIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router";
+import { login } from "../api/auth";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -19,16 +20,25 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock authentication - you'll connect this to your backend
-    if (email && password) {
-      // Simulate successful login
-      navigate("/dashboard");
-    } else {
+    setError("");
+
+    if (!email || !password) {
       setError("Veuillez remplir tous les champs");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await login(email, password);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Connexion impossible");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,7 +51,7 @@ export function LoginPage() {
         justifyContent: "center",
         background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
         position: "relative",
-        overflow: "hidden",
+        overflow: "hidden"
       }}
     >
       {/* Background Pattern */}
@@ -55,7 +65,7 @@ export function LoginPage() {
           backgroundImage: `url('https://images.unsplash.com/photo-1769065579937-07dadad748a2?w=1200')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          opacity: 0.1,
+          opacity: 0.1
         }}
       />
 
@@ -66,7 +76,7 @@ export function LoginPage() {
             p: { xs: 3, sm: 5 },
             borderRadius: 4,
             background: "rgba(255, 255, 255, 0.98)",
-            backdropFilter: "blur(10px)",
+            backdropFilter: "blur(10px)"
           }}
         >
           {/* Logo */}
@@ -85,7 +95,7 @@ export function LoginPage() {
                 color: "white",
                 mx: "auto",
                 mb: 2,
-                boxShadow: "0 8px 24px rgba(4, 120, 87, 0.3)",
+                boxShadow: "0 8px 24px rgba(4, 120, 87, 0.3)"
               }}
             >
               ق
@@ -113,7 +123,7 @@ export function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               sx={{ mb: 3 }}
               InputProps={{
-                sx: { borderRadius: 2 },
+                sx: { borderRadius: 2 }
               }}
             />
 
@@ -128,14 +138,11 @@ export function LoginPage() {
                 sx: { borderRadius: 2 },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                    >
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
-                ),
+                )
               }}
             />
 
@@ -145,6 +152,7 @@ export function LoginPage() {
               variant="contained"
               size="large"
               startIcon={<LoginIcon />}
+              disabled={loading}
               sx={{
                 borderRadius: 2,
                 py: 1.5,
@@ -154,8 +162,8 @@ export function LoginPage() {
                 boxShadow: "0 8px 24px rgba(4, 120, 87, 0.3)",
                 "&:hover": {
                   background: "linear-gradient(135deg, #065f46 0%, #047857 100%)",
-                  boxShadow: "0 12px 32px rgba(4, 120, 87, 0.4)",
-                },
+                  boxShadow: "0 12px 32px rgba(4, 120, 87, 0.4)"
+                }
               }}
             >
               Se connecter
@@ -168,28 +176,28 @@ export function LoginPage() {
               sx={{
                 color: "text.secondary",
                 textTransform: "none",
-                fontWeight: 600,
+                fontWeight: 600
               }}
             >
               ← Retour à l'accueil
             </Button>
           </Box>
 
-          {/* Demo credentials hint */}
           <Box
             sx={{
               mt: 4,
               p: 2,
               borderRadius: 2,
-              background: "linear-gradient(135deg, rgba(4, 120, 87, 0.05) 0%, rgba(212, 175, 55, 0.05) 100%)",
-              border: "1px solid rgba(4, 120, 87, 0.1)",
+              background:
+                "linear-gradient(135deg, rgba(4, 120, 87, 0.05) 0%, rgba(212, 175, 55, 0.05) 100%)",
+              border: "1px solid rgba(4, 120, 87, 0.1)"
             }}
           >
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-              💡 Mode démo :
+              ℹ️ Accès sécurisé :
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Entrez n'importe quelles informations pour accéder à l'interface. Cette maquette sera connectée à votre backend.
+              Utilisez vos identifiants administrateur pour accéder au tableau de bord.
             </Typography>
           </Box>
         </Paper>

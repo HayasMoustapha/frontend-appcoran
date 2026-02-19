@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Box,
@@ -14,7 +14,7 @@ import {
   MenuItem,
   Avatar,
   Divider,
-  LinearProgress,
+  LinearProgress
 } from "@mui/material";
 import {
   TrendingUp,
@@ -25,16 +25,23 @@ import {
   Delete,
   Add,
   Assessment,
-  CloudUpload,
+  CloudUpload
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
-import { mockRecitations } from "../data/mockData";
 import { useNavigate } from "react-router";
+import { getDashboardOverview, getDashboardPerformance } from "../api/dashboard";
+import { listAudios } from "../api/audios";
+import { mapAudioToRecitation } from "../api/mappers";
+import type { DashboardOverview, Recitation, DashboardPerformanceItem } from "../domain/types";
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRecitationId, setSelectedRecitationId] = useState<string | null>(null);
+  const [overview, setOverview] = useState<DashboardOverview | null>(null);
+  const [performance, setPerformance] = useState<DashboardPerformanceItem[]>([]);
+  const [recitations, setRecitations] = useState<Recitation[]>([]);
+  const [error, setError] = useState("");
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: string) => {
     setAnchorEl(event.currentTarget);
@@ -46,8 +53,35 @@ export function DashboardPage() {
     setSelectedRecitationId(null);
   };
 
-  const totalListens = mockRecitations.reduce((acc, r) => acc + r.listens, 0);
-  const totalDownloads = mockRecitations.reduce((acc, r) => acc + r.downloads, 0);
+  useEffect(() => {
+    let active = true;
+    const loadDashboard = async () => {
+      try {
+        const [overviewData, performanceData, all] = await Promise.all([
+          getDashboardOverview(),
+          getDashboardPerformance(),
+          listAudios()
+        ]);
+        if (!active) return;
+        setOverview(overviewData);
+        setPerformance(performanceData.slice(0, 3));
+        setRecitations(all.map(mapAudioToRecitation));
+        setError("");
+      } catch (err) {
+        if (!active) return;
+        setError(err instanceof Error ? err.message : "Chargement impossible");
+      }
+    };
+    loadDashboard();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const totalRecitations = overview?.totalRecitations ?? recitations.length;
+  const totalListens = overview?.totalListens ?? 0;
+  const totalDownloads = overview?.totalDownloads ?? 0;
+  const averageListens = overview?.averageListensPerRecitation ?? 0;
 
   return (
     <Box sx={{ minHeight: "100vh", background: "#F9FAFB" }}>
@@ -60,7 +94,7 @@ export function DashboardPage() {
           color: "white",
           py: 6,
           position: "relative",
-          overflow: "hidden",
+          overflow: "hidden"
         }}
       >
         <Box
@@ -73,7 +107,7 @@ export function DashboardPage() {
             backgroundImage: `url('https://images.unsplash.com/photo-1761640865509-31fa5c46cba0?w=1200')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
-            opacity: 0.1,
+            opacity: 0.1
           }}
         />
 
@@ -85,7 +119,7 @@ export function DashboardPage() {
                 height: 80,
                 bgcolor: "rgba(212, 175, 55, 0.3)",
                 border: "3px solid white",
-                fontSize: "2rem",
+                fontSize: "2rem"
               }}
             >
               إ
@@ -116,9 +150,9 @@ export function DashboardPage() {
               "&:hover": {
                 background: "rgba(212, 175, 55, 1)",
                 transform: "translateY(-2px)",
-                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)",
+                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)"
               },
-              transition: "all 0.2s",
+              transition: "all 0.2s"
             }}
           >
             Nouvelle Récitation
@@ -127,6 +161,12 @@ export function DashboardPage() {
       </Box>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
+        {error && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {error}
+          </Typography>
+        )}
+
         {/* Statistics Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} md={3}>
@@ -135,7 +175,7 @@ export function DashboardPage() {
                 borderRadius: 3,
                 background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(4, 120, 87, 0.2)",
+                boxShadow: "0 8px 24px rgba(4, 120, 87, 0.2)"
               }}
             >
               <CardContent>
@@ -143,7 +183,7 @@ export function DashboardPage() {
                   <CloudUpload sx={{ fontSize: 40, opacity: 0.9 }} />
                 </Box>
                 <Typography variant="h3" fontWeight={800}>
-                  {mockRecitations.length}
+                  {totalRecitations}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   Récitations publiées
@@ -158,7 +198,7 @@ export function DashboardPage() {
                 borderRadius: 3,
                 background: "linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(212, 175, 55, 0.2)",
+                boxShadow: "0 8px 24px rgba(212, 175, 55, 0.2)"
               }}
             >
               <CardContent>
@@ -181,7 +221,7 @@ export function DashboardPage() {
                 borderRadius: 3,
                 background: "linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(139, 92, 246, 0.2)",
+                boxShadow: "0 8px 24px rgba(139, 92, 246, 0.2)"
               }}
             >
               <CardContent>
@@ -204,7 +244,7 @@ export function DashboardPage() {
                 borderRadius: 3,
                 background: "linear-gradient(135deg, #EC4899 0%, #F43F5E 100%)",
                 color: "white",
-                boxShadow: "0 8px 24px rgba(236, 72, 153, 0.2)",
+                boxShadow: "0 8px 24px rgba(236, 72, 153, 0.2)"
               }}
             >
               <CardContent>
@@ -212,7 +252,7 @@ export function DashboardPage() {
                   <TrendingUp sx={{ fontSize: 40, opacity: 0.9 }} />
                 </Box>
                 <Typography variant="h3" fontWeight={800}>
-                  {Math.round((totalListens / mockRecitations.length) / 10) / 100}K
+                  {Math.round((averageListens / 1000) * 100) / 100}K
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   Moyenne par récitation
@@ -229,7 +269,7 @@ export function DashboardPage() {
             p: 3,
             borderRadius: 3,
             mb: 4,
-            background: "white",
+            background: "white"
           }}
         >
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
@@ -249,8 +289,8 @@ export function DashboardPage() {
                 fontWeight: 600,
                 borderWidth: 2,
                 "&:hover": {
-                  borderWidth: 2,
-                },
+                  borderWidth: 2
+                }
               }}
             >
               Voir rapport complet
@@ -258,11 +298,9 @@ export function DashboardPage() {
           </Box>
 
           <Grid container spacing={2}>
-            {mockRecitations.slice(0, 3).map((recitation) => {
-              const engagementRate = Math.round(
-                ((recitation.downloads / recitation.listens) * 100) || 0
-              );
-              
+            {performance.map((recitation) => {
+              const engagementRate = Math.round((recitation.engagement_ratio || 0) * 100);
+
               return (
                 <Grid item xs={12} key={recitation.id}>
                   <Box
@@ -273,9 +311,9 @@ export function DashboardPage() {
                       borderColor: "divider",
                       "&:hover": {
                         background: "rgba(4, 120, 87, 0.02)",
-                        borderColor: "primary.main",
+                        borderColor: "primary.main"
                       },
-                      transition: "all 0.2s",
+                      transition: "all 0.2s"
                     }}
                   >
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
@@ -286,12 +324,12 @@ export function DashboardPage() {
                         <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
                           <Chip
                             icon={<Visibility />}
-                            label={`${recitation.listens.toLocaleString()} écoutes`}
+                            label={`${recitation.listen_count.toLocaleString()} écoutes`}
                             size="small"
                           />
                           <Chip
                             icon={<Download />}
-                            label={`${recitation.downloads.toLocaleString()} téléchargements`}
+                            label={`${recitation.download_count.toLocaleString()} téléchargements`}
                             size="small"
                           />
                         </Box>
@@ -313,8 +351,8 @@ export function DashboardPage() {
                               background: "rgba(4, 120, 87, 0.1)",
                               "& .MuiLinearProgress-bar": {
                                 borderRadius: 3,
-                                background: "linear-gradient(90deg, #047857 0%, #D4AF37 100%)",
-                              },
+                                background: "linear-gradient(90deg, #047857 0%, #D4AF37 100%)"
+                              }
                             }}
                           />
                         </Box>
@@ -333,7 +371,7 @@ export function DashboardPage() {
           sx={{
             p: 3,
             borderRadius: 3,
-            background: "white",
+            background: "white"
           }}
         >
           <Typography variant="h5" fontWeight={800} gutterBottom>
@@ -346,7 +384,7 @@ export function DashboardPage() {
           <Divider sx={{ mb: 3 }} />
 
           <Grid container spacing={2}>
-            {mockRecitations.map((recitation) => (
+            {recitations.map((recitation) => (
               <Grid item xs={12} key={recitation.id}>
                 <Box
                   sx={{
@@ -359,9 +397,9 @@ export function DashboardPage() {
                     alignItems: "center",
                     "&:hover": {
                       background: "rgba(4, 120, 87, 0.02)",
-                      borderColor: "primary.main",
+                      borderColor: "primary.main"
                     },
-                    transition: "all 0.2s",
+                    transition: "all 0.2s"
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexGrow: 1 }}>
@@ -376,7 +414,7 @@ export function DashboardPage() {
                         justifyContent: "center",
                         color: "white",
                         fontSize: "1.5rem",
-                        fontWeight: 700,
+                        fontWeight: 700
                       }}
                     >
                       {recitation.surahNumber}
@@ -387,17 +425,13 @@ export function DashboardPage() {
                         {recitation.title}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {recitation.surah} • Verset {recitation.ayatRange} • {recitation.duration}
+                        {recitation.surah} • Verset {recitation.ayatRange} • {recitation.duration || "—"}
                       </Typography>
                       <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
                         {recitation.withBasmala && (
                           <Chip label="Avec Basmala" size="small" color="primary" />
                         )}
-                        <Chip
-                          label={recitation.date}
-                          size="small"
-                          variant="outlined"
-                        />
+                        <Chip label={recitation.date} size="small" variant="outlined" />
                       </Box>
                     </Box>
 
@@ -412,7 +446,7 @@ export function DashboardPage() {
                   </Box>
 
                   <IconButton
-                    onClick={(e) => handleMenuOpen(e, recitation.id)}
+                    onClick={(e) => handleMenuOpen(e, recitation.slug || recitation.id)}
                     sx={{ ml: 1 }}
                   >
                     <MoreVert />
@@ -432,8 +466,8 @@ export function DashboardPage() {
         PaperProps={{
           sx: {
             borderRadius: 2,
-            minWidth: 180,
-          },
+            minWidth: 180
+          }
         }}
       >
         <MenuItem
