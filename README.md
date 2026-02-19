@@ -20,6 +20,33 @@ Run `npm i` to install the dependencies.
 
 Run `npm run dev` to start the development server.
 
+## Docker (Full Stack)
+
+Use the root compose file to run frontend and backend with custom domains.
+
+1. Add local domain mapping:
+
+```
+127.0.0.1 appcoran.com api.appcoran.com
+```
+
+2. Start from the repo root:
+
+```bash
+docker compose up --build
+```
+
+3. Access:
+
+```
+Frontend: http://appcoran.com
+Backend:  http://api.appcoran.com
+```
+
+## Installable (PWA)
+
+Once running, open the app in a browser and choose “Install” to add it to your device.
+
 ## Tests
 
 Run `npm run test` to execute the frontend tests.
