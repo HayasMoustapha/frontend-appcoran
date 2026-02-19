@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
   Container,
@@ -161,14 +161,18 @@ export function RecitationPlayer() {
     }
   }, [volume]);
 
-  const currentIndex = allRecitations.findIndex(
-    (item) => item.slug === recitation?.slug || item.id === recitation?.id
-  );
-  const previousRecitation = currentIndex > 0 ? allRecitations[currentIndex - 1] : null;
-  const nextRecitation =
-    currentIndex >= 0 && currentIndex < allRecitations.length - 1
-      ? allRecitations[currentIndex + 1]
-      : null;
+  const { previousRecitation, nextRecitation } = useMemo(() => {
+    const currentIndex = allRecitations.findIndex(
+      (item) => item.slug === recitation?.slug || item.id === recitation?.id
+    );
+    return {
+      previousRecitation: currentIndex > 0 ? allRecitations[currentIndex - 1] : null,
+      nextRecitation:
+        currentIndex >= 0 && currentIndex < allRecitations.length - 1
+          ? allRecitations[currentIndex + 1]
+          : null
+    };
+  }, [allRecitations, recitation?.slug, recitation?.id]);
 
   useEffect(() => {
     if (!recitation || !("mediaSession" in navigator)) return;
