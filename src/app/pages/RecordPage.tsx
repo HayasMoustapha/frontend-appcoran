@@ -100,6 +100,16 @@ export function RecordPage() {
   }, [selectedSurah, surahReference]);
 
   useEffect(() => {
+    if (!title) return;
+    const match = title.match(/^(\d+)\./);
+    if (!match) return;
+    const number = match[1];
+    if (number && number !== selectedSurah) {
+      setSelectedSurah(number);
+    }
+  }, [title, selectedSurah]);
+
+  useEffect(() => {
     if (verseStart === "") {
       setVerseEnd("");
       return;
