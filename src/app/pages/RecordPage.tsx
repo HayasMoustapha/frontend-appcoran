@@ -43,6 +43,7 @@ export function RecordPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
+  const recordingIntervalRef = useRef<number | null>(null);
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [recordingTime, setRecordingTime] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -131,14 +132,17 @@ export function RecordPage() {
       const interval = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
-      (window as any).recordingInterval = interval;
+      recordingIntervalRef.current = interval;
     } catch (err) {
       setError("Impossible d'accéder au micro.");
     }
   };
 
   const handleStopRecording = () => {
-    clearInterval((window as any).recordingInterval);
+    if (recordingIntervalRef.current) {
+      window.clearInterval(recordingIntervalRef.current);
+      recordingIntervalRef.current = null;
+    }
     const recorder = mediaRecorderRef.current;
     if (recorder && recorder.state !== "inactive") {
       recorder.stop();
@@ -151,6 +155,10 @@ export function RecordPage() {
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
       mediaStreamRef.current = null;
+    }
+    if (recordingIntervalRef.current) {
+      window.clearInterval(recordingIntervalRef.current);
+      recordingIntervalRef.current = null;
     }
     mediaRecorderRef.current = null;
     chunksRef.current = [];
