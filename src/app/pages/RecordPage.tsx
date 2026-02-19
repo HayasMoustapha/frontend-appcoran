@@ -70,7 +70,8 @@ export function RecordPage() {
       try {
         const data = await getSurahReference();
         if (!active) return;
-        setSurahReference(data);
+        const sorted = [...data].sort((a, b) => a.number - b.number);
+        setSurahReference(sorted);
         setSurahError("");
       } catch (err) {
         if (!active) return;
