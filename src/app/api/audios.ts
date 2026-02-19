@@ -1,6 +1,13 @@
 import { del, get, post, postForm } from "./client";
 import type { ApiAudio, ApiPublicAudio } from "./types";
 
+export type UpdateAudioPayload = Partial<ApiAudio> & {
+  numeroSourate?: number;
+  sourate?: string;
+  versetStart?: number;
+  versetEnd?: number;
+};
+
 export async function listAudios() {
   return get<ApiAudio[]>("/api/audios");
 }
@@ -53,6 +60,6 @@ export async function deleteAudio(id: string) {
   return del<{ status: string }>(`/api/audios/${id}`, { auth: true });
 }
 
-export async function updateAudio(id: string, payload: Partial<ApiAudio>) {
+export async function updateAudio(id: string, payload: UpdateAudioPayload) {
   return put<ApiAudio>(`/api/audios/${id}`, payload, { auth: true });
 }

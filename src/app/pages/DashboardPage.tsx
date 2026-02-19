@@ -25,7 +25,10 @@ import {
   List,
   ListItem,
   ListItemText,
-  TextField
+  TextField,
+  FormControl,
+  InputLabel,
+  Select
 } from "@mui/material";
 import {
   TrendingUp,
@@ -42,9 +45,10 @@ import { Navbar } from "../components/Navbar";
 import { useNavigate } from "react-router";
 import { getDashboardOverview, getDashboardPerformance, getDashboardStats } from "../api/dashboard";
 import { isNetworkError } from "../api/client";
-import { deleteAudio, listAudios, updateAudio } from "../api/audios";
+import { deleteAudio, listAudios, updateAudio, type UpdateAudioPayload } from "../api/audios";
 import { mapAudioToRecitation } from "../api/mappers";
-import type { DashboardOverview, Recitation, DashboardPerformanceItem } from "../domain/types";
+import type { DashboardOverview, Recitation, DashboardPerformanceItem, SurahReference } from "../domain/types";
+import { getSurahReference } from "../api/surahReference";
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -61,7 +65,10 @@ export function DashboardPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [editSurahNumber, setEditSurahNumber] = useState<number | "">("");
   const [editSaving, setEditSaving] = useState(false);
+  const [surahReference, setSurahReference] = useState<SurahReference[]>([]);
+  const [surahLoading, setSurahLoading] = useState(true);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, recitation: Recitation) => {
     setAnchorEl(event.currentTarget);
@@ -98,6 +105,29 @@ export function DashboardPage() {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    const loadSurahs = async () => {
+      try {
+        const data = await getSurahReference();
+        if (!active) return;
+        const sorted = [...data].sort((a, b) => a.number - b.number);
+        setSurahReference(sorted);
+      } catch (err) {
+        if (!active) return;
+        if (!isNetworkError(err)) {
+          setToast({ message: err instanceof Error ? err.message : "Référentiel indisponible", severity: "error" });
+        }
+      } finally {
+        if (active) setSurahLoading(false);
+      }
+    };
+    loadSurahs();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const totalRecitations = overview?.totalRecitations ?? recitations.length;
   const totalListens = overview?.totalListens ?? 0;
   const totalDownloads = overview?.totalDownloads ?? 0;
@@ -124,6 +154,7 @@ export function DashboardPage() {
     if (!selectedRecitation) return;
     setEditTitle(selectedRecitation.title);
     setEditDescription(selectedRecitation.description || "");
+    setEditSurahNumber(selectedRecitation.surahNumber || "");
     setEditOpen(true);
     setAnchorEl(null);
   };
@@ -132,10 +163,20 @@ export function DashboardPage() {
     if (!selectedRecitation) return;
     setEditSaving(true);
     try {
-      const updated = await updateAudio(selectedRecitation.id, {
-        title: editTitle,
+      const selectedSurah = surahReference.find((surah) => surah.number === editSurahNumber);
+      const title =
+        selectedSurah
+          ? `${selectedSurah.number}. ${selectedSurah.name_fr} (${selectedSurah.name_phonetic})`
+          : editTitle;
+      const payload: UpdateAudioPayload = {
+        title,
         description: editDescription
-      });
+      };
+      if (selectedSurah) {
+        payload.numeroSourate = selectedSurah.number;
+        payload.sourate = selectedSurah.name_ar;
+      }
+      const updated = await updateAudio(selectedRecitation.id, payload);
       const mapped = mapAudioToRecitation(updated);
       setRecitations((prev) => prev.map((item) => (item.id === mapped.id ? mapped : item)));
       setToast({ message: "Récitation mise à jour.", severity: "success" });
@@ -583,12 +624,20 @@ export function DashboardPage() {
         <DialogTitle>Modifier la récitation</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-            <TextField
-              label="Titre"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              fullWidth
-            />
+            <FormControl fullWidth disabled={surahLoading}>
+              <InputLabel>Titre de la sourate</InputLabel>
+              <Select
+                value={editSurahNumber}
+                label="Titre de la sourate"
+                onChange={(e) => setEditSurahNumber(Number(e.target.value))}
+              >
+                {surahReference.map((surah) => (
+                  <MenuItem key={surah.number} value={surah.number}>
+                    {surah.number}. {surah.name_fr} ({surah.name_phonetic})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <TextField
               label="Description"
               value={editDescription}
@@ -603,7 +652,11 @@ export function DashboardPage() {
           <Button onClick={() => setEditOpen(false)} disabled={editSaving}>
             Annuler
           </Button>
-          <Button onClick={handleEditSave} variant="contained" disabled={editSaving || !editTitle.trim()}>
+          <Button
+            onClick={handleEditSave}
+            variant="contained"
+            disabled={editSaving || editSurahNumber === ""}
+          >
             {editSaving ? "Enregistrement..." : "Enregistrer"}
           </Button>
         </DialogActions>

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardMedia, Typography, Box, IconButton, Chip } from "@mui/material";
+import { Card, CardContent, Typography, Box, IconButton, Chip } from "@mui/material";
 import { PlayArrow, Download, Visibility } from "@mui/icons-material";
 import type { Recitation } from "../domain/types";
 import { useNavigate } from "react-router";
@@ -17,8 +17,7 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
     <Card
       onClick={() => navigate(`/recitation/${targetId}`)}
       sx={{
-        height: "100px",
-        width: "300px",
+        height: "100%",
         display: "flex",
         flexDirection: "column",
         cursor: "pointer",
@@ -26,10 +25,10 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
         overflow: "hidden",
         transition: "all 0.3s ease",
         position: "relative",
-        minHeight: 420, // Hauteur minimum fixe
+        background: "white",
         "&:hover": {
-          transform: "translateY(-8px)",
-          boxShadow: "0 20px 40px rgba(4, 120, 87, 0.15)",
+          transform: "translateY(-6px)",
+          boxShadow: "0 18px 36px rgba(4, 120, 87, 0.14)",
         },
         "&::before": {
           content: '""',
@@ -37,7 +36,7 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
           top: 0,
           left: 0,
           right: 0,
-          height: "4px",
+          height: "3px",
           background: "linear-gradient(90deg, #047857 0%, #D4AF37 100%)",
           opacity: 0,
           transition: "opacity 0.3s ease",
@@ -50,7 +49,7 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
       <Box
         sx={{
           position: "relative",
-          paddingTop: "50%", // Ratio fixe pour toutes les cartes
+          paddingTop: "42%",
           background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
           overflow: "hidden",
         }}
@@ -143,14 +142,23 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
         )}
       </Box>
 
-      <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          p: 2.25,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.25
+        }}
+      >
         <Typography
           variant="h6"
           gutterBottom
           sx={{
             fontWeight: 700,
             color: "text.primary",
-            mb: 1,
+            mb: 0,
+            lineHeight: 1.25
           }}
         >
           {recitation.title}
@@ -160,15 +168,15 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
           variant="body2"
           color="text.secondary"
           sx={{
-            mb: 2,
             lineHeight: 1.6,
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
+            minHeight: "2.6em"
           }}
         >
-          {recitation.description}
+          {recitation.description || "Récitation sacrée."}
         </Typography>
 
         <Box
@@ -176,9 +184,10 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            pt: 1.5,
+            pt: 1.25,
             borderTop: "1px solid",
             borderColor: "divider",
+            mt: "auto"
           }}
         >
           <Box sx={{ display: "flex", gap: 2 }}>
