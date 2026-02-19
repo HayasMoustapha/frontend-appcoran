@@ -306,7 +306,7 @@ export function RecordPage() {
     verseStart !== "" ? verseOptions.filter((value) => value >= Number(verseStart)) : verseOptions;
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "#F9FAFB" }}>
+    <Box sx={{ minHeight: "100vh", background: "#0B1F2A" }}>
       <Navbar isImam />
 
       <Container maxWidth="md" sx={{ py: 4 }}>
@@ -316,7 +316,7 @@ export function RecordPage() {
           sx={{
             mb: 3,
             fontWeight: 600,
-            color: "primary.main",
+            color: "text.secondary",
             textTransform: "none"
           }}
         >
@@ -328,7 +328,9 @@ export function RecordPage() {
           sx={{
             p: { xs: 3, md: 5 },
             borderRadius: 4,
-            background: "white"
+            background: "rgba(15, 28, 39, 0.9)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.4)"
           }}
         >
           <Box sx={{ textAlign: "center", mb: 4 }}>
@@ -337,15 +339,15 @@ export function RecordPage() {
                 width: 80,
                 height: 80,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%)",
+                background: "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "2.5rem",
-                color: "white",
+                color: "#0B1F2A",
                 mx: "auto",
                 mb: 2,
-                boxShadow: "0 8px 24px rgba(212, 175, 55, 0.3)"
+                boxShadow: "0 12px 30px rgba(0, 0, 0, 0.35)"
               }}
             >
               <Mic />
@@ -371,9 +373,10 @@ export function RecordPage() {
               p: 4,
               borderRadius: 3,
               background:
-                "linear-gradient(135deg, rgba(4, 120, 87, 0.05) 0%, rgba(212, 175, 55, 0.05) 100%)",
+                "linear-gradient(135deg, rgba(15, 118, 110, 0.12) 0%, rgba(212, 175, 55, 0.12) 100%)",
               border: "2px solid",
-              borderColor: recordingState === "recording" ? "error.main" : "divider",
+              borderColor:
+                recordingState === "recording" ? "error.main" : "rgba(255, 255, 255, 0.08)",
               textAlign: "center"
             }}
           >
@@ -406,8 +409,10 @@ export function RecordPage() {
                       py: 2,
                       fontSize: "1.1rem",
                       fontWeight: 700,
-                      background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
-                      boxShadow: "0 8px 24px rgba(4, 120, 87, 0.3)",
+                      color: "#0B1F2A",
+                      background:
+                        "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
+                      boxShadow: "0 12px 28px rgba(0, 0, 0, 0.35)",
                       flex: 1
                     }}
                   >
@@ -435,8 +440,8 @@ export function RecordPage() {
                       fontSize: "1.1rem",
                       fontWeight: 700,
                       borderWidth: 2,
-                      borderColor: "secondary.main",
-                      color: "secondary.main",
+                      borderColor: "rgba(212, 175, 55, 0.6)",
+                      color: "#F8F6F1",
                       flex: 1,
                       "&:hover": {
                         borderWidth: 2,
@@ -459,15 +464,15 @@ export function RecordPage() {
                     sx={{
                       mt: 3,
                       p: 2.5,
-                      background: "rgba(4, 120, 87, 0.05)",
+                      background: "rgba(8, 18, 25, 0.7)",
                       borderRadius: 2,
-                      border: "1px solid rgba(4, 120, 87, 0.2)"
+                      border: "1px solid rgba(255, 255, 255, 0.08)"
                     }}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <AudioFile sx={{ fontSize: 32, color: "primary.main" }} />
                       <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="body1" fontWeight={600} color="primary">
+                        <Typography variant="body1" fontWeight={600} color="text.primary">
                           {uploadedFile.name}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
@@ -582,13 +587,18 @@ export function RecordPage() {
                 sx={{ mb: 3 }}
                 disabled={recordingState === "uploading" || surahLoading || Boolean(surahError)}
               >
-                <InputLabel>Titre de la sourate</InputLabel>
+                <InputLabel sx={{ color: "text.secondary" }}>Titre de la sourate</InputLabel>
                 <Select
                   value={title}
                   label="Titre de la sourate"
                   onChange={(e) => {
                     const next = e.target.value;
                     setTitle(next);
+                  }}
+                  sx={{
+                    background: "rgba(8, 18, 25, 0.7)",
+                    color: "text.primary",
+                    ".MuiSvgIcon-root": { color: "text.secondary" }
                   }}
                 >
                   {sortedSurahs.map((surah) => {
@@ -608,11 +618,16 @@ export function RecordPage() {
                   fullWidth
                   disabled={recordingState === "uploading" || surahLoading || Boolean(surahError)}
                 >
-                  <InputLabel>Sourate</InputLabel>
+                  <InputLabel sx={{ color: "text.secondary" }}>Sourate</InputLabel>
                   <Select
                     value={selectedSurah}
                     label="Sourate"
                     onChange={(e) => setSelectedSurah(e.target.value)}
+                    sx={{
+                      background: "rgba(8, 18, 25, 0.7)",
+                      color: "text.primary",
+                      ".MuiSvgIcon-root": { color: "text.secondary" }
+                    }}
                   >
                     {sortedSurahs.map((surah) => (
                       <MenuItem key={surah.number} value={surah.number.toString()}>
@@ -632,7 +647,7 @@ export function RecordPage() {
                     Boolean(surahError)
                   }
                 >
-                  <InputLabel>Verset début</InputLabel>
+                  <InputLabel sx={{ color: "text.secondary" }}>Verset début</InputLabel>
                   <Select
                     value={verseStart}
                     label="Verset début"
@@ -640,6 +655,11 @@ export function RecordPage() {
                       const next =
                         e.target.value === "" ? "" : Number(e.target.value);
                       setVerseStart(next);
+                    }}
+                    sx={{
+                      background: "rgba(8, 18, 25, 0.7)",
+                      color: "text.primary",
+                      ".MuiSvgIcon-root": { color: "text.secondary" }
                     }}
                   >
                     {verseOptions.map((value) => (
@@ -660,7 +680,7 @@ export function RecordPage() {
                     Boolean(surahError)
                   }
                 >
-                  <InputLabel>Verset fin</InputLabel>
+                  <InputLabel sx={{ color: "text.secondary" }}>Verset fin</InputLabel>
                   <Select
                     value={verseEnd}
                     label="Verset fin"
@@ -668,6 +688,11 @@ export function RecordPage() {
                       const next =
                         e.target.value === "" ? "" : Number(e.target.value);
                       setVerseEnd(next);
+                    }}
+                    sx={{
+                      background: "rgba(8, 18, 25, 0.7)",
+                      color: "text.primary",
+                      ".MuiSvgIcon-root": { color: "text.secondary" }
                     }}
                   >
                     {verseEndOptions.map((value) => (
@@ -693,7 +718,13 @@ export function RecordPage() {
                 multiline
                 rows={3}
                 placeholder="Ajoutez une description pour cette récitation..."
-                sx={{ mb: 3 }}
+                sx={{
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    background: "rgba(8, 18, 25, 0.7)",
+                    color: "#F8F6F1"
+                  }
+                }}
                 disabled={recordingState === "uploading"}
               />
 
@@ -702,10 +733,10 @@ export function RecordPage() {
                   p: 2,
                   borderRadius: 2,
                   background: withBasmala
-                    ? "rgba(212, 175, 55, 0.1)"
-                    : "rgba(0, 0, 0, 0.03)",
+                    ? "rgba(212, 175, 55, 0.12)"
+                    : "rgba(8, 18, 25, 0.6)",
                   border: "1px solid",
-                  borderColor: withBasmala ? "secondary.main" : "divider",
+                  borderColor: withBasmala ? "rgba(212, 175, 55, 0.4)" : "rgba(255, 255, 255, 0.08)",
                   mb: 3
                 }}
               >
@@ -746,10 +777,10 @@ export function RecordPage() {
                     sx={{
                       height: 8,
                       borderRadius: 4,
-                      background: "rgba(4, 120, 87, 0.1)",
+                      background: "rgba(8, 18, 25, 0.6)",
                       "& .MuiLinearProgress-bar": {
                         borderRadius: 4,
-                        background: "linear-gradient(90deg, #047857 0%, #D4AF37 100%)"
+                        background: "linear-gradient(90deg, rgba(15, 118, 110, 0.9) 0%, rgba(212, 175, 55, 0.9) 100%)"
                       }
                     }}
                   />
@@ -773,13 +804,17 @@ export function RecordPage() {
                   py: 2,
                   fontSize: "1.1rem",
                   fontWeight: 700,
-                  background: "linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%)",
-                  boxShadow: "0 8px 24px rgba(212, 175, 55, 0.3)",
+                  color: "#0B1F2A",
+                  background:
+                    "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
+                  boxShadow: "0 12px 28px rgba(0, 0, 0, 0.35)",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #B8860B 0%, #D4AF37 100%)"
+                    background:
+                      "linear-gradient(135deg, rgba(245, 215, 110, 0.98) 0%, rgba(15, 118, 110, 1) 100%)"
                   },
                   "&.Mui-disabled": {
-                    background: "rgba(0, 0, 0, 0.12)"
+                    background: "rgba(255, 255, 255, 0.12)",
+                    color: "rgba(255, 255, 255, 0.4)"
                   }
                 }}
               >

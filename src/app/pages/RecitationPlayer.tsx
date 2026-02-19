@@ -319,7 +319,7 @@ export function RecitationPlayer() {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "#F9FAFB" }}>
+    <Box sx={{ minHeight: "100vh", background: "#0B1F2A" }}>
       <Navbar />
 
       <Container maxWidth="md" sx={{ py: 4 }}>
@@ -329,7 +329,7 @@ export function RecitationPlayer() {
           sx={{
             mb: 3,
             fontWeight: 600,
-            color: "primary.main",
+            color: "text.secondary",
             textTransform: "none"
           }}
         >
@@ -341,7 +341,9 @@ export function RecitationPlayer() {
           sx={{
             borderRadius: 4,
             overflow: "hidden",
-            background: "white"
+            background: "rgba(15, 28, 39, 0.9)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.4)"
           }}
         >
           {/* Cover Art */}
@@ -349,7 +351,8 @@ export function RecitationPlayer() {
             sx={{
               position: "relative",
               paddingTop: "56.25%",
-              background: "linear-gradient(135deg, #047857 0%, #059669 100%)"
+              background:
+                "linear-gradient(135deg, rgba(15, 118, 110, 0.9) 0%, rgba(212, 175, 55, 0.85) 100%)"
             }}
           >
             <Box
@@ -359,10 +362,9 @@ export function RecitationPlayer() {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundImage: `url('https://images.unsplash.com/photo-1590720485412-fc0322a7acb2?w=800')`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                opacity: 0.3
+                backgroundImage:
+                  "radial-gradient(circle at top, rgba(11, 31, 42, 0.55) 0%, rgba(11, 31, 42, 0.9) 65%)",
+                opacity: 0.9
               }}
             />
 
@@ -392,8 +394,8 @@ export function RecitationPlayer() {
               <Typography
                 variant="h6"
                 sx={{
-                  color: "white",
-                  textShadow: "0 2px 8px rgba(0, 0, 0, 0.5)"
+                  color: "rgba(255, 255, 255, 0.92)",
+                  textShadow: "0 2px 8px rgba(0, 0, 0, 0.45)"
                 }}
               >
                 Sourate {recitation.surahNumber} • Verset {recitation.ayatRange}
@@ -408,7 +410,7 @@ export function RecitationPlayer() {
                   top: 16,
                   right: 16,
                   background: "rgba(212, 175, 55, 0.95)",
-                  color: "white",
+                  color: "#0B1F2A",
                   fontWeight: 700
                 }}
               />
@@ -421,8 +423,8 @@ export function RecitationPlayer() {
                   position: "absolute",
                   top: 16,
                   left: 16,
-                  background: "rgba(2, 132, 199, 0.9)",
-                  color: "white",
+                  background: "rgba(15, 118, 110, 0.95)",
+                  color: "#0B1F2A",
                   fontWeight: 700
                 }}
               />
@@ -440,9 +442,17 @@ export function RecitationPlayer() {
                   {recitation.description}
                 </Typography>
                 <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                  <Chip label={`${recitation.listens.toLocaleString()} écoutes`} size="small" />
-                  <Chip label={`${recitation.downloads.toLocaleString()} téléchargements`} size="small" />
-                  <Chip label={recitation.date} size="small" />
+                  <Chip
+                    label={`${recitation.listens.toLocaleString()} écoutes`}
+                    size="small"
+                    sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
+                  />
+                  <Chip
+                    label={`${recitation.downloads.toLocaleString()} téléchargements`}
+                    size="small"
+                    sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
+                  />
+                  <Chip label={recitation.date} size="small" sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }} />
                 </Box>
               </Box>
 
@@ -456,7 +466,7 @@ export function RecitationPlayer() {
               </IconButton>
             </Box>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 3, borderColor: "rgba(255, 255, 255, 0.08)" }} />
 
             {/* Progress Bar */}
             <Box sx={{ mb: 2 }}>
@@ -500,7 +510,8 @@ export function RecitationPlayer() {
                 }
                 sx={{
                   border: "2px solid",
-                  borderColor: "divider"
+                  borderColor: "rgba(255, 255, 255, 0.1)",
+                  color: "text.primary"
                 }}
               >
                 <SkipPrevious />
@@ -512,11 +523,13 @@ export function RecitationPlayer() {
                 sx={{
                   width: 72,
                   height: 72,
-                  background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
-                  color: "white",
-                  boxShadow: "0 8px 24px rgba(4, 120, 87, 0.3)",
+                  background:
+                    "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
+                  color: "#0B1F2A",
+                  boxShadow: "0 12px 28px rgba(0, 0, 0, 0.35)",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #065f46 0%, #047857 100%)",
+                    background:
+                      "linear-gradient(135deg, rgba(245, 215, 110, 0.98) 0%, rgba(15, 118, 110, 1) 100%)",
                     transform: "scale(1.05)"
                   },
                   transition: "all 0.2s"
@@ -533,7 +546,8 @@ export function RecitationPlayer() {
                 }
                 sx={{
                   border: "2px solid",
-                  borderColor: "divider"
+                  borderColor: "rgba(255, 255, 255, 0.1)",
+                  color: "text.primary"
                 }}
               >
                 <SkipNext />
@@ -542,8 +556,8 @@ export function RecitationPlayer() {
 
             {/* Volume Control */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-              <VolumeUp color="action" />
-              <Slider value={volume} onChange={handleVolume} sx={{ flexGrow: 1 }} />
+              <VolumeUp sx={{ color: "text.secondary" }} />
+              <Slider value={volume} onChange={handleVolume} sx={{ flexGrow: 1, color: "primary.main" }} />
               <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
                 {volume}%
               </Typography>
@@ -560,9 +574,12 @@ export function RecitationPlayer() {
                   px: 4,
                   py: 1.5,
                   fontWeight: 700,
-                  background: "linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%)",
+                  color: "#0B1F2A",
+                  background:
+                    "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #B8860B 0%, #D4AF37 100%)"
+                    background:
+                      "linear-gradient(135deg, rgba(245, 215, 110, 0.98) 0%, rgba(15, 118, 110, 1) 100%)"
                   }
                 }}
               >
@@ -578,6 +595,8 @@ export function RecitationPlayer() {
                   py: 1.5,
                   fontWeight: 700,
                   borderWidth: 2,
+                  borderColor: "rgba(212, 175, 55, 0.6)",
+                  color: "text.primary",
                   "&:hover": {
                     borderWidth: 2
                   }
@@ -608,10 +627,32 @@ export function RecitationPlayer() {
         />
       </Container>
 
-      <Dialog open={shareOpen} onClose={() => setShareOpen(false)} fullWidth maxWidth="sm">
+      <Dialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            background: "rgba(15, 28, 39, 0.95)",
+            border: "1px solid rgba(255, 255, 255, 0.08)"
+          }
+        }}
+      >
         <DialogTitle>Partager cette récitation</DialogTitle>
         <DialogContent dividers>
-          <TextField fullWidth value={shareUrl} label="Lien de partage" InputProps={{ readOnly: true }} />
+          <TextField
+            fullWidth
+            value={shareUrl}
+            label="Lien de partage"
+            InputProps={{ readOnly: true }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                background: "rgba(8, 18, 25, 0.7)",
+                color: "#F8F6F1"
+              }
+            }}
+          />
         </DialogContent>
         <DialogActions>
           <Button

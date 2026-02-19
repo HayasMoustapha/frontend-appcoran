@@ -56,7 +56,8 @@ export function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
+        background:
+          "radial-gradient(circle at top, rgba(15, 38, 52, 0.9) 0%, rgba(11, 31, 42, 1) 55%, rgba(8, 20, 28, 1) 100%)",
         position: "relative",
         overflow: "hidden"
       }}
@@ -69,10 +70,9 @@ export function LoginPage() {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: `url('https://images.unsplash.com/photo-1769065579937-07dadad748a2?w=1200')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          opacity: 0.1
+          backgroundImage:
+            "linear-gradient(120deg, rgba(212, 175, 55, 0.08), rgba(15, 118, 110, 0.1))",
+          opacity: 0.85
         }}
       />
 
@@ -82,8 +82,10 @@ export function LoginPage() {
           sx={{
             p: { xs: 3, sm: 5 },
             borderRadius: 4,
-            background: "rgba(255, 255, 255, 0.98)",
-            backdropFilter: "blur(10px)"
+            background: "rgba(15, 28, 39, 0.85)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(14px)"
           }}
         >
           {/* Logo */}
@@ -93,21 +95,21 @@ export function LoginPage() {
                 width: 80,
                 height: 80,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
+                background: "linear-gradient(135deg, rgba(15, 118, 110, 0.95), rgba(212, 175, 55, 0.95))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "2.5rem",
                 fontWeight: "bold",
-                color: "white",
+                color: "#0B1F2A",
                 mx: "auto",
                 mb: 2,
-                boxShadow: "0 8px 24px rgba(4, 120, 87, 0.3)"
+                boxShadow: "0 12px 30px rgba(0, 0, 0, 0.35)"
               }}
             >
               ق
             </Box>
-            <Typography variant="h4" fontWeight={800} color="primary" gutterBottom>
+            <Typography variant="h4" fontWeight={800} color="text.primary" gutterBottom>
               Espace Imam
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -124,7 +126,11 @@ export function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               sx={{ mb: 3 }}
               InputProps={{
-                sx: { borderRadius: 2 }
+                sx: {
+                  borderRadius: 2,
+                  background: "rgba(8, 18, 25, 0.6)",
+                  color: "text.primary"
+                }
               }}
             />
 
@@ -136,10 +142,14 @@ export function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               sx={{ mb: 3 }}
               InputProps={{
-                sx: { borderRadius: 2 },
+                sx: {
+                  borderRadius: 2,
+                  background: "rgba(8, 18, 25, 0.6)",
+                  color: "text.primary"
+                },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: "text.secondary" }}>
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
@@ -159,11 +169,12 @@ export function LoginPage() {
                 py: 1.5,
                 fontSize: "1.1rem",
                 fontWeight: 700,
-                background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
-                boxShadow: "0 8px 24px rgba(4, 120, 87, 0.3)",
+                color: "#0B1F2A",
+                background: "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)",
+                boxShadow: "0 12px 28px rgba(0, 0, 0, 0.35)",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #065f46 0%, #047857 100%)",
-                  boxShadow: "0 12px 32px rgba(4, 120, 87, 0.4)"
+                  background: "linear-gradient(135deg, rgba(245, 215, 110, 0.98) 0%, rgba(15, 118, 110, 1) 100%)",
+                  boxShadow: "0 16px 36px rgba(0, 0, 0, 0.4)"
                 }
               }}
             >
@@ -190,8 +201,8 @@ export function LoginPage() {
               p: 2,
               borderRadius: 2,
               background:
-                "linear-gradient(135deg, rgba(4, 120, 87, 0.05) 0%, rgba(212, 175, 55, 0.05) 100%)",
-              border: "1px solid rgba(4, 120, 87, 0.1)"
+                "linear-gradient(135deg, rgba(15, 118, 110, 0.1) 0%, rgba(212, 175, 55, 0.08) 100%)",
+              border: "1px solid rgba(255, 255, 255, 0.08)"
             }}
           >
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>

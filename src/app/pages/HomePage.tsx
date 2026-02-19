@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Container,
   Typography,
@@ -34,6 +34,7 @@ import { useNavigate } from "react-router";
 import { getSurahReference } from "../api/surahReference";
 
 export function HomePage() {
+  const heroRef = useRef<HTMLDivElement | null>(null);
   const [selectedTab, setSelectedTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
@@ -127,6 +128,18 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
+    const target = heroRef.current;
+    if (!target) return;
+    const onScroll = () => {
+      const progress = Math.min(window.scrollY / (window.innerHeight || 1), 1);
+      target.style.setProperty("--hero-depth", String(progress));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
     const query = searchQuery.trim();
     if (!query) {
       setSearchResults(allRecitations);
@@ -183,6 +196,7 @@ export function HomePage() {
 
       {/* Hero Section */}
       <Box
+        ref={heroRef}
         sx={{
           position: "relative",
           background:
@@ -210,7 +224,8 @@ export function HomePage() {
               "radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px)",
             backgroundSize: "32px 32px",
             opacity: 0.25,
-            animation: "starDrift 20s ease-in-out infinite"
+            animation: "starDrift 20s ease-in-out infinite",
+            transform: "translateY(calc(var(--hero-depth, 0) * 22px))"
           }}
         />
         <Box
@@ -248,6 +263,7 @@ export function HomePage() {
             backgroundSize: "cover",
             backgroundPosition: "center",
             opacity: 0.1,
+            transform: "translateY(calc(var(--hero-depth, 0) * -18px))"
           }}
         />
 

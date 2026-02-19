@@ -86,7 +86,6 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
               color: "white",
               fontWeight: 700,
               textShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
-              fontFamily: "Arial, sans-serif",
               mb: 1,
               transition: "color 0.3s ease, text-shadow 0.3s ease",
               "div:hover &": {

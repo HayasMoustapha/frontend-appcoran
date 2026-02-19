@@ -197,7 +197,7 @@ export function ImamProfilePage() {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "#F9FAFB" }}>
+    <Box sx={{ minHeight: "100vh", background: "#0B1F2A" }}>
       <Navbar isImam />
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -207,7 +207,7 @@ export function ImamProfilePage() {
           sx={{
             mb: 3,
             fontWeight: 600,
-            color: "primary.main",
+            color: "text.secondary",
             textTransform: "none"
           }}
         >
@@ -218,14 +218,17 @@ export function ImamProfilePage() {
           elevation={3}
           sx={{
             borderRadius: 4,
-            overflow: "hidden"
+            overflow: "hidden",
+            background: "rgba(15, 28, 39, 0.9)",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.4)"
           }}
         >
           {/* Header */}
           <Box
             sx={{
-              background: "linear-gradient(135deg, #047857 0%, #059669 100%)",
-              color: "white",
+              background: "linear-gradient(135deg, rgba(15, 118, 110, 0.92) 0%, rgba(212, 175, 55, 0.88) 100%)",
+              color: "#0B1F2A",
               p: 4,
               position: "relative"
             }}
@@ -237,10 +240,9 @@ export function ImamProfilePage() {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundImage: `url('https://images.unsplash.com/photo-1769065579937-07dadad748a2?w=1200')`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                opacity: 0.1
+                backgroundImage:
+                  "linear-gradient(120deg, rgba(11, 31, 42, 0.75), rgba(11, 31, 42, 0.6))",
+                opacity: 0.9
               }}
             />
 
@@ -256,9 +258,11 @@ export function ImamProfilePage() {
                     startIcon={<Edit />}
                     onClick={() => setIsEditing(true)}
                     sx={{
-                      background: "rgba(212, 175, 55, 0.95)",
+                      background: "rgba(11, 31, 42, 0.9)",
+                      color: "#F8F6F1",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
                       "&:hover": {
-                        background: "rgba(212, 175, 55, 1)"
+                        background: "rgba(11, 31, 42, 1)"
                       }
                     }}
                   >
@@ -271,9 +275,11 @@ export function ImamProfilePage() {
                       startIcon={<Save />}
                       onClick={handleSave}
                       sx={{
-                        background: "rgba(212, 175, 55, 0.95)",
+                        background: "rgba(11, 31, 42, 0.9)",
+                        color: "#F8F6F1",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
                         "&:hover": {
-                          background: "rgba(212, 175, 55, 1)"
+                          background: "rgba(11, 31, 42, 1)"
                         }
                       }}
                     >
@@ -284,11 +290,11 @@ export function ImamProfilePage() {
                       startIcon={<Cancel />}
                       onClick={handleCancel}
                       sx={{
-                        borderColor: "white",
-                        color: "white",
+                        borderColor: "rgba(11, 31, 42, 0.8)",
+                        color: "rgba(11, 31, 42, 0.9)",
                         "&:hover": {
-                          borderColor: "white",
-                          background: "rgba(255, 255, 255, 0.1)"
+                          borderColor: "rgba(11, 31, 42, 1)",
+                          background: "rgba(255, 255, 255, 0.2)"
                         }
                       }}
                     >
@@ -344,10 +350,10 @@ export function ImamProfilePage() {
                       <Typography variant="h4" fontWeight={800}>
                         {profile.name || ""}
                       </Typography>
-                      <Typography variant="h5" sx={{ mb: 1, fontFamily: "Arial" }}>
+                      <Typography variant="h5" sx={{ mb: 1 }}>
                         {profile.arabicName || ""}
                       </Typography>
-                      <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                      <Typography variant="body1" sx={{ opacity: 0.85 }}>
                         {profile.title || ""}
                       </Typography>
                     </>
@@ -359,7 +365,8 @@ export function ImamProfilePage() {
                         size="small"
                         sx={{
                           "& .MuiOutlinedInput-root": {
-                            background: "rgba(255, 255, 255, 0.95)"
+                            background: "rgba(8, 18, 25, 0.7)",
+                            color: "#F8F6F1"
                           }
                         }}
                         placeholder="Nom"
@@ -370,7 +377,8 @@ export function ImamProfilePage() {
                         size="small"
                         sx={{
                           "& .MuiOutlinedInput-root": {
-                            background: "rgba(255, 255, 255, 0.95)"
+                            background: "rgba(8, 18, 25, 0.7)",
+                            color: "#F8F6F1"
                           }
                         }}
                         placeholder="Nom en arabe"
@@ -381,7 +389,8 @@ export function ImamProfilePage() {
                         size="small"
                         sx={{
                           "& .MuiOutlinedInput-root": {
-                            background: "rgba(255, 255, 255, 0.95)"
+                            background: "rgba(8, 18, 25, 0.7)",
+                            color: "#F8F6F1"
                           }
                         }}
                         placeholder="Titre"
@@ -415,6 +424,12 @@ export function ImamProfilePage() {
                     value={profile.bio}
                     onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                     placeholder="Biographie de l'imam..."
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        background: "rgba(8, 18, 25, 0.7)",
+                        color: "#F8F6F1"
+                      }
+                    }}
                   />
                 )}
               </Grid>
@@ -425,8 +440,9 @@ export function ImamProfilePage() {
                   sx={{
                     p: 3,
                     borderRadius: 3,
-                    background: "rgba(4, 120, 87, 0.03)",
-                    border: "1px solid rgba(4, 120, 87, 0.1)"
+                    background: "rgba(15, 28, 39, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    boxShadow: "0 16px 40px rgba(0, 0, 0, 0.35)"
                   }}
                 >
                   <Typography variant="h6" fontWeight={700} gutterBottom color="primary">
@@ -444,6 +460,12 @@ export function ImamProfilePage() {
                         value={profile.email}
                         onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                         placeholder="Email"
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            background: "rgba(8, 18, 25, 0.7)",
+                            color: "#F8F6F1"
+                          }
+                        }}
                       />
                     )}
                   </Box>
@@ -459,6 +481,12 @@ export function ImamProfilePage() {
                         value={profile.phone}
                         onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                         placeholder="Téléphone"
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            background: "rgba(8, 18, 25, 0.7)",
+                            color: "#F8F6F1"
+                          }
+                        }}
                       />
                     )}
                   </Box>
@@ -471,8 +499,9 @@ export function ImamProfilePage() {
                   sx={{
                     p: 3,
                     borderRadius: 3,
-                    background: "rgba(212, 175, 55, 0.05)",
-                    border: "1px solid rgba(212, 175, 55, 0.2)"
+                    background: "rgba(15, 28, 39, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    boxShadow: "0 16px 40px rgba(0, 0, 0, 0.35)"
                   }}
                 >
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
@@ -492,7 +521,16 @@ export function ImamProfilePage() {
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                     {!isEditing ? (
                       profile.specialties.map((specialty, index) => (
-                        <Chip key={index} label={specialty} color="secondary" variant="outlined" />
+                        <Chip
+                          key={index}
+                          label={specialty}
+                          variant="outlined"
+                          sx={{
+                            color: "#F8F6F1",
+                            borderColor: "rgba(212, 175, 55, 0.4)",
+                            background: "rgba(212, 175, 55, 0.12)"
+                          }}
+                        />
                       ))
                     ) : (
                       <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1 }}>
@@ -503,6 +541,12 @@ export function ImamProfilePage() {
                               size="small"
                               value={specialty}
                               onChange={(e) => updateSpecialty(index, e.target.value)}
+                              sx={{
+                                "& .MuiOutlinedInput-root": {
+                                  background: "rgba(8, 18, 25, 0.7)",
+                                  color: "#F8F6F1"
+                                }
+                              }}
                             />
                             <IconButton size="small" color="error" onClick={() => removeSpecialty(index)}>
                               <Delete />
@@ -521,8 +565,9 @@ export function ImamProfilePage() {
                   sx={{
                     p: 3,
                     borderRadius: 3,
-                    border: "1px solid",
-                    borderColor: "divider"
+                    background: "rgba(15, 28, 39, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    boxShadow: "0 16px 40px rgba(0, 0, 0, 0.35)"
                   }}
                 >
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
@@ -549,11 +594,11 @@ export function ImamProfilePage() {
                                 width: 8,
                                 height: 8,
                                 borderRadius: "50%",
-                                background: "linear-gradient(135deg, #047857 0%, #D4AF37 100%)"
+                                background: "linear-gradient(135deg, rgba(15, 118, 110, 0.85) 0%, rgba(212, 175, 55, 0.9) 100%)"
                               }}
                             />
                           </ListItemIcon>
-                          <ListItemText primary={edu} />
+                          <ListItemText primary={edu} primaryTypographyProps={{ color: "text.primary" }} />
                         </ListItem>
                       ))}
                     </List>
@@ -566,6 +611,12 @@ export function ImamProfilePage() {
                             value={edu}
                             onChange={(e) => updateEducation(index, e.target.value)}
                             placeholder="Formation..."
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                background: "rgba(8, 18, 25, 0.7)",
+                                color: "#F8F6F1"
+                              }
+                            }}
                           />
                           <IconButton color="error" onClick={() => removeEducation(index)}>
                             <Delete />
@@ -583,8 +634,9 @@ export function ImamProfilePage() {
                   sx={{
                     p: 3,
                     borderRadius: 3,
-                    border: "1px solid",
-                    borderColor: "divider"
+                    background: "rgba(15, 28, 39, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    boxShadow: "0 16px 40px rgba(0, 0, 0, 0.35)"
                   }}
                 >
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
@@ -611,11 +663,11 @@ export function ImamProfilePage() {
                                 width: 8,
                                 height: 8,
                                 borderRadius: "50%",
-                                background: "linear-gradient(135deg, #047857 0%, #D4AF37 100%)"
+                                background: "linear-gradient(135deg, rgba(15, 118, 110, 0.85) 0%, rgba(212, 175, 55, 0.9) 100%)"
                               }}
                             />
                           </ListItemIcon>
-                          <ListItemText primary={exp} />
+                          <ListItemText primary={exp} primaryTypographyProps={{ color: "text.primary" }} />
                         </ListItem>
                       ))}
                     </List>
@@ -628,6 +680,12 @@ export function ImamProfilePage() {
                             value={exp}
                             onChange={(e) => updateExperience(index, e.target.value)}
                             placeholder="Expérience..."
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                background: "rgba(8, 18, 25, 0.7)",
+                                color: "#F8F6F1"
+                              }
+                            }}
                           />
                           <IconButton color="error" onClick={() => removeExperience(index)}>
                             <Delete />
