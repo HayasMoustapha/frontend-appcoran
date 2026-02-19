@@ -89,6 +89,17 @@ export function RecordPage() {
   }, [selectedSurah]);
 
   useEffect(() => {
+    if (!selectedSurah) {
+      setTitle("");
+      return;
+    }
+    const selected = surahReference.find((surah) => surah.number.toString() === selectedSurah);
+    if (selected) {
+      setTitle(`${selected.number}. ${selected.name_fr} (${selected.name_phonetic})`);
+    }
+  }, [selectedSurah, surahReference]);
+
+  useEffect(() => {
     if (verseStart === "") {
       setVerseEnd("");
       return;
@@ -503,15 +514,30 @@ export function RecordPage() {
           {/* Form Fields */}
           {(recordingState === "recorded" || recordingState === "uploading") && (
             <Box sx={{ mb: 3 }}>
-              <TextField
+              <FormControl
                 fullWidth
-                label="Titre de la récitation"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ex: Sourate Al-Fatiha"
                 sx={{ mb: 3 }}
-                disabled={recordingState === "uploading"}
-              />
+                disabled={recordingState === "uploading" || surahLoading || Boolean(surahError)}
+              >
+                <InputLabel>Titre de la sourate</InputLabel>
+                <Select
+                  value={title}
+                  label="Titre de la sourate"
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setTitle(next);
+                  }}
+                >
+                  {surahReference.map((surah) => {
+                    const fullTitle = `${surah.number}. ${surah.name_fr} (${surah.name_phonetic})`;
+                    return (
+                      <MenuItem key={surah.number} value={fullTitle}>
+                        {fullTitle}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
 
               <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
                 <FormControl
