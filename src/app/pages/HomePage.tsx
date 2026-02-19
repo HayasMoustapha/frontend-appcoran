@@ -58,19 +58,50 @@ export function HomePage() {
     let active = true;
     const loadData = async () => {
       try {
-        const [profile, all, recent, popular] = await Promise.all([
+        const [profileResult, allResult, recentResult, popularResult] = await Promise.allSettled([
           getPublicProfile(),
           listAudios(),
           getRecent(6),
           getPopular(6)
         ]);
         if (!active) return;
-        setImamProfile(mapPublicProfile(profile));
-        const mappedAll = all.map(mapAudioToRecitation);
-        setAllRecitations(mappedAll);
-        setSearchResults(mappedAll);
-        setRecentRecitations(recent.map(mapAudioToRecitation));
-        setPopularRecitations(popular.map(mapAudioToRecitation));
+
+        if (profileResult.status === "fulfilled") {
+          setImamProfile(mapPublicProfile(profileResult.value));
+        } else if (
+          profileResult.reason &&
+          !isNetworkError(profileResult.reason) &&
+          profileResult.reason instanceof Error &&
+          profileResult.reason.message !== "Profile not found"
+        ) {
+          setToast({ message: profileResult.reason.message, severity: "error" });
+        }
+
+        if (allResult.status === "fulfilled") {
+          const mappedAll = allResult.value.map(mapAudioToRecitation);
+          setAllRecitations(mappedAll);
+          setSearchResults(mappedAll);
+        } else if (!isNetworkError(allResult.reason)) {
+          const message =
+            allResult.reason instanceof Error ? allResult.reason.message : "Erreur lors du chargement";
+          setToast({ message, severity: "error" });
+        }
+
+        if (recentResult.status === "fulfilled") {
+          setRecentRecitations(recentResult.value.map(mapAudioToRecitation));
+        } else if (!isNetworkError(recentResult.reason)) {
+          const message =
+            recentResult.reason instanceof Error ? recentResult.reason.message : "Erreur lors du chargement";
+          setToast({ message, severity: "error" });
+        }
+
+        if (popularResult.status === "fulfilled") {
+          setPopularRecitations(popularResult.value.map(mapAudioToRecitation));
+        } else if (!isNetworkError(popularResult.reason)) {
+          const message =
+            popularResult.reason instanceof Error ? popularResult.reason.message : "Erreur lors du chargement";
+          setToast({ message, severity: "error" });
+        }
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
