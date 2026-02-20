@@ -41,6 +41,36 @@ npm run build
 5) Cache iOS
 - Vider l’historique Safari ou ouvrir en navigation privée
 
+## Configuration téléphone (DNS manuel)
+Comme la HomeBox T30PLUS ne gère pas les hostnames locaux, il faut forcer le DNS sur chaque appareil.
+
+### Android
+1) Wi‑Fi → Modifier réseau → Options avancées  
+2) DNS 1 : `192.168.1.179`  
+3) DNS 2 : (laisser vide)
+
+### iPhone
+1) Wi‑Fi → (i) → Configurer DNS → Manuel  
+2) Ajouter : `192.168.1.179`
+
+### Vérification
+Ouvrir :
+- `http://api.appcoran.com/health`
+- `http://appcoran.com`
+
+## QR Code Wi‑Fi (optionnel)
+Un script est fourni pour générer un QR Code Wi‑Fi (incluant DNS).
+
+```bash
+python3 /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/generate_wifi_qr.py \
+  --ssid "ISCAI 4G" \
+  --password "VOTRE_MOT_DE_PASSE_WIFI" \
+  --dns "192.168.1.179"
+```
+
+Le QR est généré ici :
+`frontend-appcoran/deploy/wifi-setup.png`
+
 ## 2) Reverse proxy local (Caddy)
 Use the local proxy config:
 - `frontend-appcoran/deploy/Caddyfile.local`
