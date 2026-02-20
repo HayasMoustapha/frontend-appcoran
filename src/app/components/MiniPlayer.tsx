@@ -1,10 +1,12 @@
 import { Box, IconButton, LinearProgress, Typography } from "@mui/material";
 import { Pause, PlayArrow, SkipNext, SkipPrevious } from "@mui/icons-material";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
+import { useEffect, useRef, useState } from "react";
 import { useAudioPlayer } from "./AudioPlayerProvider";
 
 export function MiniPlayer() {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     currentRecitation,
     isPlaying,
@@ -15,7 +17,42 @@ export function MiniPlayer() {
     playPrevious
   } = useAudioPlayer();
 
-  if (!currentRecitation) return null;
+  const [position, setPosition] = useState({ x: 16, y: 16 });
+  const draggingRef = useRef(false);
+  const startRef = useRef({ x: 0, y: 0 });
+  const posRef = useRef(position);
+
+  useEffect(() => {
+    posRef.current = position;
+  }, [position]);
+
+  useEffect(() => {
+    const onMove = (event: PointerEvent) => {
+      if (!draggingRef.current) return;
+      const nextX = Math.max(
+        8,
+        Math.min(window.innerWidth - 120, posRef.current.x + (event.clientX - startRef.current.x))
+      );
+      const nextY = Math.max(
+        8,
+        Math.min(window.innerHeight - 140, posRef.current.y + (event.clientY - startRef.current.y))
+      );
+      setPosition({ x: nextX, y: nextY });
+      startRef.current = { x: event.clientX, y: event.clientY };
+    };
+    const onUp = () => {
+      draggingRef.current = false;
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, []);
+
+  const isPlayerPage = location.pathname.startsWith("/recitation/");
+  if (!currentRecitation || isPlayerPage) return null;
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation.slug || currentRecitation.id;
@@ -24,38 +61,39 @@ export function MiniPlayer() {
     <Box
       sx={{
         position: "fixed",
-        left: { xs: 12, md: 24 },
-        right: { xs: 12, md: 24 },
-        bottom: { xs: 16, md: 24 },
+        right: "auto",
+        left: position.x,
+        bottom: "auto",
+        top: position.y,
         zIndex: 1300,
-        background: "rgba(12, 24, 34, 0.92)",
+        width: 120,
+        background: "rgba(12, 24, 34, 0.85)",
         border: "1px solid rgba(255,255,255,0.08)",
         borderRadius: 3,
-        p: 1.5,
+        p: 1,
         boxShadow: "0 12px 30px rgba(0,0,0,0.4)",
         backdropFilter: "blur(14px)",
         display: "grid",
-        gap: 1
+        gap: 0.75,
+        cursor: "grab",
+        opacity: 0.9,
+        "&:active": { cursor: "grabbing" }
+      }}
+      onPointerDown={(event) => {
+        draggingRef.current = true;
+        startRef.current = { x: event.clientX, y: event.clientY };
       }}
     >
       <Box
         onClick={() => navigate(`/recitation/${targetId}`)}
         sx={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          flexDirection: "column",
+          gap: 0.35,
           cursor: "pointer"
         }}
       >
-        <Box>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ color: "text.primary" }}>
-            {currentRecitation.title}
-          </Typography>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            {currentRecitation.surah}
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <IconButton
             size="small"
             onClick={(e) => {
@@ -64,7 +102,7 @@ export function MiniPlayer() {
             }}
             sx={{ color: "text.secondary" }}
           >
-            <SkipPrevious />
+            <SkipPrevious fontSize="small" />
           </IconButton>
           <IconButton
             size="small"
@@ -87,15 +125,28 @@ export function MiniPlayer() {
             }}
             sx={{ color: "text.secondary" }}
           >
-            <SkipNext />
+            <SkipNext fontSize="small" />
           </IconButton>
         </Box>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            textAlign: "center",
+            maxWidth: "100%",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap"
+          }}
+        >
+          {currentRecitation.surah}
+        </Typography>
       </Box>
       <LinearProgress
         variant="determinate"
         value={progress}
         sx={{
-          height: 6,
+          height: 4,
           borderRadius: 999,
           backgroundColor: "rgba(255,255,255,0.08)",
           "& .MuiLinearProgress-bar": {
