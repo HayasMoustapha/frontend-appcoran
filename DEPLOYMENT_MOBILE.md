@@ -24,6 +24,13 @@ Run:
 caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local
 ```
 
+### Script automatique (recommandé)
+Un script est fourni pour tout configurer d’un coup (Caddy + dnsmasq).
+```bash
+sudo bash /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/setup-local-domain.sh 192.168.1.50
+```
+Remplace `192.168.1.50` par l’IP de ton PC.
+
 ## 3) Recommended: Router DNS (Best Option)
 This keeps the domain **appcoran.com** and **api.appcoran.com**.
 
