@@ -7,7 +7,6 @@ import { checkHealth } from "./api/health";
 import { isNetworkError } from "./api/client";
 import { VisualLayers } from "./components/VisualLayers";
 import { AudioPlayerProvider } from "./components/AudioPlayerProvider";
-import { MiniPlayer } from "./components/MiniPlayer";
 
 const theme = createTheme({
   palette: {
@@ -77,7 +76,6 @@ export default function App() {
       <AudioPlayerProvider>
         <VisualLayers />
         <RouterProvider router={router} />
-        <MiniPlayer />
       </AudioPlayerProvider>
     </ThemeProvider>
   );
