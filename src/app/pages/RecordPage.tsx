@@ -59,6 +59,7 @@ export function RecordPage() {
   const [selectedSurah, setSelectedSurah] = useState("");
   const [verseStart, setVerseStart] = useState<number | "">("");
   const [verseEnd, setVerseEnd] = useState<number | "">("");
+  const [isComplete, setIsComplete] = useState(false);
   const [description, setDescription] = useState("");
   const [withBasmala, setWithBasmala] = useState(true);
   const [error, setError] = useState("");
@@ -111,6 +112,13 @@ export function RecordPage() {
     setVerseStart("");
     setVerseEnd("");
   }, [selectedSurah]);
+
+  useEffect(() => {
+    if (!isComplete) return;
+    if (!selectedSurahEntry) return;
+    setVerseStart(1);
+    setVerseEnd(selectedSurahEntry.verses);
+  }, [isComplete, selectedSurahEntry]);
 
   const sortedSurahs = useMemo(
     () => [...surahReference].sort((a, b) => a.number - b.number),
@@ -265,9 +273,12 @@ export function RecordPage() {
       setError("Veuillez sélectionner une sourate valide.");
       return;
     }
-    const normalizedStart = verseStart === "" ? undefined : Number(verseStart);
-    const normalizedEnd =
-      verseEnd === "" ? normalizedStart : Number(verseEnd);
+    const normalizedStart = isComplete ? 1 : verseStart === "" ? undefined : Number(verseStart);
+    const normalizedEnd = isComplete
+      ? selected?.verses
+      : verseEnd === ""
+      ? normalizedStart
+      : Number(verseEnd);
     const formData = new FormData();
     formData.append("file", uploadedFile);
     formData.append("title", title);
@@ -277,6 +288,7 @@ export function RecordPage() {
     if (normalizedEnd !== undefined) formData.append("versetEnd", String(normalizedEnd));
     formData.append("description", description);
     formData.append("addBasmala", String(withBasmala));
+    formData.append("isComplete", String(isComplete));
 
     try {
       await uploadAudio(formData);
@@ -649,6 +661,7 @@ export function RecordPage() {
                   disabled={
                     recordingState === "uploading" ||
                     !selectedSurah ||
+                    isComplete ||
                     surahLoading ||
                     Boolean(surahError)
                   }
@@ -682,6 +695,7 @@ export function RecordPage() {
                   disabled={
                     recordingState === "uploading" ||
                     !selectedSurah ||
+                    isComplete ||
                     surahLoading ||
                     Boolean(surahError)
                   }
@@ -709,6 +723,26 @@ export function RecordPage() {
                   </Select>
                 </FormControl>
               </Box>
+
+              <FormControlLabel
+                sx={{ ml: 0, mb: 2 }}
+                control={
+                  <Switch
+                    checked={isComplete}
+                    onChange={(event) => {
+                      const next = event.target.checked;
+                      setIsComplete(next);
+                      if (!next) {
+                        setVerseStart("");
+                        setVerseEnd("");
+                      }
+                    }}
+                    color="primary"
+                    disabled={recordingState === "uploading" || !selectedSurah}
+                  />
+                }
+                label={t("record.completeSurah")}
+              />
 
               {surahError && (
                 <Typography variant="caption" color="error" sx={{ display: "block", mb: 2 }}>

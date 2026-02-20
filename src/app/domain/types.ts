@@ -12,6 +12,7 @@ export interface Recitation {
   downloads: number;
   views?: number;
   shares?: number;
+  isComplete?: boolean;
   description?: string | null;
   streamUrl?: string;
   downloadUrl?: string;

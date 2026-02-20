@@ -36,6 +36,7 @@ export function mapAudioToRecitation(audio: ApiAudio): Recitation {
     downloads: audio.download_count ?? 0,
     views: audio.view_count ?? 0,
     shares: audio.share_count ?? 0,
+    isComplete: Boolean(audio.is_complete),
     description: audio.description ?? ""
   };
 }
@@ -54,6 +55,7 @@ export function mapPublicAudioToRecitation(audio: ApiPublicAudio): Recitation {
     downloads: audio.download_count,
     views: audio.view_count,
     description: audio.description ?? "",
+    isComplete: Boolean(audio.is_complete),
     streamUrl: audio.stream_url,
     downloadUrl: audio.download_url,
     shareUrl: audio.share_url

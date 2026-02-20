@@ -26,7 +26,6 @@ export function MiniPlayer() {
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
   const sizeRef = useRef(size);
-  const frameRef = useRef<number | null>(null);
   const targetRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -43,36 +42,24 @@ export function MiniPlayer() {
       const dx = event.clientX - startRef.current.x;
       const dy = event.clientY - startRef.current.y;
 
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
+      if (resizingRef.current) {
+        const nextW = Math.max(150, Math.min(window.innerWidth - 24, sizeRef.current.w + dx));
+        const nextH = Math.max(130, Math.min(window.innerHeight - 24, sizeRef.current.h + dy));
+        sizeRef.current = { w: nextW, h: nextH };
+        if (targetRef.current) {
+          targetRef.current.style.width = `${nextW}px`;
+          targetRef.current.style.height = `${nextH}px`;
+        }
+        startRef.current = { x: event.clientX, y: event.clientY };
+        return;
       }
 
-      frameRef.current = requestAnimationFrame(() => {
-        if (resizingRef.current) {
-          const nextW = Math.max(150, Math.min(window.innerWidth - 24, sizeRef.current.w + dx));
-          const nextH = Math.max(130, Math.min(window.innerHeight - 24, sizeRef.current.h + dy));
-          sizeRef.current = { w: nextW, h: nextH };
-          if (targetRef.current) {
-            targetRef.current.style.width = `${nextW}px`;
-            targetRef.current.style.height = `${nextH}px`;
-          }
-        } else {
-          const nextX = Math.max(
-            8,
-            Math.min(window.innerWidth - sizeRef.current.w - 8, posRef.current.x + dx)
-          );
-          const nextY = Math.max(
-            8,
-            Math.min(window.innerHeight - sizeRef.current.h - 8, posRef.current.y + dy)
-          );
-          posRef.current = { x: nextX, y: nextY };
-          if (targetRef.current) {
-            targetRef.current.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
-          }
-        }
-      });
-
-      startRef.current = { x: event.clientX, y: event.clientY };
+      const nextX = Math.max(8, Math.min(window.innerWidth - sizeRef.current.w - 8, event.clientX));
+      const nextY = Math.max(8, Math.min(window.innerHeight - sizeRef.current.h - 8, event.clientY));
+      posRef.current = { x: nextX, y: nextY };
+      if (targetRef.current) {
+        targetRef.current.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
+      }
     };
     const onUp = () => {
       draggingRef.current = false;
@@ -80,19 +67,14 @@ export function MiniPlayer() {
       document.body.style.userSelect = "";
       setPosition(posRef.current);
       setSize(sizeRef.current);
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-        frameRef.current = null;
-      }
+      // no-op
     };
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     return () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-      }
+      // no-op
     };
   }, []);
 
