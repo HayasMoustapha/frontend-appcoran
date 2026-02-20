@@ -41,7 +41,7 @@ import { formatNumber, formatNumericText } from "../utils/formatNumber";
 export function RecitationPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const publicAppUrl =
     import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin;
