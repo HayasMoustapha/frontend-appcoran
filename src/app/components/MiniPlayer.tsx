@@ -76,7 +76,7 @@ export function MiniPlayer() {
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation?.slug || currentRecitation?.id;
   const isCompact = fixedSize.w < 190;
-  const innerPadding = collapsed ? 0.7 : 1.1;
+  const innerPadding = collapsed ? "10px" : "10px";
   const modeIcon =
     playbackMode === "repeat-one" ? (
       <RepeatOne fontSize="small" />
