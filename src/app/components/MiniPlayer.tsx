@@ -21,6 +21,7 @@ export function MiniPlayer() {
   const {
     currentRecitation,
     isPlaying,
+    hasPlaybackStarted,
     currentTime,
     duration,
     togglePlay,
@@ -73,7 +74,7 @@ export function MiniPlayer() {
   const isPlayerPage = location.pathname.startsWith("/recitation/");
   const isHomePage = location.pathname === "/";
   const isLoginPage = location.pathname.startsWith("/login");
-  const hasStartedPlayback = isPlaying || currentTime > 0;
+  const hasStartedPlayback = hasPlaybackStarted || isPlaying || currentTime > 0;
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation?.slug || currentRecitation?.id;

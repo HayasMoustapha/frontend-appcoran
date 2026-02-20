@@ -6,6 +6,7 @@ type AudioPlayerContextValue = {
   currentRecitation: Recitation | null;
   playlist: Recitation[];
   isPlaying: boolean;
+  hasPlaybackStarted: boolean;
   currentTime: number;
   duration: number;
   volume: number;
@@ -40,6 +41,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
   const [currentRecitation, setCurrentRecitation] = useState<Recitation | null>(null);
   const [playlist, setPlaylist] = useState<Recitation[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [hasPlaybackStarted, setHasPlaybackStarted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(80);
@@ -62,6 +64,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       audio.load();
     }
     setIsPlaying(false);
+    setHasPlaybackStarted(false);
     setCurrentTime(0);
     setDuration(0);
     setCurrentRecitation(null);
@@ -181,7 +184,10 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       setIsPlaying(false);
       playNext();
     };
-    const onPlay = () => setIsPlaying(true);
+    const onPlay = () => {
+      setIsPlaying(true);
+      setHasPlaybackStarted(true);
+    };
     const onPause = () => setIsPlaying(false);
 
     audio.addEventListener("timeupdate", onTimeUpdate);
@@ -236,6 +242,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     currentRecitation,
     playlist,
     isPlaying,
+    hasPlaybackStarted,
     currentTime,
     duration,
     volume,

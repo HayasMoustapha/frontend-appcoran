@@ -42,11 +42,13 @@ import type { Recitation } from "../domain/types";
 import { useTranslation } from "react-i18next";
 import { formatNumber, formatNumericText } from "../utils/formatNumber";
 import { useAudioPlayer } from "../components/AudioPlayerProvider";
+import { useDataRefresh } from "../state/dataRefresh";
 
 export function RecitationPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { refreshToken } = useDataRefresh();
   const publicAppUrl =
     import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin;
 
@@ -113,7 +115,7 @@ export function RecitationPlayer() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [refreshToken]);
 
   useEffect(() => {
     let active = true;

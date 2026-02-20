@@ -51,10 +51,12 @@ import { deleteAudio, listAudios, updateAudio, type UpdateAudioPayload } from ".
 import { mapAudioToRecitation } from "../api/mappers";
 import type { DashboardOverview, Recitation, DashboardPerformanceItem, SurahReference } from "../domain/types";
 import { getSurahReference } from "../api/surahReference";
+import { useDataRefresh } from "../state/dataRefresh";
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { refreshToken, triggerRefresh } = useDataRefresh();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRecitation, setSelectedRecitation] = useState<Recitation | null>(null);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
@@ -116,7 +118,7 @@ export function DashboardPage() {
       if (intervalId) window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [i18n.language]);
+  }, [i18n.language, refreshToken]);
 
   useEffect(() => {
     let active = true;
@@ -193,6 +195,7 @@ export function DashboardPage() {
       const mapped = mapAudioToRecitation(updated);
       setRecitations((prev) => prev.map((item) => (item.id === mapped.id ? mapped : item)));
       setToast({ message: t("dashboard.updated"), severity: "success" });
+      triggerRefresh();
       setEditOpen(false);
       handleMenuClose();
     } catch (err) {
@@ -210,6 +213,7 @@ export function DashboardPage() {
       await deleteAudio(selectedRecitation.id);
       setRecitations((prev) => prev.filter((item) => item.id !== selectedRecitation.id));
       setToast({ message: t("dashboard.deleted"), severity: "success" });
+      triggerRefresh();
       setDeleteOpen(false);
       handleMenuClose();
     } catch (err) {

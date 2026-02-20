@@ -36,6 +36,7 @@ import { getSurahReference } from "../api/surahReference";
 import { useTranslation } from "react-i18next";
 import { formatNumber, formatNumericText } from "../utils/formatNumber";
 import { useAudioPlayer } from "../components/AudioPlayerProvider";
+import { useDataRefresh } from "../state/dataRefresh";
 
 export function HomePage() {
   const heroRef = useRef<HTMLDivElement | null>(null);
@@ -63,6 +64,7 @@ export function HomePage() {
   });
   const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
   const { t, i18n } = useTranslation();
+  const { refreshToken } = useDataRefresh();
   const { currentRecitation, isPlaying, playRecitation, togglePlay } = useAudioPlayer();
 
   useEffect(() => {
@@ -151,7 +153,7 @@ export function HomePage() {
       if (intervalId) window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [i18n.language]);
+  }, [i18n.language, refreshToken]);
 
   const handleSearchSubmit = () => {
     if (recitationsRef.current) {

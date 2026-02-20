@@ -38,10 +38,12 @@ import { createProfile, getProfile, updateProfile } from "../api/profile";
 import { isNetworkError } from "../api/client";
 import { mapPublicProfile } from "../api/mappers";
 import { useTranslation } from "react-i18next";
+import { useDataRefresh } from "../state/dataRefresh";
 
 export function ImamProfilePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { refreshToken, triggerRefresh } = useDataRefresh();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<ImamProfile>({
@@ -96,7 +98,7 @@ export function ImamProfilePage() {
       if (intervalId) window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [i18n.language]);
+  }, [i18n.language, refreshToken]);
 
   const handleSave = async () => {
     const formData = new FormData();
@@ -125,6 +127,7 @@ export function ImamProfilePage() {
       setPhotoFile(null);
       setIsEditing(false);
       setToast({ message: "Profil enregistré avec succès.", severity: "success" });
+      triggerRefresh();
     } catch (err) {
       if (isNetworkError(err)) return;
       setToast({ message: err instanceof Error ? err.message : t("profile.saveFailed"), severity: "error" });

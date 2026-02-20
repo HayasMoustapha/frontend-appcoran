@@ -37,12 +37,14 @@ import { getSurahReference } from "../api/surahReference";
 import type { SurahReference } from "../domain/types";
 import { useTranslation } from "react-i18next";
 import { formatNumber } from "../utils/formatNumber";
+import { useDataRefresh } from "../state/dataRefresh";
 
 type RecordingState = "idle" | "recording" | "recorded" | "uploading" | "success";
 
 export function RecordPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { triggerRefresh } = useDataRefresh();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -298,6 +300,7 @@ export function RecordPage() {
       setUploadProgress(100);
       setRecordingState("success");
       setToast({ message: t("record.publishedSuccess"), severity: "success" });
+      triggerRefresh();
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
