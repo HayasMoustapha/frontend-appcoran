@@ -128,17 +128,36 @@ export function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              sx={{ mb: 3 }}
-              InputLabelProps={{
-                shrink: true,
-                sx: { right: isRtl ? 14 : "auto", left: isRtl ? "auto" : 14, transformOrigin: isRtl ? "top right" : "top left" }
-              }}
-              InputProps={{
-                sx: {
+              sx={{
+                mb: 3,
+                "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
                   background: "rgba(8, 18, 25, 0.6)",
                   color: "text.primary",
                   textAlign: isRtl ? "right" : "left"
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(255, 255, 255, 0.12)"
+                },
+                "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(212, 175, 55, 0.45)"
+                },
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(212, 175, 55, 0.7)"
+                }
+              }}
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  right: isRtl ? 14 : "auto",
+                  left: isRtl ? "auto" : 14,
+                  transformOrigin: isRtl ? "top right" : "top left",
+                  color: "text.secondary",
+                  px: 0.75,
+                  background: "rgba(15, 28, 39, 0.9)",
+                  borderRadius: 1,
+                  zIndex: 2,
+                  transform: isRtl ? "translate(-14px, -9px) scale(0.75)" : "translate(14px, -9px) scale(0.75)"
                 }
               }}
             />
@@ -149,18 +168,39 @@ export function LoginPage() {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              sx={{ mb: 3 }}
-              InputLabelProps={{
-                shrink: true,
-                sx: { right: isRtl ? 14 : "auto", left: isRtl ? "auto" : 14, transformOrigin: isRtl ? "top right" : "top left" }
-              }}
-              InputProps={{
-                sx: {
+              sx={{
+                mb: 3,
+                "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
                   background: "rgba(8, 18, 25, 0.6)",
                   color: "text.primary",
                   textAlign: isRtl ? "right" : "left"
                 },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(255, 255, 255, 0.12)"
+                },
+                "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(212, 175, 55, 0.45)"
+                },
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(212, 175, 55, 0.7)"
+                }
+              }}
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  right: isRtl ? 14 : "auto",
+                  left: isRtl ? "auto" : 14,
+                  transformOrigin: isRtl ? "top right" : "top left",
+                  color: "text.secondary",
+                  px: 0.75,
+                  background: "rgba(15, 28, 39, 0.9)",
+                  borderRadius: 1,
+                  zIndex: 2,
+                  transform: isRtl ? "translate(-14px, -9px) scale(0.75)" : "translate(14px, -9px) scale(0.75)"
+                }
+              }}
+              InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: "text.secondary" }}>
