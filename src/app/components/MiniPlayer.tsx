@@ -33,7 +33,7 @@ export function MiniPlayer() {
   } = useAudioPlayer();
 
   const [position, setPosition] = useState({ x: 16, y: 16 });
-  const [size, setSize] = useState({ w: 170, h: 160 });
+  const [size, setSize] = useState({ w: 240, h: 190 });
   const [collapsed, setCollapsed] = useState(false);
   const draggingRef = useRef(false);
   const resizingRef = useRef(false);
@@ -57,8 +57,8 @@ export function MiniPlayer() {
       const dy = event.clientY - startRef.current.y;
 
       if (resizingRef.current) {
-        const nextW = Math.max(150, Math.min(window.innerWidth - 24, sizeRef.current.w + dx));
-        const nextH = Math.max(130, Math.min(window.innerHeight - 24, sizeRef.current.h + dy));
+        const nextW = Math.max(200, Math.min(window.innerWidth - 24, sizeRef.current.w + dx));
+        const nextH = Math.max(160, Math.min(window.innerHeight - 24, sizeRef.current.h + dy));
         sizeRef.current = { w: nextW, h: nextH };
         if (targetRef.current) {
           targetRef.current.style.width = `${nextW}px`;
