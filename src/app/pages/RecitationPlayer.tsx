@@ -32,26 +32,22 @@ import {
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { getPublicAudioBySlug, listAudios, sharePublicAudio } from "../api/audios";
-import { isNetworkError } from "../api/client";
+import { isNetworkError, PUBLIC_BASE_URL } from "../api/client";
 import { mapAudioToRecitation, mapPublicAudioToRecitation } from "../api/mappers";
 import type { Recitation } from "../domain/types";
 import { useTranslation } from "react-i18next";
 import { formatNumber, formatNumericText } from "../utils/formatNumber";
+import { useAudioPlayer } from "../components/AudioPlayerProvider";
 
 export function RecitationPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const publicAppUrl =
     import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin;
 
   const [recitation, setRecitation] = useState<Recitation | null>(null);
   const [allRecitations, setAllRecitations] = useState<Recitation[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(80);
   const [isFavorite, setIsFavorite] = useState(false);
   const [error, setError] = useState("");
   const [audioLoadError, setAudioLoadError] = useState("");
@@ -62,6 +58,21 @@ export function RecitationPlayer() {
   const [showConversionBadge, setShowConversionBadge] = useState(false);
   const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
   const conversionTimerRef = useRef<number | null>(null);
+  const {
+    audioRef: sharedAudioRef,
+    isPlaying,
+    currentTime,
+    duration,
+    volume,
+    setPlaylist,
+    setCurrentRecitation,
+    playRecitation,
+    togglePlay,
+    seek,
+    setVolume: setPlayerVolume,
+    playNext,
+    playPrevious
+  } = useAudioPlayer();
 
   useEffect(() => {
     let active = true;
@@ -69,7 +80,17 @@ export function RecitationPlayer() {
       try {
         const all = await listAudios();
         if (!active) return;
-        setAllRecitations(all.map(mapAudioToRecitation));
+        const mapped = all.map(mapAudioToRecitation).map((item) =>
+          item.slug
+            ? {
+                ...item,
+                streamUrl: `${PUBLIC_BASE_URL}/public/audios/${item.slug}/stream`,
+                downloadUrl: `${PUBLIC_BASE_URL}/public/audios/${item.slug}/download`
+              }
+            : item
+        );
+        setAllRecitations(mapped);
+        setPlaylist(mapped);
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
@@ -94,7 +115,9 @@ export function RecitationPlayer() {
       try {
         const audio = await getPublicAudioBySlug(id);
         if (!active) return;
-        setRecitation(mapPublicAudioToRecitation(audio));
+        const mapped = mapPublicAudioToRecitation(audio);
+        setRecitation(mapped);
+        setCurrentRecitation(mapped);
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
@@ -109,13 +132,11 @@ export function RecitationPlayer() {
   }, [id]);
 
   useEffect(() => {
-    const audio = audioRef.current;
+    const audio = sharedAudioRef.current;
     if (!audio) return;
 
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime || 0);
-    const onLoaded = () => setDuration(audio.duration || 0);
     const onEnded = () => {
-      setIsPlaying(false);
+      playNext();
       if ("mediaSession" in navigator) {
         navigator.mediaSession.playbackState = "paused";
       }
@@ -138,31 +159,39 @@ export function RecitationPlayer() {
         setShowConversionBadge(true);
       }, 1500);
     };
+    const onError = () => {
+      if (conversionTimerRef.current) {
+        window.clearTimeout(conversionTimerRef.current);
+        conversionTimerRef.current = null;
+      }
+      setConversionOpen(false);
+      const message = "Lecture audio impossible. Format non supporté ou fichier manquant.";
+      setAudioLoadError(message);
+      if (hasTriedPlay) {
+        setToast({ message, severity: "error" });
+      }
+    };
 
-    audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("loadedmetadata", onLoaded);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("canplay", onCanPlay);
     audio.addEventListener("loadstart", onLoadStart);
+    audio.addEventListener("error", onError);
 
     return () => {
-      audio.removeEventListener("timeupdate", onTimeUpdate);
-      audio.removeEventListener("loadedmetadata", onLoaded);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("canplay", onCanPlay);
       audio.removeEventListener("loadstart", onLoadStart);
+      audio.removeEventListener("error", onError);
       if (conversionTimerRef.current) {
         window.clearTimeout(conversionTimerRef.current);
         conversionTimerRef.current = null;
       }
     };
-  }, [recitation?.streamUrl]);
+  }, [recitation?.streamUrl, hasTriedPlay, playNext, sharedAudioRef]);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume / 100;
-    }
-  }, [volume]);
+    setPlayerVolume(volume);
+  }, [volume, setPlayerVolume]);
 
   const { previousRecitation, nextRecitation } = useMemo(() => {
     const currentIndex = allRecitations.findIndex(
@@ -191,33 +220,33 @@ export function RecitationPlayer() {
 
     navigator.mediaSession.setActionHandler("play", async () => {
       try {
-        await audioRef.current?.play();
-        setIsPlaying(true);
+        await sharedAudioRef.current?.play();
         navigator.mediaSession.playbackState = "playing";
       } catch {
         // ignore
       }
     });
     navigator.mediaSession.setActionHandler("pause", () => {
-      audioRef.current?.pause();
-      setIsPlaying(false);
+      sharedAudioRef.current?.pause();
       navigator.mediaSession.playbackState = "paused";
     });
     navigator.mediaSession.setActionHandler("seekto", (event) => {
-      if (!audioRef.current || event.seekTime === undefined) return;
-      audioRef.current.currentTime = event.seekTime;
+      if (!sharedAudioRef.current || event.seekTime === undefined) return;
+      sharedAudioRef.current.currentTime = event.seekTime;
     });
     navigator.mediaSession.setActionHandler("previoustrack", () => {
       if (previousRecitation) {
+        playRecitation(previousRecitation, true);
         navigate(`/recitation/${previousRecitation.slug || previousRecitation.id}`);
       }
     });
     navigator.mediaSession.setActionHandler("nexttrack", () => {
       if (nextRecitation) {
+        playRecitation(nextRecitation, true);
         navigate(`/recitation/${nextRecitation.slug || nextRecitation.id}`);
       }
     });
-  }, [recitation, previousRecitation, nextRecitation, navigate]);
+  }, [recitation, previousRecitation, nextRecitation, navigate, playRecitation]);
 
   useEffect(() => {
     setAudioLoadError("");
@@ -231,7 +260,7 @@ export function RecitationPlayer() {
   };
 
   const handlePlayToggle = async () => {
-    const audio = audioRef.current;
+    const audio = sharedAudioRef.current;
     if (!audio) return;
     try {
       setHasTriedPlay(true);
@@ -239,19 +268,7 @@ export function RecitationPlayer() {
         setToast({ message: audioLoadError, severity: "error" });
         return;
       }
-      if (isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
-        if ("mediaSession" in navigator) {
-          navigator.mediaSession.playbackState = "paused";
-        }
-      } else {
-        await audio.play();
-        setIsPlaying(true);
-        if ("mediaSession" in navigator) {
-          navigator.mediaSession.playbackState = "playing";
-        }
-      }
+      togglePlay();
     } catch (err) {
       if (isNetworkError(err)) return;
       setToast({ message: err instanceof Error ? err.message : "Lecture impossible", severity: "error" });
@@ -259,19 +276,13 @@ export function RecitationPlayer() {
   };
 
   const handleSeek = (_: Event, value: number | number[]) => {
-    const audio = audioRef.current;
-    if (!audio) return;
     const nextTime = Array.isArray(value) ? value[0] : value;
-    audio.currentTime = nextTime;
-    setCurrentTime(nextTime);
+    seek(nextTime);
   };
 
   const handleVolume = (_: Event, value: number | number[]) => {
     const nextVolume = Array.isArray(value) ? value[0] : value;
-    setVolume(nextVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = nextVolume / 100;
-    }
+    setPlayerVolume(nextVolume);
   };
 
   const handleDownload = () => {
@@ -509,9 +520,11 @@ export function RecitationPlayer() {
               <IconButton
                 size="large"
                 disabled={!previousRecitation}
-                onClick={() =>
-                  previousRecitation && navigate(`/recitation/${previousRecitation.slug || previousRecitation.id}`)
-                }
+                onClick={() => {
+                  if (!previousRecitation) return;
+                  playRecitation(previousRecitation, true);
+                  navigate(`/recitation/${previousRecitation.slug || previousRecitation.id}`);
+                }}
                 sx={{
                   border: "2px solid",
                   borderColor: "rgba(255, 255, 255, 0.1)",
@@ -545,9 +558,11 @@ export function RecitationPlayer() {
               <IconButton
                 size="large"
                 disabled={!nextRecitation}
-                onClick={() =>
-                  nextRecitation && navigate(`/recitation/${nextRecitation.slug || nextRecitation.id}`)
-                }
+                onClick={() => {
+                  if (!nextRecitation) return;
+                  playRecitation(nextRecitation, true);
+                  navigate(`/recitation/${nextRecitation.slug || nextRecitation.id}`);
+                }}
                 sx={{
                   border: "2px solid",
                   borderColor: "rgba(255, 255, 255, 0.1)",
@@ -611,24 +626,9 @@ export function RecitationPlayer() {
             </Box>
           </Box>
         </Paper>
-        <audio
-          ref={audioRef}
-          src={recitation.streamUrl || recitation.downloadUrl}
-          preload="metadata"
-          crossOrigin="anonymous"
-          onError={() => {
-            if (conversionTimerRef.current) {
-              window.clearTimeout(conversionTimerRef.current);
-              conversionTimerRef.current = null;
-            }
-            setConversionOpen(false);
-            const message = "Lecture audio impossible. Format non supporté ou fichier manquant.";
-            setAudioLoadError(message);
-            if (hasTriedPlay) {
-              setToast({ message, severity: "error" });
-            }
-          }}
-        />
+        <div style={{ display: "none" }}>
+          {/* audio element is managed globally by AudioPlayerProvider */}
+        </div>
       </Container>
 
       <Dialog
