@@ -97,7 +97,7 @@ export function MiniPlayer() {
   const isPlayerPage = location.pathname.startsWith("/recitation/");
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
-  const targetId = currentRecitation.slug || currentRecitation.id;
+  const targetId = currentRecitation?.slug || currentRecitation?.id;
   const isCompact = size.w < 190;
   const modeIcon =
     playbackMode === "repeat-one" ? (
@@ -119,7 +119,7 @@ export function MiniPlayer() {
     }
   }, [location.pathname, currentRecitation, isPlayerPage]);
 
-  if (!currentRecitation || isPlayerPage) return null;
+  if (!currentRecitation || isPlayerPage || !targetId) return null;
 
   const effectiveWidth = collapsed ? 120 : size.w;
   const effectiveHeight = collapsed ? 120 : size.h;
