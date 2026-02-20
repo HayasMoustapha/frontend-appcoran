@@ -8,9 +8,7 @@ import {
   RepeatOne,
   Shuffle,
   QueueMusic,
-  Close,
-  ExpandLess,
-  ExpandMore
+  Close
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router";
 import { useEffect, useRef, useState } from "react";
@@ -120,6 +118,16 @@ export function MiniPlayer() {
       color: "rgba(246,233,198,0.92)"
     }
   } as const;
+
+  const waveBarSx = (index: number) => ({
+    width: 4,
+    borderRadius: 999,
+    background:
+      "linear-gradient(180deg, rgba(212,175,55,0.9), rgba(15,118,110,0.9))",
+    height: isPlaying ? 16 : 6,
+    opacity: isPlaying ? 0.9 : 0.55,
+    animation: isPlaying ? `miniPulse 900ms ${index * 120}ms ease-in-out infinite` : "none"
+  });
 
   useEffect(() => {
     if (!currentRecitation || isPlayerPage) return;
@@ -253,12 +261,12 @@ export function MiniPlayer() {
             >
               <SkipNext fontSize="small" />
             </IconButton>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                cyclePlaybackMode();
-              }}
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              cyclePlaybackMode();
+            }}
               sx={{
                 ...iconSx,
                 color:
@@ -267,22 +275,12 @@ export function MiniPlayer() {
                     : "rgba(212,175,55,0.95)"
               }}
             >
-              {modeIcon}
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setCollapsed((prev) => (location.pathname === "/" ? true : !prev));
-              }}
-              sx={iconSx}
-            >
-              {collapsed ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
+            {modeIcon}
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
                 stopPlayback();
               }}
               sx={iconSx}
@@ -290,21 +288,40 @@ export function MiniPlayer() {
               <Close fontSize="small" />
             </IconButton>
           </Box>
-          <Typography
-            variant="caption"
-            sx={{
-              color: "rgba(232,220,190,0.78)",
-              textAlign: "center",
-              maxWidth: "100%",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              letterSpacing: "0.02em"
-            }}
-          >
-            {collapsed ? currentRecitation.surah : currentRecitation.title}
-          </Typography>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "rgba(232,220,190,0.78)",
+            textAlign: "center",
+            maxWidth: "100%",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            letterSpacing: "0.02em"
+          }}
+        >
+          {collapsed ? currentRecitation.surah : currentRecitation.title}
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-end",
+            gap: 0.6,
+            height: 18,
+            mt: 0.2,
+            "& @keyframes miniPulse": {
+              "0%": { transform: "scaleY(0.4)" },
+              "50%": { transform: "scaleY(1.2)" },
+              "100%": { transform: "scaleY(0.5)" }
+            }
+          }}
+        >
+          {[0, 1, 2, 3, 4].map((index) => (
+            <Box key={index} sx={waveBarSx(index)} />
+          ))}
         </Box>
+      </Box>
         <LinearProgress
           variant="determinate"
           value={progress}
