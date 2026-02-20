@@ -13,6 +13,12 @@ Note: this guide is **without Docker**.
 Use the local proxy config:
 - `frontend-appcoran/deploy/Caddyfile.local`
 
+Install prerequisites (Linux Mint 22.3):
+```bash
+sudo apt-get update
+sudo apt-get install -y caddy dnsmasq
+```
+
 Run:
 ```bash
 caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local
