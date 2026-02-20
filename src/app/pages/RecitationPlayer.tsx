@@ -122,7 +122,6 @@ export function RecitationPlayer() {
         const audio = await getPublicAudioBySlug(id);
         if (!active) return;
         const mapped = mapPublicAudioToRecitation(audio);
-        setRecitation(mapped);
         setCurrentRecitation(mapped);
       } catch (err) {
         if (!active) return;
@@ -255,9 +254,13 @@ export function RecitationPlayer() {
   }, [recitation, previousRecitation, nextRecitation, navigate, playRecitation]);
 
   useEffect(() => {
+    setRecitation(currentRecitation || null);
+  }, [currentRecitation]);
+
+  useEffect(() => {
     setAudioLoadError("");
     setHasTriedPlay(false);
-  }, [recitation?.slug]);
+  }, [currentRecitation?.slug]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

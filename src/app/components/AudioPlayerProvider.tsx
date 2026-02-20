@@ -109,11 +109,16 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         playRecitation(playlist[0], true);
         return;
       }
-      let nextIndex = currentIndex;
-      while (nextIndex === currentIndex) {
-        nextIndex = Math.floor(Math.random() * playlist.length);
+      const candidates = playlist.filter((item) => {
+        const key = item.slug || item.id;
+        return key && key !== (currentRecitation.slug || currentRecitation.id);
+      });
+      if (candidates.length === 0) {
+        stopPlayback();
+        return;
       }
-      playRecitation(playlist[nextIndex], true);
+      const random = candidates[Math.floor(Math.random() * candidates.length)];
+      playRecitation(random, true);
       return;
     }
     if (playbackMode === "repeat-all") {
