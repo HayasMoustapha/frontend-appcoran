@@ -18,30 +18,49 @@ export function MiniPlayer() {
   } = useAudioPlayer();
 
   const [position, setPosition] = useState({ x: 16, y: 16 });
+  const [size, setSize] = useState({ w: 150, h: 140 });
   const draggingRef = useRef(false);
+  const resizingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
+  const sizeRef = useRef(size);
 
   useEffect(() => {
     posRef.current = position;
   }, [position]);
 
   useEffect(() => {
+    sizeRef.current = size;
+  }, [size]);
+
+  useEffect(() => {
     const onMove = (event: PointerEvent) => {
-      if (!draggingRef.current) return;
+      if (!draggingRef.current && !resizingRef.current) return;
+      const dx = event.clientX - startRef.current.x;
+      const dy = event.clientY - startRef.current.y;
+
+      if (resizingRef.current) {
+        const nextW = Math.max(140, Math.min(window.innerWidth - 24, sizeRef.current.w + dx));
+        const nextH = Math.max(120, Math.min(window.innerHeight - 24, sizeRef.current.h + dy));
+        setSize({ w: nextW, h: nextH });
+        startRef.current = { x: event.clientX, y: event.clientY };
+        return;
+      }
+
       const nextX = Math.max(
         8,
-        Math.min(window.innerWidth - 120, posRef.current.x + (event.clientX - startRef.current.x))
+        Math.min(window.innerWidth - sizeRef.current.w - 8, posRef.current.x + dx)
       );
       const nextY = Math.max(
         8,
-        Math.min(window.innerHeight - 140, posRef.current.y + (event.clientY - startRef.current.y))
+        Math.min(window.innerHeight - sizeRef.current.h - 8, posRef.current.y + dy)
       );
       setPosition({ x: nextX, y: nextY });
       startRef.current = { x: event.clientX, y: event.clientY };
     };
     const onUp = () => {
       draggingRef.current = false;
+      resizingRef.current = false;
     };
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
@@ -66,7 +85,8 @@ export function MiniPlayer() {
         bottom: "auto",
         top: position.y,
         zIndex: 1300,
-        width: 120,
+        width: size.w,
+        height: size.h,
         background: "rgba(12, 24, 34, 0.85)",
         border: "1px solid rgba(255,255,255,0.08)",
         borderRadius: 3,
@@ -77,11 +97,15 @@ export function MiniPlayer() {
         gap: 0.75,
         cursor: "grab",
         opacity: 0.9,
+        userSelect: "none",
+        touchAction: "none",
         "&:active": { cursor: "grabbing" }
       }}
       onPointerDown={(event) => {
+        if ((event.target as HTMLElement)?.dataset?.resizeHandle) return;
         draggingRef.current = true;
         startRef.current = { x: event.clientX, y: event.clientY };
+        (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
       }}
     >
       <Box
@@ -152,6 +176,26 @@ export function MiniPlayer() {
           "& .MuiLinearProgress-bar": {
             background: "linear-gradient(135deg, rgba(212,175,55,0.95), rgba(15,118,110,0.9))"
           }
+        }}
+      />
+      <Box
+        data-resize-handle
+        onPointerDown={(event) => {
+          event.stopPropagation();
+          resizingRef.current = true;
+          startRef.current = { x: event.clientX, y: event.clientY };
+          (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+        }}
+        sx={{
+          position: "absolute",
+          right: 6,
+          bottom: 6,
+          width: 14,
+          height: 14,
+          borderRadius: 1,
+          background: "rgba(212,175,55,0.6)",
+          border: "1px solid rgba(255,255,255,0.2)",
+          cursor: "nwse-resize"
         }}
       />
     </Box>
