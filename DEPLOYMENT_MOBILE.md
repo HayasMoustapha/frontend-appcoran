@@ -9,10 +9,15 @@ This guide explains how to access **appcoran.com** from your phone on the same W
 
 Note: this guide is **without Docker**.
 
-Make sure frontend env points to local domains:
-- `VITE_API_BASE_URL=http://api.appcoran.com`
-- `VITE_PUBLIC_APP_URL=http://appcoran.com`
-- `VITE_PUBLIC_BASE_URL=http://api.appcoran.com`
+Make sure frontend env points to reachable addresses:
+- If DNS is not configured, use IP:
+  - `VITE_API_BASE_URL=http://192.168.1.179:4000`
+  - `VITE_PUBLIC_APP_URL=http://192.168.1.179:5173`
+  - `VITE_PUBLIC_BASE_URL=http://192.168.1.179:4000`
+- If DNS is configured, use domains:
+  - `VITE_API_BASE_URL=http://api.appcoran.com`
+  - `VITE_PUBLIC_APP_URL=http://appcoran.com`
+  - `VITE_PUBLIC_BASE_URL=http://api.appcoran.com`
 
 ## iPhone (style stable) - recommandé
 Le mode `dev` de Vite peut provoquer des styles qui disparaissent lors d’un reload iOS.
