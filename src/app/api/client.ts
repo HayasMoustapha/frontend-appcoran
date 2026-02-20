@@ -33,10 +33,11 @@ function getLang() {
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
+  const method = options.method ?? "GET";
   const headers: Record<string, string> = {
     ...(options.headers ?? {})
   };
-  if ((options.method ?? "GET") === "GET") {
+  if (method === "GET") {
     headers["Cache-Control"] = "no-cache";
     headers.Pragma = "no-cache";
     headers["Accept-Language"] = getLang();
@@ -50,15 +51,26 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     }
   }
 
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      method: options.method ?? "GET",
-      headers,
-      body: options.body ?? null,
-      cache: (options.method ?? "GET") === "GET" ? "no-store" : "default"
-    });
-  } catch (err) {
+  let response: Response | null = null;
+  const maxAttempts = method === "GET" ? 2 : 1;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    try {
+      response = await fetch(url, {
+        method,
+        headers,
+        body: options.body ?? null,
+        cache: method === "GET" ? "no-store" : "default"
+      });
+      break;
+    } catch (err) {
+      if (attempt >= maxAttempts - 1) {
+        throw new NetworkError();
+      }
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    }
+  }
+
+  if (!response) {
     throw new NetworkError();
   }
 

@@ -814,12 +814,24 @@ export function HomePage() {
           <Tabs
             value={selectedTab}
             onChange={(_, newValue) => setSelectedTab(newValue)}
+            variant="scrollable"
+            allowScrollButtonsMobile
+            scrollButtons="auto"
             sx={{
+              maxWidth: "100%",
+              flex: 1,
+              minHeight: 48,
               "& .MuiTabs-indicator": {
                 height: 3,
                 borderRadius: 2,
                 background: "linear-gradient(90deg, #047857 0%, #D4AF37 100%)",
               },
+              "& .MuiTabs-scroller": {
+                overflowY: "hidden"
+              },
+              "& .MuiTabs-scrollButtons": {
+                color: "text.secondary"
+              }
             }}
           >
             <Tab
@@ -828,9 +840,11 @@ export function HomePage() {
               label={t("home.tabsAll")}
               sx={{
                 fontWeight: 600,
-                fontSize: "1rem",
+                fontSize: { xs: "0.9rem", sm: "1rem" },
                 textTransform: "none",
                 minHeight: 56,
+                minWidth: "auto",
+                px: { xs: 1.5, sm: 2.5 }
               }}
             />
             <Tab
@@ -839,9 +853,11 @@ export function HomePage() {
               label={t("home.tabsRecent")}
               sx={{
                 fontWeight: 600,
-                fontSize: "1rem",
+                fontSize: { xs: "0.9rem", sm: "1rem" },
                 textTransform: "none",
                 minHeight: 56,
+                minWidth: "auto",
+                px: { xs: 1.5, sm: 2.5 }
               }}
             />
             <Tab
@@ -850,9 +866,11 @@ export function HomePage() {
               label={t("home.tabsPopular")}
               sx={{
                 fontWeight: 600,
-                fontSize: "1rem",
+                fontSize: { xs: "0.9rem", sm: "1rem" },
                 textTransform: "none",
                 minHeight: 56,
+                minWidth: "auto",
+                px: { xs: 1.5, sm: 2.5 }
               }}
             />
           </Tabs>
