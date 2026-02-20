@@ -9,6 +9,11 @@ This guide explains how to access **appcoran.com** from your phone on the same W
 
 Note: this guide is **without Docker**.
 
+Make sure frontend env points to local domains:
+- `VITE_API_BASE_URL=http://api.appcoran.com`
+- `VITE_PUBLIC_APP_URL=http://appcoran.com`
+- `VITE_PUBLIC_BASE_URL=http://api.appcoran.com`
+
 ## 2) Reverse proxy local (Caddy)
 Use the local proxy config:
 - `frontend-appcoran/deploy/Caddyfile.local`
