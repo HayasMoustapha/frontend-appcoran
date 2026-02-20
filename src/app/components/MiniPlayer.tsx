@@ -95,7 +95,6 @@ export function MiniPlayer() {
   }, []);
 
   const isPlayerPage = location.pathname.startsWith("/recitation/");
-  if (!currentRecitation || isPlayerPage) return null;
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation.slug || currentRecitation.id;
@@ -112,12 +111,15 @@ export function MiniPlayer() {
     );
 
   useEffect(() => {
+    if (!currentRecitation || isPlayerPage) return;
     if (location.pathname === "/") {
       setCollapsed(true);
     } else {
       setCollapsed(false);
     }
-  }, [location.pathname]);
+  }, [location.pathname, currentRecitation, isPlayerPage]);
+
+  if (!currentRecitation || isPlayerPage) return null;
 
   const effectiveWidth = collapsed ? 120 : size.w;
   const effectiveHeight = collapsed ? 120 : size.h;
