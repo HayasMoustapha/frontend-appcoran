@@ -32,7 +32,6 @@ export function MiniPlayer() {
   } = useAudioPlayer();
 
   const [position, setPosition] = useState({ x: 16, y: 16 });
-  const [collapsed, setCollapsed] = useState(false);
   const draggingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
@@ -76,7 +75,8 @@ export function MiniPlayer() {
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation?.slug || currentRecitation?.id;
   const isCompact = fixedSize.w < 190;
-  const innerPadding = collapsed ? "10px" : "10px";
+  const collapsed = false;
+  const innerPadding = "10px";
   const modeIcon =
     playbackMode === "repeat-one" ? (
       <RepeatOne fontSize="small" />
@@ -108,19 +108,10 @@ export function MiniPlayer() {
     animation: isPlaying ? `miniPulse 900ms ${index * 120}ms ease-in-out infinite` : "none"
   });
 
-  useEffect(() => {
-    if (!currentRecitation || isPlayerPage) return;
-    if (location.pathname === "/") {
-      setCollapsed(true);
-    } else {
-      setCollapsed(false);
-    }
-  }, [location.pathname, currentRecitation, isPlayerPage]);
-
   if (!currentRecitation || isPlayerPage || !targetId) return null;
 
-  const effectiveWidth = collapsed ? 120 : fixedSize.w;
-  const effectiveHeight = collapsed ? 120 : fixedSize.h;
+  const effectiveWidth = fixedSize.w;
+  const effectiveHeight = fixedSize.h;
 
   return (
     <Box
@@ -197,13 +188,21 @@ export function MiniPlayer() {
         <Box
           onClick={() => navigate(`/recitation/${targetId}`)}
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 0.35,
+            display: "grid",
+            gap: 0.6,
             cursor: "pointer"
           }}
         >
-          <Box data-no-drag sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Box
+            data-no-drag
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.6,
+              flexWrap: "wrap",
+              justifyContent: "space-between"
+            }}
+          >
             <IconButton
               size="small"
               onClick={(e) => {
@@ -214,68 +213,80 @@ export function MiniPlayer() {
             >
               <SkipPrevious fontSize="small" />
             </IconButton>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                togglePlay();
-              }}
+            <Box
               sx={{
-                ...iconSx,
-                color: "#0B1F2A",
-                background:
-                  "linear-gradient(135deg, rgba(212,175,55,0.98), rgba(15,118,110,0.92))",
-                border: "1px solid rgba(212,175,55,0.45)"
+                display: "flex",
+                alignItems: "center",
+                gap: 0.6,
+                flex: 1,
+                justifyContent: "center"
               }}
             >
-              {isPlaying ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                playNext();
-              }}
-              sx={iconSx}
-            >
-              <SkipNext fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                cyclePlaybackMode();
-              }}
-              sx={{
-                ...iconSx,
-                color:
-                  playbackMode === "sequence"
-                    ? "rgba(232,220,190,0.7)"
-                    : "rgba(212,175,55,0.95)"
-              }}
-            >
-              {modeIcon}
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/recitation/${targetId}`);
-              }}
-              sx={iconSx}
-            >
-              <OpenInFull fontSize="small" />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                stopPlayback();
-              }}
-              sx={iconSx}
-            >
-              <Close fontSize="small" />
-            </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  togglePlay();
+                }}
+                sx={{
+                  ...iconSx,
+                  color: "#0B1F2A",
+                  background:
+                    "linear-gradient(135deg, rgba(212,175,55,0.98), rgba(15,118,110,0.92))",
+                  border: "1px solid rgba(212,175,55,0.45)"
+                }}
+              >
+                {isPlaying ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playNext();
+                }}
+                sx={iconSx}
+              >
+                <SkipNext fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  cyclePlaybackMode();
+                }}
+                sx={{
+                  ...iconSx,
+                  color:
+                    playbackMode === "sequence"
+                      ? "rgba(232,220,190,0.7)"
+                      : "rgba(212,175,55,0.95)"
+                }}
+              >
+                {modeIcon}
+              </IconButton>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/recitation/${targetId}`);
+                }}
+                sx={iconSx}
+              >
+                <OpenInFull fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  stopPlayback();
+                }}
+                sx={iconSx}
+              >
+                <Close fontSize="small" />
+              </IconButton>
+            </Box>
           </Box>
         <Typography
           variant="caption"
