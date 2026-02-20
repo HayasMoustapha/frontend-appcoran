@@ -43,6 +43,7 @@ import {
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { getDashboardOverview, getDashboardPerformance, getDashboardStats } from "../api/dashboard";
 import { isNetworkError } from "../api/client";
 import { deleteAudio, listAudios, updateAudio, type UpdateAudioPayload } from "../api/audios";
@@ -52,6 +53,7 @@ import { getSurahReference } from "../api/surahReference";
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRecitation, setSelectedRecitation] = useState<Recitation | null>(null);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
@@ -189,7 +191,7 @@ export function DashboardPage() {
       const updated = await updateAudio(selectedRecitation.id, payload);
       const mapped = mapAudioToRecitation(updated);
       setRecitations((prev) => prev.map((item) => (item.id === mapped.id ? mapped : item)));
-      setToast({ message: "Récitation mise à jour.", severity: "success" });
+      setToast({ message: t("dashboard.updated"), severity: "success" });
       setEditOpen(false);
       handleMenuClose();
     } catch (err) {
@@ -206,7 +208,7 @@ export function DashboardPage() {
     try {
       await deleteAudio(selectedRecitation.id);
       setRecitations((prev) => prev.filter((item) => item.id !== selectedRecitation.id));
-      setToast({ message: "Récitation supprimée.", severity: "success" });
+      setToast({ message: t("dashboard.deleted"), severity: "success" });
       setDeleteOpen(false);
       handleMenuClose();
     } catch (err) {
@@ -305,10 +307,10 @@ export function DashboardPage() {
             </Avatar>
             <Box>
               <Typography variant="h4" fontWeight={800}>
-                Tableau de bord de l'Imam
+                {t("dashboard.title")}
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9, mt: 0.5 }}>
-                Gérez vos récitations et suivez vos statistiques
+                {t("dashboard.subtitle")}
               </Typography>
             </Box>
           </Box>
@@ -335,7 +337,7 @@ export function DashboardPage() {
               transition: "all 0.2s"
             }}
           >
-            Nouvelle Récitation
+            {t("navbar.newRecitation")}
           </Button>
         </Container>
       </Box>
@@ -363,7 +365,7 @@ export function DashboardPage() {
                   {totalRecitations}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  Récitations publiées
+                  {t("dashboard.stats.recitations")}
                 </Typography>
               </CardContent>
             </Card>
@@ -389,7 +391,7 @@ export function DashboardPage() {
                   {totalListens.toLocaleString()}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  Total d'écoutes
+                  {t("dashboard.stats.listens")}
                 </Typography>
               </CardContent>
             </Card>
@@ -415,7 +417,7 @@ export function DashboardPage() {
                   {totalDownloads.toLocaleString()}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  Total de téléchargements
+                  {t("dashboard.stats.downloads")}
                 </Typography>
               </CardContent>
             </Card>
@@ -441,7 +443,7 @@ export function DashboardPage() {
                   {Math.round((averageListens / 1000) * 100) / 100}K
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  Moyenne par récitation
+                  {t("dashboard.stats.average")}
                 </Typography>
               </CardContent>
             </Card>
@@ -463,10 +465,10 @@ export function DashboardPage() {
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
             <Box>
               <Typography variant="h5" fontWeight={800} gutterBottom>
-                Activité récente
+                {t("dashboard.activityTitle")}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Performances de vos récitations cette semaine
+                {t("dashboard.activitySubtitle")}
               </Typography>
             </Box>
             <Button
@@ -484,7 +486,7 @@ export function DashboardPage() {
                 }
               }}
             >
-              Voir rapport complet
+              {t("dashboard.reportButton")}
             </Button>
           </Box>
 
@@ -529,7 +531,7 @@ export function DashboardPage() {
                         <Box>
                           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
                             <Typography variant="caption" color="text.secondary">
-                              Taux d'engagement
+                              {t("dashboard.engagement")}
                             </Typography>
                             <Typography variant="caption" fontWeight={700} color="primary">
                               {engagementRate}%
@@ -571,10 +573,10 @@ export function DashboardPage() {
           }}
         >
           <Typography variant="h5" fontWeight={800} gutterBottom>
-            Toutes vos récitations
+            {t("dashboard.allRecitations")}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Gérez et modifiez vos publications
+            {t("dashboard.manageSubtitle")}
           </Typography>
 
           <Divider sx={{ mb: 3 }} />
@@ -622,7 +624,7 @@ export function DashboardPage() {
                         {recitation.title}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {recitation.surah} • Verset {recitation.ayatRange} • {recitation.duration || "—"}
+                        {recitation.surah} • {t("home.table.verses")} {recitation.ayatRange} • {recitation.duration || "—"}
                       </Typography>
                       <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
                         {recitation.withBasmala && (
@@ -650,7 +652,7 @@ export function DashboardPage() {
                         {recitation.listens.toLocaleString()}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        écoutes
+                        {t("dashboard.listens")}
                       </Typography>
                     </Box>
                   </Box>
@@ -691,7 +693,7 @@ export function DashboardPage() {
           }}
         >
           <Visibility sx={{ mr: 1, fontSize: 20 }} />
-          Voir
+          {t("dashboard.actions.view")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -699,7 +701,7 @@ export function DashboardPage() {
           }}
         >
           <Edit sx={{ mr: 1, fontSize: 20 }} />
-          Modifier
+          {t("dashboard.actions.edit")}
         </MenuItem>
         <Divider />
         <MenuItem
@@ -710,7 +712,7 @@ export function DashboardPage() {
           sx={{ color: "error.main" }}
         >
           <Delete sx={{ mr: 1, fontSize: 20 }} />
-          Supprimer
+          {t("dashboard.actions.delete")}
         </MenuItem>
       </Menu>
 
@@ -726,14 +728,14 @@ export function DashboardPage() {
           }
         }}
       >
-        <DialogTitle>Modifier la récitation</DialogTitle>
+        <DialogTitle>{t("dashboard.actions.edit")}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             <FormControl fullWidth disabled={surahLoading}>
-              <InputLabel sx={{ color: "text.secondary" }}>Titre de la sourate</InputLabel>
+              <InputLabel sx={{ color: "text.secondary" }}>{t("record.titleSurah")}</InputLabel>
               <Select
                 value={editSurahNumber}
-                label="Titre de la sourate"
+                label={t("record.titleSurah")}
                 onChange={(e) => setEditSurahNumber(Number(e.target.value))}
                 sx={{
                   background: "rgba(8, 18, 25, 0.7)",
@@ -749,7 +751,7 @@ export function DashboardPage() {
               </Select>
             </FormControl>
             <TextField
-              label="Description"
+              label={t("record.description")}
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
               fullWidth
@@ -766,14 +768,14 @@ export function DashboardPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditOpen(false)} disabled={editSaving}>
-            Annuler
+            {t("dashboard.actions.cancel")}
           </Button>
           <Button
             onClick={handleEditSave}
             variant="contained"
             disabled={editSaving || editSurahNumber === ""}
           >
-            {editSaving ? "Enregistrement..." : "Enregistrer"}
+            {editSaving ? "..." : t("dashboard.actions.save")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -790,16 +792,16 @@ export function DashboardPage() {
           }
         }}
       >
-        <DialogTitle>Supprimer la récitation ?</DialogTitle>
+        <DialogTitle>{t("dashboard.actions.deleteConfirm")}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
-            Cette action est irréversible.
+            {t("dashboard.actions.irreversible")}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteOpen(false)}>Annuler</Button>
+          <Button onClick={() => setDeleteOpen(false)}>{t("dashboard.actions.cancel")}</Button>
           <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            Supprimer
+            {t("dashboard.actions.delete")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -816,7 +818,7 @@ export function DashboardPage() {
           }
         }}
       >
-        <DialogTitle>Rapport complet (7 derniers jours)</DialogTitle>
+        <DialogTitle>{t("dashboard.reportTitle")}</DialogTitle>
         <DialogContent dividers>
           {reportLoading ? (
             <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
@@ -828,20 +830,20 @@ export function DashboardPage() {
                 <ListItem key={item.day} divider>
                   <ListItemText
                     primary={item.day}
-                    secondary={`Écoutes: ${item.listens} • Téléchargements: ${item.downloads} • Partages: ${item.shares}`}
+                    secondary={`${t("home.table.listens")}: ${item.listens} • ${t("home.table.downloads")}: ${item.downloads} • ${t("dashboard.shares")}: ${item.shares}`}
                   />
                 </ListItem>
               ))}
               {!reportStats.length && (
                 <ListItem>
-                  <ListItemText primary="Aucune donnée disponible." />
+                  <ListItemText primary={t("dashboard.noData")} />
                 </ListItem>
               )}
             </List>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setReportOpen(false)}>Fermer</Button>
+          <Button onClick={() => setReportOpen(false)}>{t("player.close")}</Button>
         </DialogActions>
       </Dialog>
 

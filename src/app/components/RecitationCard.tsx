@@ -2,6 +2,7 @@ import { Card, CardContent, Typography, Box, IconButton, Chip } from "@mui/mater
 import { PlayArrow, Download, Visibility } from "@mui/icons-material";
 import type { Recitation } from "../domain/types";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 
 interface RecitationCardProps {
   recitation: Recitation;
@@ -10,6 +11,7 @@ interface RecitationCardProps {
 
 export function RecitationCard({ recitation, featured = false }: RecitationCardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const targetId = recitation.slug || recitation.id;
 
@@ -129,7 +131,7 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
               fontWeight: 600,
             }}
           >
-            Sourate {recitation.surahNumber} • Verset {recitation.ayatRange}
+            {t("home.table.surah")} {recitation.surahNumber} • {t("home.table.verses")} {recitation.ayatRange}
           </Typography>
         </Box>
 
@@ -159,7 +161,7 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
 
         {recitation.withBasmala && (
           <Chip
-            label="Avec Basmala"
+            label={t("player.withBasmala")}
             size="small"
             sx={{
               position: "absolute",
@@ -208,7 +210,7 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
             minHeight: "2.6em"
           }}
         >
-          {recitation.description || "Récitation sacrée."}
+          {recitation.description || t("home.defaultDescription")}
         </Typography>
 
         <Box

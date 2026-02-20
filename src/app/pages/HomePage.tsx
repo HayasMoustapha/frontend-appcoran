@@ -20,7 +20,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper
+  Paper,
+  IconButton
 } from "@mui/material";
 import { Search, TrendingUp, AccessTime, Star } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
@@ -32,9 +33,11 @@ import { mapAudioToRecitation, mapPublicProfile } from "../api/mappers";
 import type { ImamProfile, Recitation, SurahReference } from "../domain/types";
 import { useNavigate } from "react-router";
 import { getSurahReference } from "../api/surahReference";
+import { useTranslation } from "react-i18next";
 
 export function HomePage() {
   const heroRef = useRef<HTMLDivElement | null>(null);
+  const recitationsRef = useRef<HTMLDivElement | null>(null);
   const [selectedTab, setSelectedTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
@@ -56,6 +59,7 @@ export function HomePage() {
     avatar: ""
   });
   const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     let active = true;
@@ -137,6 +141,12 @@ export function HomePage() {
     };
   }, []);
 
+  const handleSearchSubmit = () => {
+    if (recitationsRef.current) {
+      recitationsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   useEffect(() => {
     const target = heroRef.current;
     if (!target) return;
@@ -170,7 +180,7 @@ export function HomePage() {
     const numberCandidate = numberMatch ? Number(numberMatch[1]) : undefined;
 
     const surahMatch = surahReference.find((surah) => {
-      const names = [surah.name_fr, surah.name_phonetic, surah.name_ar];
+      const names = [surah.name_local, surah.name_fr, surah.name_phonetic, surah.name_ar];
       return names.some((name) => name && normalize(name).includes(normalizedQuery));
     });
     const matchedNumber =
@@ -223,7 +233,8 @@ export function HomePage() {
             background:
               "radial-gradient(circle at 20% 20%, rgba(212,175,55,0.35), transparent 45%), radial-gradient(circle at 80% 15%, rgba(4,120,87,0.35), transparent 50%), radial-gradient(circle at 75% 80%, rgba(5,150,105,0.3), transparent 50%)",
             animation: "shimmer 14s ease-in-out infinite",
-            opacity: 0.9
+            opacity: 0.9,
+            pointerEvents: "none"
           }}
         />
         <Box
@@ -235,7 +246,8 @@ export function HomePage() {
             backgroundSize: "32px 32px",
             opacity: 0.25,
             animation: "starDrift 20s ease-in-out infinite",
-            transform: "translateY(calc(var(--hero-depth, 0) * 22px))"
+            transform: "translateY(calc(var(--hero-depth, 0) * 22px))",
+            pointerEvents: "none"
           }}
         />
         <Box
@@ -247,7 +259,8 @@ export function HomePage() {
             background: "radial-gradient(circle, rgba(212,175,55,0.35), transparent 60%)",
             top: -120,
             right: -80,
-            animation: "floatY 8s ease-in-out infinite"
+            animation: "floatY 8s ease-in-out infinite",
+            pointerEvents: "none"
           }}
         />
         <Box
@@ -259,7 +272,8 @@ export function HomePage() {
             background: "radial-gradient(circle, rgba(255,255,255,0.18), transparent 60%)",
             bottom: -120,
             left: -60,
-            animation: "floatY 10s ease-in-out infinite"
+            animation: "floatY 10s ease-in-out infinite",
+            pointerEvents: "none"
           }}
         />
         <Box
@@ -273,7 +287,8 @@ export function HomePage() {
             backgroundSize: "cover",
             backgroundPosition: "center",
             opacity: 0.1,
-            transform: "translateY(calc(var(--hero-depth, 0) * -18px))"
+            transform: "translateY(calc(var(--hero-depth, 0) * -18px))",
+            pointerEvents: "none"
           }}
         />
 
@@ -289,7 +304,7 @@ export function HomePage() {
                 animation: "fadeUp 0.6s ease both"
               }}
             >
-              Écoutez la Parole Divine
+              {t("home.heroTitle")}
             </Typography>
             <Typography
               variant="h6"
@@ -303,25 +318,30 @@ export function HomePage() {
                 animation: "fadeUp 0.7s ease both"
               }}
             >
-              Plongez dans l'océan des récitations sacrées de notre imam, où chaque
-              verset résonne comme une mélodie céleste
+              {t("home.heroSubtitle")}
             </Typography>
 
             <TextField
               fullWidth
-              placeholder="Rechercher une sourate, un titre, ou un verset..."
+              placeholder={t("home.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  handleSearchSubmit();
+                }
+              }}
               sx={{
                 maxWidth: 600,
                 mx: "auto",
                 animation: "fadeUp 0.85s ease both",
                 "& .MuiOutlinedInput-root": {
-                  background: "rgba(255,255,255,0.92)",
+                  background: "rgba(15, 28, 39, 0.85)",
                   borderRadius: 3,
                   fontSize: "1.1rem",
+                  color: "rgba(248, 246, 241, 0.95)",
                   "& fieldset": {
-                    borderColor: "transparent",
+                    borderColor: "rgba(255, 255, 255, 0.08)",
                   },
                   "&:hover fieldset": {
                     borderColor: "rgba(212, 175, 55, 0.5)",
@@ -330,13 +350,28 @@ export function HomePage() {
                     borderColor: "#D4AF37",
                   },
                 },
+                "& .MuiInputBase-input::placeholder": {
+                  color: "rgba(248, 246, 241, 0.6)",
+                  opacity: 1,
+                },
               }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search sx={{ color: "text.secondary", fontSize: 28 }} />
+                    <Search sx={{ color: "rgba(212, 175, 55, 0.85)", fontSize: 28 }} />
                   </InputAdornment>
                 ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={t("home.searchButton")}
+                      onClick={handleSearchSubmit}
+                      sx={{ color: "rgba(248, 246, 241, 0.8)" }}
+                    >
+                      <Search />
+                    </IconButton>
+                  </InputAdornment>
+                )
               }}
             />
           </Box>
@@ -355,7 +390,7 @@ export function HomePage() {
                 {allRecitations.length}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Récitations
+                {t("home.statsRecitations")}
               </Typography>
             </Box>
             <Box sx={{ textAlign: "center" }}>
@@ -389,14 +424,14 @@ export function HomePage() {
         >
           <Box>
             <Typography variant="h5" fontWeight={800} sx={{ color: "rgba(248,246,241,0.95)" }}>
-              Constellations sacrées
+              {t("home.featuredTitle")}
             </Typography>
             <Typography variant="body2" sx={{ color: "rgba(248,246,241,0.7)" }}>
-              Les récitations les plus lumineuses, alignées comme des étoiles
+              {t("home.featuredSubtitle")}
             </Typography>
           </Box>
           <Chip
-            label="En direct"
+            label={t("home.liveChip")}
             sx={{
               background: "rgba(212,175,55,0.2)",
               color: "#F8F6F1",
@@ -455,7 +490,7 @@ export function HomePage() {
                 <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
                   <Chip
                     size="small"
-                    label={`${recitation.listens.toLocaleString()} écoutes`}
+                    label={`${recitation.listens.toLocaleString()} ${t("player.listens")}`}
                     sx={{
                       background: "rgba(4,120,87,0.25)",
                       color: "#F8F6F1"
@@ -463,7 +498,7 @@ export function HomePage() {
                   />
                   <Chip
                     size="small"
-                    label={`${recitation.downloads.toLocaleString()} dl`}
+                    label={`${recitation.downloads.toLocaleString()} ${t("player.downloads")}`}
                     sx={{
                       background: "rgba(212,175,55,0.25)",
                       color: "#F8F6F1"
@@ -551,7 +586,7 @@ export function HomePage() {
                   whiteSpace: "nowrap",
                 }}
               >
-                🕌 Imam
+                🕌 {t("home.imamLabel")}
               </Box>
             </Box>
 
@@ -645,7 +680,7 @@ export function HomePage() {
                       gutterBottom
                       sx={{ display: "flex", alignItems: "center", gap: 1 }}
                     >
-                      📚 Formation
+                      📚 {t("home.formation")}
                     </Typography>
                     <Box component="ul" sx={{ m: 0, pl: 2 }}>
                       {imamProfile.education.slice(0, 2).map((edu, index) => (
@@ -679,7 +714,7 @@ export function HomePage() {
                       gutterBottom
                       sx={{ display: "flex", alignItems: "center", gap: 1 }}
                     >
-                      💼 Parcours
+                      💼 {t("home.parcours")}
                     </Typography>
                     <Box component="ul" sx={{ m: 0, pl: 2 }}>
                       {imamProfile.experience.slice(0, 2).map((exp, index) => (
@@ -703,6 +738,7 @@ export function HomePage() {
 
         {/* Tabs + Affichage */}
         <Box
+          ref={recitationsRef}
           sx={{
             mb: 4,
             display: "flex",
@@ -726,7 +762,7 @@ export function HomePage() {
             <Tab
               icon={<Star />}
               iconPosition="start"
-              label="Toutes les récitations"
+              label={t("home.tabsAll")}
               sx={{
                 fontWeight: 600,
                 fontSize: "1rem",
@@ -737,7 +773,7 @@ export function HomePage() {
             <Tab
               icon={<AccessTime />}
               iconPosition="start"
-              label="Récentes"
+              label={t("home.tabsRecent")}
               sx={{
                 fontWeight: 600,
                 fontSize: "1rem",
@@ -748,7 +784,7 @@ export function HomePage() {
             <Tab
               icon={<TrendingUp />}
               iconPosition="start"
-              label="Populaires"
+              label={t("home.tabsPopular")}
               sx={{
                 fontWeight: 600,
                 fontSize: "1rem",
@@ -783,8 +819,8 @@ export function HomePage() {
               }
             }}
           >
-            <ToggleButton value="cards">Cartes</ToggleButton>
-            <ToggleButton value="list">Liste</ToggleButton>
+            <ToggleButton value="cards">{t("home.viewCards")}</ToggleButton>
+            <ToggleButton value="list">{t("home.viewList")}</ToggleButton>
           </ToggleButtonGroup>
         </Box>
 
@@ -819,14 +855,26 @@ export function HomePage() {
                         "linear-gradient(135deg, rgba(15,118,110,0.18) 0%, rgba(212,175,55,0.18) 100%)"
                     }}
                   >
-                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Récitation</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Sourate</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Versets</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Date</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Écoutes</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>Téléchargements</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>
+                      {t("home.table.recitation")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>
+                      {t("home.table.surah")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>
+                      {t("home.table.verses")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>
+                      {t("home.table.date")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>
+                      {t("home.table.listens")}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>
+                      {t("home.table.downloads")}
+                    </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 800, color: "text.primary" }}>
-                      Action
+                      {t("home.table.action")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -844,7 +892,7 @@ export function HomePage() {
                       <TableCell>
                         <Typography fontWeight={700}>{recitation.title}</Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {recitation.description || "Récitation sacrée"}
+                          {recitation.description || t("home.defaultDescription")}
                         </Typography>
                       </TableCell>
                       <TableCell sx={{ color: "text.primary" }}>{recitation.surah}</TableCell>
@@ -868,7 +916,7 @@ export function HomePage() {
                               "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)"
                           }}
                         >
-                          Écouter
+                          {t("home.table.listen")}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -886,10 +934,10 @@ export function HomePage() {
             }}
           >
             <Typography variant="h6" color="text.secondary" gutterBottom>
-              Aucune récitation trouvée
+              {t("home.noRecitationsTitle")}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Essayez d'autres termes de recherche
+              {t("home.noRecitationsSubtitle")}
             </Typography>
           </Box>
         )}
@@ -908,13 +956,13 @@ export function HomePage() {
         <Container maxWidth="lg">
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="h6" gutterBottom fontWeight={700}>
-              Récitations Sacrées
+              {t("home.footerTitle")}
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.9, mb: 2 }}>
-              Que la paix et les bénédictions d'Allah soient sur vous
+              {t("home.footerSubtitle")}
             </Typography>
             <Typography variant="caption" sx={{ opacity: 0.7 }}>
-              © 2026 Récitations Sacrées. Tous droits réservés.
+              {t("home.footerCopyright")}
             </Typography>
           </Box>
         </Container>

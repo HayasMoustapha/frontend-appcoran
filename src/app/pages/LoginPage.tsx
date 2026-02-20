@@ -15,9 +15,11 @@ import { Visibility, VisibilityOff, Login as LoginIcon } from "@mui/icons-materi
 import { useNavigate } from "react-router";
 import { login } from "../api/auth";
 import { isNetworkError } from "../api/client";
+import { useTranslation } from "react-i18next";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,20 +32,20 @@ export function LoginPage() {
     setError("");
 
     if (!email || !password) {
-      setError("Veuillez remplir tous les champs");
+      setError(t("login.errorFill"));
       return;
     }
 
     try {
       setLoading(true);
       await login(email, password);
-      setToast({ message: "Connexion réussie.", severity: "success" });
+      setToast({ message: t("login.success"), severity: "success" });
       setTimeout(() => {
         navigate("/dashboard");
       }, 600);
     } catch (err) {
       if (isNetworkError(err)) return;
-      setError(err instanceof Error ? err.message : "Connexion impossible");
+      setError(err instanceof Error ? err.message : t("login.failed"));
     } finally {
       setLoading(false);
     }
@@ -110,21 +112,22 @@ export function LoginPage() {
               ق
             </Box>
             <Typography variant="h4" fontWeight={800} color="text.primary" gutterBottom>
-              Espace Imam
+              {t("login.title")}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Connectez-vous pour gérer vos récitations sacrées
+              {t("login.subtitle")}
             </Typography>
           </Box>
 
           <form onSubmit={handleLogin}>
             <TextField
               fullWidth
-              label="Email"
+              label={t("login.email")}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               sx={{ mb: 3 }}
+              InputLabelProps={{ shrink: true }}
               InputProps={{
                 sx: {
                   borderRadius: 2,
@@ -136,11 +139,12 @@ export function LoginPage() {
 
             <TextField
               fullWidth
-              label="Mot de passe"
+              label={t("login.password")}
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               sx={{ mb: 3 }}
+              InputLabelProps={{ shrink: true }}
               InputProps={{
                 sx: {
                   borderRadius: 2,
@@ -178,7 +182,7 @@ export function LoginPage() {
                 }
               }}
             >
-              Se connecter
+              {t("login.login")}
             </Button>
           </form>
 
@@ -191,7 +195,7 @@ export function LoginPage() {
                 fontWeight: 600
               }}
             >
-              ← Retour à l'accueil
+              {t("login.backHome")}
             </Button>
           </Box>
 
@@ -206,10 +210,10 @@ export function LoginPage() {
             }}
           >
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-              ℹ️ Accès sécurisé :
+              ℹ️ {t("login.secureAccess")}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Utilisez vos identifiants administrateur pour accéder au tableau de bord.
+              {t("login.secureHint")}
             </Typography>
           </Box>
         </Paper>

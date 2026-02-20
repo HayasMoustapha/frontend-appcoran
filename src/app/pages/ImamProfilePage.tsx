@@ -37,9 +37,11 @@ import type { ImamProfile } from "../domain/types";
 import { createProfile, getProfile, updateProfile } from "../api/profile";
 import { isNetworkError } from "../api/client";
 import { mapPublicProfile } from "../api/mappers";
+import { useTranslation } from "react-i18next";
 
 export function ImamProfilePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<ImamProfile>({
@@ -221,7 +223,7 @@ export function ImamProfilePage() {
             textTransform: "none"
           }}
         >
-          Retour au tableau de bord
+          {t("profile.back")}
         </Button>
 
         <Paper
@@ -259,14 +261,14 @@ export function ImamProfilePage() {
             <Box sx={{ position: "relative", zIndex: 1 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start", mb: 3 }}>
                 <Typography variant="h4" fontWeight={800}>
-                  Profil de l'Imam
+                  {t("profile.title")}
                 </Typography>
 
                 {!isEditing ? (
-                  <Button
-                    variant="contained"
-                    startIcon={<Edit />}
-                    onClick={() => setIsEditing(true)}
+                    <Button
+                      variant="contained"
+                      startIcon={<Edit />}
+                      onClick={() => setIsEditing(true)}
                     sx={{
                       background: "rgba(11, 31, 42, 0.9)",
                       color: "#F8F6F1",
@@ -275,9 +277,9 @@ export function ImamProfilePage() {
                         background: "rgba(11, 31, 42, 1)"
                       }
                     }}
-                  >
-                    Modifier
-                  </Button>
+                    >
+                    {t("profile.edit")}
+                    </Button>
                 ) : (
                   <Box sx={{ display: "flex", gap: 2 }}>
                     <Button
@@ -293,7 +295,7 @@ export function ImamProfilePage() {
                         }
                       }}
                     >
-                      Enregistrer
+                    {t("profile.save")}
                     </Button>
                     <Button
                       variant="outlined"
@@ -308,7 +310,7 @@ export function ImamProfilePage() {
                         }
                       }}
                     >
-                      Annuler
+                    {t("profile.cancel")}
                     </Button>
                   </Box>
                 )}
@@ -379,7 +381,7 @@ export function ImamProfilePage() {
                             color: "#F8F6F1"
                           }
                         }}
-                        placeholder="Nom"
+                        placeholder={t("profile.name")}
                       />
                       <TextField
                         value={profile.arabicName}
@@ -391,7 +393,7 @@ export function ImamProfilePage() {
                             color: "#F8F6F1"
                           }
                         }}
-                        placeholder="Nom en arabe"
+                        placeholder={t("profile.arabicName")}
                       />
                       <TextField
                         value={profile.title}
@@ -403,7 +405,7 @@ export function ImamProfilePage() {
                             color: "#F8F6F1"
                           }
                         }}
-                        placeholder="Titre"
+                        placeholder={t("profile.role")}
                       />
                     </Box>
                   )}
@@ -419,7 +421,7 @@ export function ImamProfilePage() {
               <Grid size={{ xs: 12 }}>
                 <Box sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
                   <Typography variant="h6" fontWeight={700} color="primary">
-                    Biographie
+                    {t("profile.biography")}
                   </Typography>
                 </Box>
                 {!isEditing ? (
@@ -456,7 +458,7 @@ export function ImamProfilePage() {
                   }}
                 >
                   <Typography variant="h6" fontWeight={700} gutterBottom color="primary">
-                    Coordonnées
+                    {t("profile.contacts")}
                   </Typography>
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
@@ -469,7 +471,7 @@ export function ImamProfilePage() {
                         size="small"
                         value={profile.email}
                         onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                        placeholder="Email"
+                        placeholder={t("profile.email")}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             background: "rgba(8, 18, 25, 0.7)",
@@ -490,7 +492,7 @@ export function ImamProfilePage() {
                         size="small"
                         value={profile.phone}
                         onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                        placeholder="Téléphone"
+                        placeholder={t("profile.phone")}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             background: "rgba(8, 18, 25, 0.7)",
@@ -518,7 +520,7 @@ export function ImamProfilePage() {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Star color="secondary" />
                       <Typography variant="h6" fontWeight={700} color="secondary">
-                        Spécialités
+                        {t("profile.specialties")}
                       </Typography>
                     </Box>
                     {isEditing && (
@@ -584,12 +586,12 @@ export function ImamProfilePage() {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <School color="primary" />
                       <Typography variant="h6" fontWeight={700} color="primary">
-                        Formation
+                        {t("profile.education")}
                       </Typography>
                     </Box>
                     {isEditing && (
                       <Button startIcon={<Add />} onClick={addEducation} size="small">
-                        Ajouter
+                        {t("profile.add")}
                       </Button>
                     )}
                   </Box>
@@ -653,12 +655,12 @@ export function ImamProfilePage() {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Work color="primary" />
                       <Typography variant="h6" fontWeight={700} color="primary">
-                        Parcours Professionnel
+                        {t("profile.experience")}
                       </Typography>
                     </Box>
                     {isEditing && (
                       <Button startIcon={<Add />} onClick={addExperience} size="small">
-                        Ajouter
+                        {t("profile.add")}
                       </Button>
                     )}
                   </Box>

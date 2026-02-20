@@ -1,0 +1,479 @@
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+
+const storedLang = typeof window !== "undefined" ? localStorage.getItem("appcoran-lang") : null;
+const fallbackLng = "fr";
+const initialLang = storedLang || fallbackLng;
+
+const resources = {
+  fr: {
+    translation: {
+      appName: "Récitations Sacrées",
+      navbar: {
+        nightMode: "Mode Nuit céleste",
+        imamSpace: "Espace Imam",
+        newRecitation: "+ Nouvelle Récitation"
+      },
+      home: {
+        heroTitle: "Écoutez la Parole Divine",
+        heroSubtitle:
+          "Laissez le Coran éclairer vos cœurs : chaque verset est un appel d’Allah, une guidance vivante et une miséricorde pour l’âme.",
+        searchPlaceholder: "Rechercher une sourate, un titre, ou un verset...",
+        searchButton: "Rechercher",
+        liveChip: "En direct",
+        featuredTitle: "Lumières du Coran",
+        featuredSubtitle: "Les récitations les plus écoutées pour nourrir la foi et apaiser l’âme",
+        statsRecitations: "Récitations",
+        imamLabel: "Imam",
+        formation: "Formation",
+        parcours: "Parcours",
+        tabsAll: "Toutes les récitations",
+        tabsRecent: "Récentes",
+        tabsPopular: "Populaires",
+        viewCards: "Cartes",
+        viewList: "Liste",
+        noRecitationsTitle: "Aucune récitation trouvée",
+        noRecitationsSubtitle: "Essayez d'autres termes de recherche",
+        table: {
+          recitation: "Récitation",
+          surah: "Sourate",
+          verses: "Versets",
+          date: "Date",
+          listens: "Écoutes",
+          downloads: "Téléchargements",
+          action: "Action",
+          listen: "Écouter"
+        },
+        defaultDescription: "Récitation sacrée",
+        footerTitle: "Récitations Sacrées",
+        footerSubtitle: "Que la paix et les bénédictions d'Allah soient sur vous",
+        footerCopyright: "© 2026 Récitations Sacrées. Tous droits réservés."
+      },
+      login: {
+        title: "Espace Imam",
+        subtitle: "Connectez-vous pour gérer vos récitations sacrées",
+        email: "Email",
+        password: "Mot de passe",
+        login: "Se connecter",
+        backHome: "← Retour à l'accueil",
+        secureAccess: "Accès sécurisé :",
+        secureHint: "Utilisez vos identifiants administrateur pour accéder au tableau de bord.",
+        errorFill: "Veuillez remplir tous les champs",
+        success: "Connexion réussie.",
+        failed: "Connexion impossible"
+      },
+      dashboard: {
+        title: "Tableau de bord de l'Imam",
+        subtitle: "Gérez vos récitations et suivez vos statistiques",
+        stats: {
+          recitations: "Récitations publiées",
+          listens: "Total d'écoutes",
+          downloads: "Total de téléchargements",
+          average: "Moyenne par récitation"
+        },
+        activityTitle: "Activité récente",
+        activitySubtitle: "Performances de vos récitations cette semaine",
+        reportButton: "Voir rapport complet",
+        engagement: "Taux d'engagement",
+        allRecitations: "Toutes vos récitations",
+        manageSubtitle: "Gérez et modifiez vos publications",
+        listens: "écoutes",
+        shares: "Partages",
+        actions: {
+          view: "Voir",
+          edit: "Modifier",
+          delete: "Supprimer",
+          deleteConfirm: "Supprimer la récitation ?",
+          irreversible: "Cette action est irréversible.",
+          cancel: "Annuler",
+          save: "Enregistrer"
+        },
+        updated: "Récitation mise à jour.",
+        deleted: "Récitation supprimée.",
+        reportTitle: "Rapport complet (7 derniers jours)",
+        noData: "Aucune donnée disponible."
+      },
+      record: {
+        back: "Retour au tableau de bord",
+        title: "Nouvelle Récitation",
+        subtitle: "Enregistrez et publiez votre récitation sacrée",
+        recordingReady: "Prêt à enregistrer",
+        recordingUnsupported: "Enregistrement audio non supporté sur ce navigateur.",
+        recordingReadyToast: "Enregistrement prêt.",
+        recordingDeleted: "Enregistrement supprimé.",
+        chooseMethod: "Choisissez votre méthode d'enregistrement",
+        record: "Enregistrer",
+        uploadFile: "Importer un fichier",
+        recordingInProgress: "Enregistrement en cours...",
+        recordingDone: "✓ Enregistrement terminé",
+        stop: "Arrêter",
+        preview: "Pré-écouter",
+        delete: "Supprimer",
+        titleSurah: "Titre de la sourate",
+        surah: "Sourate",
+        verseStart: "Verset début",
+        verseEnd: "Verset fin",
+        description: "Description",
+        addBasmala: "Inclure la Basmala",
+        publishing: "Publication en cours...",
+        publish: "Publier la récitation",
+        publishedSuccess: "Récitation publiée avec succès."
+        ,
+        publishFailed: "Publication impossible"
+      },
+      player: {
+        back: "Retour aux récitations",
+        withBasmala: "Avec Basmala",
+        conversion: "Conversion en cours",
+        listens: "écoutes",
+        downloads: "téléchargements",
+        download: "Télécharger",
+        share: "Partager",
+        shareTitle: "Partager cette récitation",
+        shareLink: "Lien de partage",
+        copyLink: "Copier le lien",
+        close: "Fermer",
+        linkCopied: "Lien copié.",
+        notFound: "Récitation non trouvée",
+        downloadStarted: "Téléchargement démarré.",
+        shareText: "Écoutez {{title}}"
+      },
+      profile: {
+        back: "Retour au tableau de bord",
+        title: "Profil de l'Imam",
+        edit: "Modifier",
+        save: "Enregistrer",
+        cancel: "Annuler",
+        biography: "Biographie",
+        contacts: "Coordonnées",
+        specialties: "Spécialités",
+        education: "Formation",
+        experience: "Parcours Professionnel",
+        add: "Ajouter",
+        name: "Nom",
+        arabicName: "Nom en arabe",
+        role: "Titre",
+        email: "Email",
+        phone: "Téléphone"
+      }
+    }
+  },
+  en: {
+    translation: {
+      appName: "Sacred Recitations",
+      navbar: {
+        nightMode: "Celestial Night Mode",
+        imamSpace: "Imam Space",
+        newRecitation: "+ New Recitation"
+      },
+      home: {
+        heroTitle: "Listen to the Divine Word",
+        heroSubtitle:
+          "Let the Quran illuminate your heart: each verse is Allah’s call, a living guidance and mercy for the soul.",
+        searchPlaceholder: "Search for a surah, title, or verse...",
+        searchButton: "Search",
+        liveChip: "Live",
+        featuredTitle: "Quran Lights",
+        featuredSubtitle: "Most listened recitations to nourish faith and soothe the soul",
+        statsRecitations: "Recitations",
+        imamLabel: "Imam",
+        formation: "Education",
+        parcours: "Journey",
+        tabsAll: "All recitations",
+        tabsRecent: "Recent",
+        tabsPopular: "Popular",
+        viewCards: "Cards",
+        viewList: "List",
+        noRecitationsTitle: "No recitations found",
+        noRecitationsSubtitle: "Try different search terms",
+        table: {
+          recitation: "Recitation",
+          surah: "Surah",
+          verses: "Verses",
+          date: "Date",
+          listens: "Listens",
+          downloads: "Downloads",
+          action: "Action",
+          listen: "Listen"
+        },
+        defaultDescription: "Sacred recitation",
+        footerTitle: "Sacred Recitations",
+        footerSubtitle: "May peace and blessings of Allah be upon you",
+        footerCopyright: "© 2026 Sacred Recitations. All rights reserved."
+      },
+      login: {
+        title: "Imam Space",
+        subtitle: "Sign in to manage your sacred recitations",
+        email: "Email",
+        password: "Password",
+        login: "Sign in",
+        backHome: "← Back to home",
+        secureAccess: "Secure access:",
+        secureHint: "Use your admin credentials to access the dashboard.",
+        errorFill: "Please fill in all fields",
+        success: "Login successful.",
+        failed: "Login failed"
+      },
+      dashboard: {
+        title: "Imam Dashboard",
+        subtitle: "Manage recitations and track statistics",
+        stats: {
+          recitations: "Published recitations",
+          listens: "Total listens",
+          downloads: "Total downloads",
+          average: "Average per recitation"
+        },
+        activityTitle: "Recent activity",
+        activitySubtitle: "Your recitations performance this week",
+        reportButton: "View full report",
+        engagement: "Engagement rate",
+        allRecitations: "All your recitations",
+        manageSubtitle: "Manage and edit your publications",
+        listens: "listens",
+        shares: "Shares",
+        actions: {
+          view: "View",
+          edit: "Edit",
+          delete: "Delete",
+          deleteConfirm: "Delete the recitation?",
+          irreversible: "This action is irreversible.",
+          cancel: "Cancel",
+          save: "Save"
+        },
+        updated: "Recitation updated.",
+        deleted: "Recitation deleted.",
+        reportTitle: "Full report (last 7 days)",
+        noData: "No data available."
+      },
+      record: {
+        back: "Back to dashboard",
+        title: "New Recitation",
+        subtitle: "Record and publish your sacred recitation",
+        recordingReady: "Ready to record",
+        recordingUnsupported: "Audio recording is not supported on this browser.",
+        recordingReadyToast: "Recording is ready.",
+        recordingDeleted: "Recording deleted.",
+        chooseMethod: "Choose your recording method",
+        record: "Record",
+        uploadFile: "Upload a file",
+        recordingInProgress: "Recording in progress...",
+        recordingDone: "✓ Recording complete",
+        stop: "Stop",
+        preview: "Preview",
+        delete: "Delete",
+        titleSurah: "Surah title",
+        surah: "Surah",
+        verseStart: "Start verse",
+        verseEnd: "End verse",
+        description: "Description",
+        addBasmala: "Include Basmala",
+        publishing: "Publishing...",
+        publish: "Publish recitation",
+        publishedSuccess: "Recitation published successfully."
+        ,
+        publishFailed: "Publishing failed"
+      },
+      player: {
+        back: "Back to recitations",
+        withBasmala: "With Basmala",
+        conversion: "Conversion in progress",
+        listens: "listens",
+        downloads: "downloads",
+        download: "Download",
+        share: "Share",
+        shareTitle: "Share this recitation",
+        shareLink: "Share link",
+        copyLink: "Copy link",
+        close: "Close",
+        linkCopied: "Link copied.",
+        notFound: "Recitation not found",
+        downloadStarted: "Download started.",
+        shareText: "Listen to {{title}}"
+      },
+      profile: {
+        back: "Back to dashboard",
+        title: "Imam Profile",
+        edit: "Edit",
+        save: "Save",
+        cancel: "Cancel",
+        biography: "Biography",
+        contacts: "Contacts",
+        specialties: "Specialties",
+        education: "Education",
+        experience: "Professional journey",
+        add: "Add",
+        name: "Name",
+        arabicName: "Arabic name",
+        role: "Title",
+        email: "Email",
+        phone: "Phone"
+      }
+    }
+  },
+  ar: {
+    translation: {
+      appName: "التلاوات المباركة",
+      navbar: {
+        nightMode: "وضع الليل السماوي",
+        imamSpace: "فضاء الإمام",
+        newRecitation: "+ تلاوة جديدة"
+      },
+      home: {
+        heroTitle: "استمع إلى كلام الله",
+        heroSubtitle:
+          "ليُنِر القرآن قلبك: كل آية نداء من الله وهداية ورحمة للروح.",
+        searchPlaceholder: "ابحث عن سورة أو عنوان أو آية...",
+        searchButton: "بحث",
+        liveChip: "مباشر",
+        featuredTitle: "أنوار القرآن",
+        featuredSubtitle: "أكثر التلاوات استماعًا لزيادة الإيمان وطمأنينة النفس",
+        statsRecitations: "تلاوات",
+        imamLabel: "إمام",
+        formation: "التكوين",
+        parcours: "المسار",
+        tabsAll: "كل التلاوات",
+        tabsRecent: "الأحدث",
+        tabsPopular: "الأكثر رواجًا",
+        viewCards: "بطاقات",
+        viewList: "قائمة",
+        noRecitationsTitle: "لا توجد تلاوات",
+        noRecitationsSubtitle: "جرّب كلمات بحث أخرى",
+        table: {
+          recitation: "التلاوة",
+          surah: "السورة",
+          verses: "الآيات",
+          date: "التاريخ",
+          listens: "الاستماع",
+          downloads: "التحميلات",
+          action: "الإجراء",
+          listen: "استماع"
+        },
+        defaultDescription: "تلاوة مباركة",
+        footerTitle: "التلاوات المباركة",
+        footerSubtitle: "نسأل الله أن يفيض عليكم السكينة والرحمة",
+        footerCopyright: "© 2026 التلاوات المباركة. جميع الحقوق محفوظة."
+      },
+      login: {
+        title: "فضاء الإمام",
+        subtitle: "سجّل الدخول لإدارة التلاوات المباركة",
+        email: "البريد الإلكتروني",
+        password: "كلمة المرور",
+        login: "تسجيل الدخول",
+        backHome: "← العودة للرئيسية",
+        secureAccess: "دخول آمن:",
+        secureHint: "استخدم بيانات المسؤول للوصول إلى لوحة التحكم.",
+        errorFill: "يرجى ملء جميع الحقول",
+        success: "تم تسجيل الدخول بنجاح.",
+        failed: "تعذر تسجيل الدخول"
+      },
+      dashboard: {
+        title: "لوحة تحكم الإمام",
+        subtitle: "إدارة التلاوات وتتبع الإحصاءات",
+        stats: {
+          recitations: "تلاوات منشورة",
+          listens: "إجمالي الاستماع",
+          downloads: "إجمالي التحميلات",
+          average: "المعدل لكل تلاوة"
+        },
+        activityTitle: "النشاط الأخير",
+        activitySubtitle: "أداء التلاوات هذا الأسبوع",
+        reportButton: "عرض التقرير الكامل",
+        engagement: "معدل التفاعل",
+        allRecitations: "جميع تلاواتك",
+        manageSubtitle: "إدارة المنشورات وتعديلها",
+        listens: "استماع",
+        shares: "المشاركات",
+        actions: {
+          view: "عرض",
+          edit: "تعديل",
+          delete: "حذف",
+          deleteConfirm: "هل تريد حذف التلاوة؟",
+          irreversible: "هذا الإجراء لا يمكن التراجع عنه.",
+          cancel: "إلغاء",
+          save: "حفظ"
+        },
+        updated: "تم تحديث التلاوة.",
+        deleted: "تم حذف التلاوة.",
+        reportTitle: "التقرير الكامل (آخر 7 أيام)",
+        noData: "لا توجد بيانات."
+      },
+      record: {
+        back: "العودة للوحة التحكم",
+        title: "تلاوة جديدة",
+        subtitle: "سجّل وانشر التلاوة المباركة",
+        recordingReady: "جاهز للتسجيل",
+        recordingUnsupported: "تسجيل الصوت غير مدعوم في هذا المتصفح.",
+        recordingReadyToast: "التسجيل جاهز.",
+        recordingDeleted: "تم حذف التسجيل.",
+        chooseMethod: "اختر طريقة التسجيل",
+        record: "تسجيل",
+        uploadFile: "رفع ملف",
+        recordingInProgress: "التسجيل جارٍ...",
+        recordingDone: "✓ تم إنهاء التسجيل",
+        stop: "إيقاف",
+        preview: "معاينة",
+        delete: "حذف",
+        titleSurah: "عنوان السورة",
+        surah: "السورة",
+        verseStart: "بداية الآيات",
+        verseEnd: "نهاية الآيات",
+        description: "الوصف",
+        addBasmala: "إضافة البسملة",
+        publishing: "جارٍ النشر...",
+        publish: "نشر التلاوة",
+        publishedSuccess: "تم نشر التلاوة بنجاح."
+        ,
+        publishFailed: "تعذر النشر"
+      },
+      player: {
+        back: "العودة للتلاوات",
+        withBasmala: "مع البسملة",
+        conversion: "جارٍ التحويل",
+        listens: "استماع",
+        downloads: "تحميلات",
+        download: "تحميل",
+        share: "مشاركة",
+        shareTitle: "شارك هذه التلاوة",
+        shareLink: "رابط المشاركة",
+        copyLink: "نسخ الرابط",
+        close: "إغلاق",
+        linkCopied: "تم نسخ الرابط.",
+        notFound: "التلاوة غير موجودة",
+        downloadStarted: "بدأ التحميل.",
+        shareText: "استمع إلى {{title}}"
+      },
+      profile: {
+        back: "العودة للوحة التحكم",
+        title: "ملف الإمام",
+        edit: "تعديل",
+        save: "حفظ",
+        cancel: "إلغاء",
+        biography: "السيرة",
+        contacts: "بيانات التواصل",
+        specialties: "التخصصات",
+        education: "التكوين",
+        experience: "المسار المهني",
+        add: "إضافة",
+        name: "الاسم",
+        arabicName: "الاسم بالعربية",
+        role: "الصفة",
+        email: "البريد الإلكتروني",
+        phone: "الهاتف"
+      }
+    }
+  }
+};
+
+i18n.use(initReactI18next).init({
+  resources,
+  lng: initialLang,
+  fallbackLng,
+  interpolation: { escapeValue: false }
+});
+
+if (typeof document !== "undefined") {
+  document.documentElement.lang = initialLang;
+  document.documentElement.dir = initialLang === "ar" ? "rtl" : "ltr";
+}
+
+export default i18n;

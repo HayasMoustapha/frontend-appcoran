@@ -35,11 +35,13 @@ import { uploadAudio } from "../api/audios";
 import { isNetworkError } from "../api/client";
 import { getSurahReference } from "../api/surahReference";
 import type { SurahReference } from "../domain/types";
+import { useTranslation } from "react-i18next";
 
 type RecordingState = "idle" | "recording" | "recorded" | "uploading" | "success";
 
 export function RecordPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -148,7 +150,7 @@ export function RecordPage() {
   const handleStartRecording = async () => {
     setError("");
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError("Enregistrement audio non supporté sur ce navigateur.");
+      setError(t("record.recordingUnsupported"));
       return;
     }
     try {
@@ -168,7 +170,7 @@ export function RecordPage() {
         const file = new File([blob], `recitation-${Date.now()}.webm`, { type: blob.type });
         setUploadedFile(file);
         setRecordingState("recorded");
-        setToast({ message: "Enregistrement prêt.", severity: "success" });
+        setToast({ message: t("record.recordingReadyToast"), severity: "success" });
         stream.getTracks().forEach((track) => track.stop());
         mediaStreamRef.current = null;
       };
@@ -216,7 +218,7 @@ export function RecordPage() {
       previewRef.current.pause();
       previewRef.current.currentTime = 0;
     }
-    setToast({ message: "Enregistrement supprimé.", severity: "success" });
+    setToast({ message: t("record.recordingDeleted"), severity: "success" });
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,7 +280,7 @@ export function RecordPage() {
       await uploadAudio(formData);
       setUploadProgress(100);
       setRecordingState("success");
-      setToast({ message: "Récitation publiée avec succès.", severity: "success" });
+      setToast({ message: t("record.publishedSuccess"), severity: "success" });
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
@@ -286,7 +288,7 @@ export function RecordPage() {
       setRecordingState("recorded");
       setUploadProgress(0);
       if (isNetworkError(err)) return;
-      setError(err instanceof Error ? err.message : "Publication impossible");
+      setError(err instanceof Error ? err.message : t("record.publishFailed"));
     }
   };
 
@@ -320,7 +322,7 @@ export function RecordPage() {
             textTransform: "none"
           }}
         >
-          Retour au tableau de bord
+          {t("record.back")}
         </Button>
 
         <Paper
@@ -353,10 +355,10 @@ export function RecordPage() {
               <Mic />
             </Box>
             <Typography variant="h4" fontWeight={800} gutterBottom>
-              Nouvelle Récitation
+              {t("record.title")}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Enregistrez et publiez votre récitation sacrée
+              {t("record.subtitle")}
             </Typography>
           </Box>
 
@@ -383,10 +385,10 @@ export function RecordPage() {
             {recordingState === "idle" && (
               <>
                 <Typography variant="h6" gutterBottom fontWeight={600}>
-                  Prêt à enregistrer
+                  {t("record.recordingReady")}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Choisissez votre méthode d'enregistrement
+                  {t("record.chooseMethod")}
                 </Typography>
 
                 <Box
@@ -416,7 +418,7 @@ export function RecordPage() {
                       flex: 1
                     }}
                   >
-                    Enregistrer
+                    {t("record.record")}
                   </Button>
 
                   <Box sx={{ display: { xs: "block", sm: "none" }, my: 1 }}>
@@ -449,7 +451,7 @@ export function RecordPage() {
                       }
                     }}
                   >
-                    Importer un fichier
+                    {t("record.uploadFile")}
                     <input
                       type="file"
                       accept="audio/*,video/*,.mp4"
@@ -515,7 +517,7 @@ export function RecordPage() {
                   {formatTime(recordingTime)}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Enregistrement en cours...
+                  {t("record.recordingInProgress")}
                 </Typography>
                 <Button
                   variant="contained"
@@ -531,7 +533,7 @@ export function RecordPage() {
                     fontWeight: 700
                   }}
                 >
-                  Arrêter
+                  {t("record.stop")}
                 </Button>
               </>
             )}
@@ -539,7 +541,7 @@ export function RecordPage() {
             {recordingState === "recorded" && (
               <>
                 <Typography variant="h6" gutterBottom fontWeight={600} color="success.main">
-                  ✓ Enregistrement terminé
+                  {t("record.recordingDone")}
                 </Typography>
                 <Typography variant="h4" fontWeight={800} gutterBottom>
                   {formatTime(recordingTime)}
@@ -587,10 +589,10 @@ export function RecordPage() {
                 sx={{ mb: 3 }}
                 disabled={recordingState === "uploading" || surahLoading || Boolean(surahError)}
               >
-                <InputLabel sx={{ color: "text.secondary" }}>Titre de la sourate</InputLabel>
+                <InputLabel sx={{ color: "text.secondary" }}>{t("record.titleSurah")}</InputLabel>
                 <Select
                   value={title}
-                  label="Titre de la sourate"
+                  label={t("record.titleSurah")}
                   onChange={(e) => {
                     const next = e.target.value;
                     setTitle(next);
@@ -602,7 +604,8 @@ export function RecordPage() {
                   }}
                 >
                   {sortedSurahs.map((surah) => {
-                    const fullTitle = `${surah.number}. ${surah.name_fr} (${surah.name_phonetic})`;
+                    const localName = surah.name_local ?? surah.name_fr;
+                    const fullTitle = `${surah.number}. ${localName} (${surah.name_phonetic})`;
                     return (
                       <MenuItem key={surah.number} value={fullTitle}>
                         {fullTitle}
@@ -618,10 +621,10 @@ export function RecordPage() {
                   fullWidth
                   disabled={recordingState === "uploading" || surahLoading || Boolean(surahError)}
                 >
-                  <InputLabel sx={{ color: "text.secondary" }}>Sourate</InputLabel>
+                  <InputLabel sx={{ color: "text.secondary" }}>{t("record.surah")}</InputLabel>
                   <Select
                     value={selectedSurah}
-                    label="Sourate"
+                    label={t("record.surah")}
                     onChange={(e) => setSelectedSurah(e.target.value)}
                     sx={{
                       background: "rgba(8, 18, 25, 0.7)",
@@ -631,7 +634,7 @@ export function RecordPage() {
                   >
                     {sortedSurahs.map((surah) => (
                       <MenuItem key={surah.number} value={surah.number.toString()}>
-                        {surah.number}. {surah.name_fr} • {surah.name_ar} ({surah.name_phonetic})
+                        {surah.number}. {surah.name_local ?? surah.name_fr} • {surah.name_ar} ({surah.name_phonetic})
                       </MenuItem>
                     ))}
                   </Select>
@@ -647,10 +650,10 @@ export function RecordPage() {
                     Boolean(surahError)
                   }
                 >
-                  <InputLabel sx={{ color: "text.secondary" }}>Verset début</InputLabel>
+                  <InputLabel sx={{ color: "text.secondary" }}>{t("record.verseStart")}</InputLabel>
                   <Select
                     value={verseStart}
-                    label="Verset début"
+                    label={t("record.verseStart")}
                     onChange={(e) => {
                       const next =
                         e.target.value === "" ? "" : Number(e.target.value);
@@ -680,10 +683,10 @@ export function RecordPage() {
                     Boolean(surahError)
                   }
                 >
-                  <InputLabel sx={{ color: "text.secondary" }}>Verset fin</InputLabel>
+                  <InputLabel sx={{ color: "text.secondary" }}>{t("record.verseEnd")}</InputLabel>
                   <Select
                     value={verseEnd}
-                    label="Verset fin"
+                    label={t("record.verseEnd")}
                     onChange={(e) => {
                       const next =
                         e.target.value === "" ? "" : Number(e.target.value);
@@ -712,7 +715,7 @@ export function RecordPage() {
 
               <TextField
                 fullWidth
-                label="Description"
+                label={t("record.description")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 multiline
@@ -751,7 +754,7 @@ export function RecordPage() {
                   label={
                     <Box>
                       <Typography variant="body1" fontWeight={600}>
-                        Inclure la Basmala
+                        {t("record.addBasmala")}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -765,7 +768,7 @@ export function RecordPage() {
                 <Box sx={{ mb: 3 }}>
                   <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                     <Typography variant="body2" fontWeight={600}>
-                      Publication en cours...
+                      {t("record.publishing")}
                     </Typography>
                     <Typography variant="body2" color="primary" fontWeight={700}>
                       {uploadProgress}%
@@ -818,7 +821,7 @@ export function RecordPage() {
                   }
                 }}
               >
-                Publier la récitation
+                {t("record.publish")}
               </Button>
             </Box>
           )}

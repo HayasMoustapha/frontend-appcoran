@@ -67,6 +67,7 @@ export interface SurahReference {
   name_fr: string;
   name_phonetic: string;
   name_ar: string;
+  name_local?: string;
   revelation: number;
   verses: number;
   words: number;

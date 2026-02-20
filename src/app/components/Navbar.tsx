@@ -1,7 +1,19 @@
-import { AppBar, Toolbar, Typography, Button, Box, IconButton, Avatar, Tooltip } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  IconButton,
+  Avatar,
+  Tooltip,
+  Select,
+  MenuItem
+} from "@mui/material";
 import { Menu as MenuIcon, AccountCircle, NightsStay } from "@mui/icons-material";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface NavbarProps {
   showAuth?: boolean;
@@ -10,9 +22,14 @@ interface NavbarProps {
 
 export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [nightMode, setNightMode] = useState(() => {
     if (typeof window === "undefined") return true;
     return localStorage.getItem("appcoran-night") !== "false";
+  });
+  const [lang, setLang] = useState(() => {
+    if (typeof window === "undefined") return "fr";
+    return localStorage.getItem("appcoran-lang") || "fr";
   });
 
   useEffect(() => {
@@ -25,6 +42,14 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
       localStorage.setItem("appcoran-night", "false");
     }
   }, [nightMode]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    localStorage.setItem("appcoran-lang", lang);
+    i18n.changeLanguage(lang);
+  }, [lang, i18n]);
 
   return (
     <AppBar 
@@ -86,13 +111,32 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
                 display: { xs: "none", sm: "block" }
               }}
             >
-              Récitations Sacrées
+              {t("appName")}
             </Typography>
           </Box>
         </Box>
 
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <Tooltip title="Mode Nuit céleste">
+          <Select
+            size="small"
+            value={lang}
+            onChange={(event) => setLang(event.target.value)}
+            sx={{
+              minWidth: 84,
+              background: "rgba(15, 28, 39, 0.6)",
+              color: "text.primary",
+              borderRadius: 2,
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "rgba(255,255,255,0.15)"
+              },
+              "& .MuiSvgIcon-root": { color: "text.secondary" }
+            }}
+          >
+            <MenuItem value="fr">FR</MenuItem>
+            <MenuItem value="en">EN</MenuItem>
+            <MenuItem value="ar">AR</MenuItem>
+          </Select>
+          <Tooltip title={t("navbar.nightMode")}>
             <IconButton
               color="inherit"
               onClick={() => setNightMode((prev) => !prev)}
@@ -120,7 +164,7 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
                 },
               }}
             >
-              Espace Imam
+              {t("navbar.imamSpace")}
             </Button>
           )}
           
@@ -144,7 +188,7 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
                   display: { xs: "none", md: "flex" }
                 }}
               >
-                + Nouvelle Récitation
+                {t("navbar.newRecitation")}
               </Button>
               
               <IconButton

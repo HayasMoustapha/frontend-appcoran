@@ -26,6 +26,11 @@ export const API_BASE_URL =
 export const PUBLIC_BASE_URL =
   import.meta.env.VITE_PUBLIC_BASE_URL ?? API_BASE_URL;
 
+function getLang() {
+  if (typeof window === "undefined") return "fr";
+  return localStorage.getItem("appcoran-lang") || "fr";
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
   const headers: Record<string, string> = {
@@ -34,6 +39,8 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   if ((options.method ?? "GET") === "GET") {
     headers["Cache-Control"] = "no-cache";
     headers.Pragma = "no-cache";
+    headers["Accept-Language"] = getLang();
+    headers["X-Lang"] = getLang();
   }
 
   if (options.auth) {

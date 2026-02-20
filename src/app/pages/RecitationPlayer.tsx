@@ -35,10 +35,12 @@ import { getPublicAudioBySlug, listAudios, sharePublicAudio } from "../api/audio
 import { isNetworkError } from "../api/client";
 import { mapAudioToRecitation, mapPublicAudioToRecitation } from "../api/mappers";
 import type { Recitation } from "../domain/types";
+import { useTranslation } from "react-i18next";
 
 export function RecitationPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const publicAppUrl =
     import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin;
@@ -95,7 +97,7 @@ export function RecitationPlayer() {
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
-        const message = err instanceof Error ? err.message : "Récitation introuvable";
+        const message = err instanceof Error ? err.message : t("player.notFound");
         setError(message);
       }
     };
@@ -274,7 +276,7 @@ export function RecitationPlayer() {
   const handleDownload = () => {
     if (!recitation?.downloadUrl) return;
     window.open(recitation.downloadUrl, "_blank", "noopener");
-    setToast({ message: "Téléchargement démarré.", severity: "success" });
+    setToast({ message: t("player.downloadStarted"), severity: "success" });
   };
 
   const handleShare = async () => {
@@ -287,7 +289,7 @@ export function RecitationPlayer() {
         try {
           await navigator.share({
             title: recitation.title,
-            text: `Écoutez ${recitation.title}`,
+            text: t("player.shareText", { title: recitation.title }),
             url
           });
           setToast({ message: "Partage lancé.", severity: "success" });
@@ -312,7 +314,7 @@ export function RecitationPlayer() {
       <Box>
         <Navbar />
         <Container sx={{ py: 4 }}>
-          <Typography>{error || "Récitation non trouvée"}</Typography>
+          <Typography>{error || t("player.notFound")}</Typography>
         </Container>
       </Box>
     );
@@ -333,7 +335,7 @@ export function RecitationPlayer() {
             textTransform: "none"
           }}
         >
-          Retour aux récitations
+          {t("player.back")}
         </Button>
 
         <Paper
@@ -404,7 +406,7 @@ export function RecitationPlayer() {
 
             {recitation.withBasmala && (
               <Chip
-                label="Avec Basmala"
+                label={t("player.withBasmala")}
                 sx={{
                   position: "absolute",
                   top: 16,
@@ -418,7 +420,7 @@ export function RecitationPlayer() {
 
             {showConversionBadge && (
               <Chip
-                label="Conversion en cours"
+                label={t("player.conversion")}
                 sx={{
                   position: "absolute",
                   top: 16,
@@ -443,12 +445,12 @@ export function RecitationPlayer() {
                 </Typography>
                 <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                   <Chip
-                    label={`${recitation.listens.toLocaleString()} écoutes`}
+                    label={`${recitation.listens.toLocaleString()} ${t("player.listens")}`}
                     size="small"
                     sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
                   />
                   <Chip
-                    label={`${recitation.downloads.toLocaleString()} téléchargements`}
+                    label={`${recitation.downloads.toLocaleString()} ${t("player.downloads")}`}
                     size="small"
                     sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
                   />
@@ -583,7 +585,7 @@ export function RecitationPlayer() {
                   }
                 }}
               >
-                Télécharger
+                {t("player.download")}
               </Button>
               <Button
                 variant="outlined"
@@ -602,7 +604,7 @@ export function RecitationPlayer() {
                   }
                 }}
               >
-                Partager
+                {t("player.share")}
               </Button>
             </Box>
           </Box>
@@ -639,12 +641,12 @@ export function RecitationPlayer() {
           }
         }}
       >
-        <DialogTitle>Partager cette récitation</DialogTitle>
+        <DialogTitle>{t("player.shareTitle")}</DialogTitle>
         <DialogContent dividers>
           <TextField
             fullWidth
             value={shareUrl}
-            label="Lien de partage"
+            label={t("player.shareLink")}
             InputProps={{ readOnly: true }}
             sx={{
               "& .MuiOutlinedInput-root": {
@@ -659,13 +661,13 @@ export function RecitationPlayer() {
             onClick={async () => {
               if (navigator.clipboard && shareUrl) {
                 await navigator.clipboard.writeText(shareUrl);
-                setToast({ message: "Lien copié.", severity: "success" });
+                setToast({ message: t("player.linkCopied"), severity: "success" });
               }
             }}
           >
-            Copier le lien
+            {t("player.copyLink")}
           </Button>
-          <Button onClick={() => setShareOpen(false)}>Fermer</Button>
+          <Button onClick={() => setShareOpen(false)}>{t("player.close")}</Button>
         </DialogActions>
       </Dialog>
 
@@ -689,7 +691,7 @@ export function RecitationPlayer() {
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert severity="info" onClose={() => setConversionOpen(false)} sx={{ borderRadius: 2 }}>
-          Conversion audio en cours… veuillez patienter.
+          {t("player.conversion")}…
         </Alert>
       </Snackbar>
     </Box>
