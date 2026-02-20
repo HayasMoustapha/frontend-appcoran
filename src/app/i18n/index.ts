@@ -36,6 +36,7 @@ const resources = {
         viewList: "Liste",
         noRecitationsTitle: "Aucune récitation trouvée",
         noRecitationsSubtitle: "Essayez d'autres termes de recherche",
+        searching: "Recherche en cours...",
         table: {
           recitation: "Récitation",
           surah: "Sourate",
@@ -197,6 +198,7 @@ const resources = {
         viewList: "List",
         noRecitationsTitle: "No recitations found",
         noRecitationsSubtitle: "Try different search terms",
+        searching: "Searching...",
         table: {
           recitation: "Recitation",
           surah: "Surah",
@@ -358,6 +360,7 @@ const resources = {
         viewList: "قائمة",
         noRecitationsTitle: "لا توجد تلاوات",
         noRecitationsSubtitle: "جرّب كلمات بحث أخرى",
+        searching: "جارٍ البحث...",
         table: {
           recitation: "التلاوة",
           surah: "السورة",

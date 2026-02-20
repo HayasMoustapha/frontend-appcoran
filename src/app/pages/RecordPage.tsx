@@ -115,10 +115,11 @@ export function RecordPage() {
 
   useEffect(() => {
     if (!isComplete) return;
-    if (!selectedSurahEntry) return;
+    const entry = sortedSurahs.find((surah) => surah.number.toString() === selectedSurah);
+    if (!entry) return;
     setVerseStart(1);
-    setVerseEnd(selectedSurahEntry.verses);
-  }, [isComplete, selectedSurahEntry]);
+    setVerseEnd(entry.verses);
+  }, [isComplete, selectedSurah, sortedSurahs]);
 
   const sortedSurahs = useMemo(
     () => [...surahReference].sort((a, b) => a.number - b.number),

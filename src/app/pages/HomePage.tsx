@@ -35,6 +35,7 @@ import { useNavigate } from "react-router";
 import { getSurahReference } from "../api/surahReference";
 import { useTranslation } from "react-i18next";
 import { formatNumber, formatNumericText } from "../utils/formatNumber";
+import { useAudioPlayer } from "../components/AudioPlayerProvider";
 
 export function HomePage() {
   const heroRef = useRef<HTMLDivElement | null>(null);
@@ -46,6 +47,7 @@ export function HomePage() {
   const [recentRecitations, setRecentRecitations] = useState<Recitation[]>([]);
   const [popularRecitations, setPopularRecitations] = useState<Recitation[]>([]);
   const [searchResults, setSearchResults] = useState<Recitation[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [surahReference, setSurahReference] = useState<SurahReference[]>([]);
   const [imamProfile, setImamProfile] = useState<ImamProfile>({
     name: "",
@@ -61,6 +63,7 @@ export function HomePage() {
   });
   const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
   const { t, i18n } = useTranslation();
+  const { currentRecitation, isPlaying, playRecitation, togglePlay } = useAudioPlayer();
 
   useEffect(() => {
     let active = true;
@@ -161,6 +164,8 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
+    setIsSearching(true);
+    const timer = window.setTimeout(() => setIsSearching(false), 120);
     const query = searchQuery.trim();
     if (!query) {
       setSearchResults(allRecitations);
@@ -197,6 +202,7 @@ export function HomePage() {
     });
 
     setSearchResults(matches);
+    return () => window.clearTimeout(timer);
   }, [searchQuery, allRecitations, surahReference]);
 
   const displayedRecitations =
@@ -839,7 +845,13 @@ export function HomePage() {
           </ToggleButtonGroup>
         </Box>
 
-        {displayedRecitations.length > 0 ? (
+        {isSearching ? (
+          <Box sx={{ textAlign: "center", py: 10 }}>
+            <Typography variant="body2" color="text.secondary">
+              {t("home.searching")}
+            </Typography>
+          </Box>
+        ) : displayedRecitations.length > 0 ? (
           viewMode === "cards" ? (
             <Grid container spacing={3}>
               {displayedRecitations.map((recitation, index) => (
@@ -847,6 +859,22 @@ export function HomePage() {
                   <RecitationCard
                     recitation={recitation}
                     featured={index === 0 && selectedTab === 2}
+                    isActive={
+                      Boolean(currentRecitation) &&
+                      (currentRecitation?.slug === recitation.slug ||
+                        currentRecitation?.id === recitation.id)
+                    }
+                    isPlaying={isPlaying}
+                    onPlayToggle={() => {
+                      if (
+                        currentRecitation?.slug === recitation.slug ||
+                        currentRecitation?.id === recitation.id
+                      ) {
+                        togglePlay();
+                      } else {
+                        playRecitation(recitation, true);
+                      }
+                    }}
                   />
                 </Grid>
               ))}

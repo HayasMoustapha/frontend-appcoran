@@ -1,5 +1,5 @@
 import { Card, CardContent, Typography, Box, IconButton, Chip } from "@mui/material";
-import { PlayArrow, Download, Visibility } from "@mui/icons-material";
+import { PlayArrow, Pause, Download, Visibility } from "@mui/icons-material";
 import type { Recitation } from "../domain/types";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -8,9 +8,18 @@ import { formatNumber, formatNumericText } from "../utils/formatNumber";
 interface RecitationCardProps {
   recitation: Recitation;
   featured?: boolean;
+  isActive?: boolean;
+  isPlaying?: boolean;
+  onPlayToggle?: () => void;
 }
 
-export function RecitationCard({ recitation, featured = false }: RecitationCardProps) {
+export function RecitationCard({
+  recitation,
+  featured = false,
+  isActive = false,
+  isPlaying = false,
+  onPlayToggle
+}: RecitationCardProps) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
@@ -18,7 +27,10 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
 
   return (
     <Card
-      onClick={() => navigate(`/recitation/${targetId}`)}
+      onClick={(event) => {
+        if ((event.target as HTMLElement)?.closest("[data-play-button]")) return;
+        navigate(`/recitation/${targetId}`);
+      }}
       sx={{
         height: "100%",
         display: "flex",
@@ -43,12 +55,18 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
           right: 0,
           height: "3px",
           background: "linear-gradient(90deg, #047857 0%, #D4AF37 100%)",
-          opacity: 0,
+          opacity: isActive ? 1 : 0,
           transition: "opacity 0.3s ease",
         },
         "&:hover::before": {
           opacity: 1,
         },
+        ...(isActive
+          ? {
+              boxShadow: "0 20px 40px rgba(15, 118, 110, 0.25)",
+              transform: "translateY(-6px)"
+            }
+          : {})
       }}
     >
         <Box
@@ -137,7 +155,39 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
           </Typography>
         </Box>
 
+        {isActive && isPlaying && (
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 16,
+              left: 16,
+              display: "flex",
+              gap: 0.5,
+              alignItems: "flex-end",
+              height: 18
+            }}
+          >
+            {[0, 1, 2, 3].map((bar) => (
+              <Box
+                key={bar}
+                sx={{
+                  width: 4,
+                  height: 6,
+                  borderRadius: 2,
+                  background: "rgba(212,175,55,0.85)",
+                  animation: `voicePulse 1.2s ${bar * 0.2}s ease-in-out infinite`,
+                  "@keyframes voicePulse": {
+                    "0%, 100%": { height: 6, opacity: 0.6 },
+                    "50%": { height: 16, opacity: 1 }
+                  }
+                }}
+              />
+            ))}
+          </Box>
+        )}
+
         <IconButton
+          data-play-button
           sx={{
             position: "absolute",
             top: "50%",
@@ -147,7 +197,7 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
             color: "white",
             width: 56,
             height: 56,
-            opacity: 0,
+            opacity: isActive ? 1 : 0,
             transition: "opacity 0.3s ease",
             "&:hover": {
               background: "rgba(212, 175, 55, 1)",
@@ -157,8 +207,12 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
               opacity: 1,
             },
           }}
+          onClick={(event) => {
+            event.stopPropagation();
+            onPlayToggle?.();
+          }}
         >
-          <PlayArrow sx={{ fontSize: 32 }} />
+          {isActive && isPlaying ? <Pause sx={{ fontSize: 32 }} /> : <PlayArrow sx={{ fontSize: 32 }} />}
         </IconButton>
 
         {recitation.withBasmala && (
