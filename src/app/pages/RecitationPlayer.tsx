@@ -68,6 +68,7 @@ export function RecitationPlayer() {
     currentTime,
     duration,
     volume,
+    currentRecitation,
     setPlaylist,
     setCurrentRecitation,
     playRecitation,
