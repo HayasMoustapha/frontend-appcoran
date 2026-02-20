@@ -9,6 +9,7 @@ type AudioPlayerContextValue = {
   currentTime: number;
   duration: number;
   volume: number;
+  playbackMode: PlaybackMode;
   setPlaylist: (items: Recitation[]) => void;
   setCurrentRecitation: (recitation: Recitation | null) => void;
   playRecitation: (recitation: Recitation, autoplay?: boolean) => void;
@@ -17,9 +18,13 @@ type AudioPlayerContextValue = {
   setVolume: (value: number) => void;
   playNext: () => void;
   playPrevious: () => void;
+  setPlaybackMode: (mode: PlaybackMode) => void;
+  cyclePlaybackMode: () => void;
 };
 
 const AudioPlayerContext = createContext<AudioPlayerContextValue | null>(null);
+
+export type PlaybackMode = "sequence" | "repeat-one" | "repeat-all" | "shuffle";
 
 export function useAudioPlayer() {
   const ctx = useContext(AudioPlayerContext);
@@ -37,13 +42,28 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(80);
+  const [playbackMode, setPlaybackMode] = useState<PlaybackMode>("sequence");
   const pendingAutoPlayRef = useRef(false);
+  const shuffleHistoryRef = useRef<Recitation[]>([]);
 
   const updateVolume = useCallback((value: number) => {
     setVolumeState(value);
     if (audioRef.current) {
       audioRef.current.volume = Math.min(1, Math.max(0, value / 100));
     }
+  }, []);
+
+  const stopPlayback = useCallback(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    }
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setCurrentRecitation(null);
   }, []);
 
   const playRecitation = useCallback((recitation: Recitation, autoplay = true) => {
@@ -73,22 +93,77 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
 
   const playNext = useCallback(() => {
     if (!currentRecitation) return;
+    if (playbackMode === "repeat-one") {
+      playRecitation(currentRecitation, true);
+      return;
+    }
+    if (playlist.length === 0) {
+      stopPlayback();
+      return;
+    }
     const currentIndex = playlist.findIndex(
       (item) => item.slug === currentRecitation.slug || item.id === currentRecitation.id
     );
+    if (playbackMode === "shuffle") {
+      if (playlist.length === 1) {
+        playRecitation(playlist[0], true);
+        return;
+      }
+      let nextIndex = currentIndex;
+      while (nextIndex === currentIndex) {
+        nextIndex = Math.floor(Math.random() * playlist.length);
+      }
+      playRecitation(playlist[nextIndex], true);
+      return;
+    }
+    if (playbackMode === "repeat-all") {
+      const next =
+        currentIndex >= 0 && currentIndex < playlist.length - 1
+          ? playlist[currentIndex + 1]
+          : playlist[0];
+      if (next) playRecitation(next, true);
+      return;
+    }
     const next =
       currentIndex >= 0 && currentIndex < playlist.length - 1 ? playlist[currentIndex + 1] : null;
-    if (next) playRecitation(next, true);
-  }, [currentRecitation, playlist, playRecitation]);
+    if (next) {
+      playRecitation(next, true);
+    } else {
+      stopPlayback();
+    }
+  }, [currentRecitation, playbackMode, playlist, playRecitation, stopPlayback]);
 
   const playPrevious = useCallback(() => {
     if (!currentRecitation) return;
     const currentIndex = playlist.findIndex(
       (item) => item.slug === currentRecitation.slug || item.id === currentRecitation.id
     );
-    const prev = currentIndex > 0 ? playlist[currentIndex - 1] : null;
+    if (playbackMode === "shuffle") {
+      const history = shuffleHistoryRef.current;
+      if (history.length > 1) {
+        history.pop();
+        const previous = history[history.length - 1];
+        playRecitation(previous, true);
+        return;
+      }
+    }
+    const prev =
+      currentIndex > 0
+        ? playlist[currentIndex - 1]
+        : playbackMode === "repeat-all" && playlist.length > 0
+        ? playlist[playlist.length - 1]
+        : null;
     if (prev) playRecitation(prev, true);
-  }, [currentRecitation, playlist, playRecitation]);
+  }, [currentRecitation, playbackMode, playlist, playRecitation]);
+
+  const cyclePlaybackMode = useCallback(() => {
+    setPlaybackMode((mode) => {
+      if (mode === "sequence") return "repeat-all";
+      if (mode === "repeat-all") return "repeat-one";
+      if (mode === "repeat-one") return "shuffle";
+      return "sequence";
+    });
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -140,6 +215,16 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     updateVolume(volume);
   }, [volume, updateVolume]);
 
+  useEffect(() => {
+    if (!currentRecitation) return;
+    if (playbackMode !== "shuffle") return;
+    const history = shuffleHistoryRef.current;
+    const last = history[history.length - 1];
+    if (!last || last.id !== currentRecitation.id) {
+      history.push(currentRecitation);
+    }
+  }, [currentRecitation, playbackMode]);
+
   const value: AudioPlayerContextValue = {
     audioRef,
     currentRecitation,
@@ -148,6 +233,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     currentTime,
     duration,
     volume,
+    playbackMode,
     setPlaylist,
     setCurrentRecitation,
     playRecitation,
@@ -155,7 +241,9 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     seek,
     setVolume: updateVolume,
     playNext,
-    playPrevious
+    playPrevious,
+    setPlaybackMode,
+    cyclePlaybackMode
   };
 
   return (

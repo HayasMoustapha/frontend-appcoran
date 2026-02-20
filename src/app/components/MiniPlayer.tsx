@@ -1,5 +1,5 @@
 import { Box, IconButton, LinearProgress, Typography } from "@mui/material";
-import { Pause, PlayArrow, SkipNext, SkipPrevious } from "@mui/icons-material";
+import { Pause, PlayArrow, SkipNext, SkipPrevious, Repeat, RepeatOne, Shuffle, QueueMusic } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { useAudioPlayer } from "./AudioPlayerProvider";
@@ -14,11 +14,13 @@ export function MiniPlayer() {
     duration,
     togglePlay,
     playNext,
-    playPrevious
+    playPrevious,
+    playbackMode,
+    cyclePlaybackMode
   } = useAudioPlayer();
 
   const [position, setPosition] = useState({ x: 16, y: 16 });
-  const [size, setSize] = useState({ w: 150, h: 140 });
+  const [size, setSize] = useState({ w: 170, h: 160 });
   const draggingRef = useRef(false);
   const resizingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
@@ -61,6 +63,7 @@ export function MiniPlayer() {
     const onUp = () => {
       draggingRef.current = false;
       resizingRef.current = false;
+      document.body.style.userSelect = "";
     };
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
@@ -75,6 +78,17 @@ export function MiniPlayer() {
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation.slug || currentRecitation.id;
+  const isCompact = size.w < 190;
+  const modeIcon =
+    playbackMode === "repeat-one" ? (
+      <RepeatOne fontSize="small" />
+    ) : playbackMode === "repeat-all" ? (
+      <Repeat fontSize="small" />
+    ) : playbackMode === "shuffle" ? (
+      <Shuffle fontSize="small" />
+    ) : (
+      <QueueMusic fontSize="small" />
+    );
 
   return (
     <Box
@@ -103,8 +117,11 @@ export function MiniPlayer() {
       }}
       onPointerDown={(event) => {
         if ((event.target as HTMLElement)?.dataset?.resizeHandle) return;
+        if ((event.target as HTMLElement)?.closest("[data-no-drag]")) return;
+        event.preventDefault();
         draggingRef.current = true;
         startRef.current = { x: event.clientX, y: event.clientY };
+        document.body.style.userSelect = "none";
         (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
       }}
     >
@@ -117,7 +134,7 @@ export function MiniPlayer() {
           cursor: "pointer"
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        <Box data-no-drag sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <IconButton
             size="small"
             onClick={(e) => {
@@ -151,6 +168,16 @@ export function MiniPlayer() {
           >
             <SkipNext fontSize="small" />
           </IconButton>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              cyclePlaybackMode();
+            }}
+            sx={{ color: playbackMode === "sequence" ? "text.secondary" : "primary.main" }}
+          >
+            {modeIcon}
+          </IconButton>
         </Box>
         <Typography
           variant="caption"
@@ -178,12 +205,32 @@ export function MiniPlayer() {
           }
         }}
       />
+      {isCompact && (
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            textAlign: "center",
+            letterSpacing: "0.06em"
+          }}
+        >
+          {playbackMode === "repeat-one"
+            ? "1x"
+            : playbackMode === "repeat-all"
+            ? "∞"
+            : playbackMode === "shuffle"
+            ? "⇄"
+            : "▶"}
+        </Typography>
+      )}
       <Box
         data-resize-handle
         onPointerDown={(event) => {
           event.stopPropagation();
+          event.preventDefault();
           resizingRef.current = true;
           startRef.current = { x: event.clientX, y: event.clientY };
+          document.body.style.userSelect = "none";
           (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
         }}
         sx={{

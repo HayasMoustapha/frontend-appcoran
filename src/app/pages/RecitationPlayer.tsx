@@ -28,7 +28,11 @@ import {
   Favorite,
   FavoriteBorder,
   VolumeUp,
-  ArrowBack
+  ArrowBack,
+  Repeat,
+  RepeatOne,
+  Shuffle,
+  QueueMusic
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { getPublicAudioBySlug, listAudios, sharePublicAudio } from "../api/audios";
@@ -71,7 +75,9 @@ export function RecitationPlayer() {
     seek,
     setVolume: setPlayerVolume,
     playNext,
-    playPrevious
+    playPrevious,
+    playbackMode,
+    cyclePlaybackMode
   } = useAudioPlayer();
 
   useEffect(() => {
@@ -580,6 +586,50 @@ export function RecitationPlayer() {
               <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
                 {volume}%
               </Typography>
+            </Box>
+
+            {/* Playback Mode */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 3,
+                p: 1.5,
+                borderRadius: 2,
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.04)"
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                {t("player.playbackMode")}
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <IconButton
+                  onClick={cyclePlaybackMode}
+                  sx={{ color: playbackMode === "sequence" ? "text.secondary" : "primary.main" }}
+                  title={t("player.modeSequence")}
+                >
+                  {playbackMode === "repeat-one" ? (
+                    <RepeatOne />
+                  ) : playbackMode === "repeat-all" ? (
+                    <Repeat />
+                  ) : playbackMode === "shuffle" ? (
+                    <Shuffle />
+                  ) : (
+                    <QueueMusic />
+                  )}
+                </IconButton>
+                <Typography variant="caption" color="text.secondary">
+                  {playbackMode === "repeat-one"
+                    ? t("player.modeRepeatOne")
+                    : playbackMode === "repeat-all"
+                    ? t("player.modeRepeatAll")
+                    : playbackMode === "shuffle"
+                    ? t("player.modeShuffle")
+                    : t("player.modeSequence")}
+                </Typography>
+              </Box>
             </Box>
 
             {/* Action Buttons */}
