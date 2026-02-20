@@ -99,6 +99,7 @@ export function MiniPlayer() {
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation?.slug || currentRecitation?.id;
   const isCompact = size.w < 190;
+  const innerPadding = collapsed ? 0.7 : 1.1;
   const modeIcon =
     playbackMode === "repeat-one" ? (
       <RepeatOne fontSize="small" />
@@ -147,15 +148,15 @@ export function MiniPlayer() {
         width: effectiveWidth,
         height: effectiveHeight,
         background:
-          "linear-gradient(145deg, rgba(10,25,36,0.94), rgba(9,22,32,0.88))",
+          "linear-gradient(145deg, rgba(10,25,36,0.96), rgba(9,22,32,0.9))",
         border: "1px solid rgba(212,175,55,0.2)",
         borderRadius: 4,
-        p: collapsed ? 0.7 : 1.1,
+        p: 0,
         boxShadow:
           "0 14px 32px rgba(2,6,12,0.55), inset 0 1px 0 rgba(255,255,255,0.08)",
         backdropFilter: "blur(18px) saturate(120%)",
         display: "grid",
-        gap: 0.6,
+        gap: 0,
         cursor: "grab",
         opacity: 0.95,
         userSelect: "none",
@@ -163,7 +164,26 @@ export function MiniPlayer() {
         transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
         willChange: "transform, width, height",
         transition: "box-shadow 240ms ease, opacity 240ms ease",
-        "&:active": { cursor: "grabbing" }
+        boxSizing: "border-box",
+        overflow: "hidden",
+        "&:active": { cursor: "grabbing" },
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at 10% 20%, rgba(212,175,55,0.12), transparent 45%)",
+          opacity: 0.9,
+          pointerEvents: "none"
+        },
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.18))",
+          pointerEvents: "none"
+        }
       }}
       onPointerDown={(event) => {
         if ((event.target as HTMLElement)?.dataset?.resizeHandle) return;
@@ -176,135 +196,149 @@ export function MiniPlayer() {
       }}
     >
       <Box
-        onClick={() => navigate(`/recitation/${targetId}`)}
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 0.35,
-          cursor: "pointer"
+          position: "relative",
+          zIndex: 1,
+          height: "100%",
+          width: "100%",
+          display: "grid",
+          gap: 0.6,
+          padding: innerPadding,
+          boxSizing: "border-box"
         }}
       >
-        <Box data-no-drag sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              playPrevious();
-            }}
-            sx={iconSx}
-          >
-            <SkipPrevious fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              togglePlay();
-            }}
+        <Box
+          onClick={() => navigate(`/recitation/${targetId}`)}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.35,
+            cursor: "pointer"
+          }}
+        >
+          <Box data-no-drag sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                playPrevious();
+              }}
+              sx={iconSx}
+            >
+              <SkipPrevious fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay();
+              }}
+              sx={{
+                ...iconSx,
+                color: "#0B1F2A",
+                background:
+                  "linear-gradient(135deg, rgba(212,175,55,0.98), rgba(15,118,110,0.92))",
+                border: "1px solid rgba(212,175,55,0.45)"
+              }}
+            >
+              {isPlaying ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                playNext();
+              }}
+              sx={iconSx}
+            >
+              <SkipNext fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                cyclePlaybackMode();
+              }}
+              sx={{
+                ...iconSx,
+                color:
+                  playbackMode === "sequence"
+                    ? "rgba(232,220,190,0.7)"
+                    : "rgba(212,175,55,0.95)"
+              }}
+            >
+              {modeIcon}
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCollapsed((prev) => (location.pathname === "/" ? true : !prev));
+              }}
+              sx={iconSx}
+            >
+              {collapsed ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                stopPlayback();
+              }}
+              sx={iconSx}
+            >
+              <Close fontSize="small" />
+            </IconButton>
+          </Box>
+          <Typography
+            variant="caption"
             sx={{
-              ...iconSx,
-              color: "#0B1F2A",
-              background:
-                "linear-gradient(135deg, rgba(212,175,55,0.98), rgba(15,118,110,0.92))",
-              border: "1px solid rgba(212,175,55,0.45)"
+              color: "rgba(232,220,190,0.78)",
+              textAlign: "center",
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              letterSpacing: "0.02em"
             }}
           >
-            {isPlaying ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              playNext();
-            }}
-            sx={iconSx}
-          >
-            <SkipNext fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              cyclePlaybackMode();
-            }}
-            sx={{
-              ...iconSx,
-              color:
-                playbackMode === "sequence"
-                  ? "rgba(232,220,190,0.7)"
-                  : "rgba(212,175,55,0.95)"
-            }}
-          >
-            {modeIcon}
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              setCollapsed((prev) => (location.pathname === "/" ? true : !prev));
-            }}
-            sx={iconSx}
-          >
-            {collapsed ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              stopPlayback();
-            }}
-            sx={iconSx}
-          >
-            <Close fontSize="small" />
-          </IconButton>
+            {collapsed ? currentRecitation.surah : currentRecitation.title}
+          </Typography>
         </Box>
-        <Typography
-          variant="caption"
+        <LinearProgress
+          variant="determinate"
+          value={progress}
           sx={{
-            color: "rgba(232,220,190,0.78)",
-            textAlign: "center",
-            maxWidth: "100%",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            letterSpacing: "0.02em"
+            width: "100%",
+            height: 4,
+            borderRadius: 999,
+            backgroundColor: "rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            "& .MuiLinearProgress-bar": {
+              background:
+                "linear-gradient(135deg, rgba(212,175,55,0.98), rgba(15,118,110,0.92))"
+            }
           }}
-        >
-          {collapsed ? currentRecitation.surah : currentRecitation.title}
-        </Typography>
+        />
+        {isCompact && (
+          <Typography
+            variant="caption"
+            sx={{
+              color: "rgba(232,220,190,0.65)",
+              textAlign: "center",
+              letterSpacing: "0.06em"
+            }}
+          >
+            {playbackMode === "repeat-one"
+              ? "1x"
+              : playbackMode === "repeat-all"
+              ? "∞"
+              : playbackMode === "shuffle"
+              ? "⇄"
+              : "▶"}
+          </Typography>
+        )}
       </Box>
-      <LinearProgress
-        variant="determinate"
-        value={progress}
-        sx={{
-          height: 4,
-          borderRadius: 999,
-          backgroundColor: "rgba(255,255,255,0.1)",
-          border: "1px solid rgba(255,255,255,0.06)",
-          "& .MuiLinearProgress-bar": {
-            background:
-              "linear-gradient(135deg, rgba(212,175,55,0.98), rgba(15,118,110,0.92))"
-          }
-        }}
-      />
-      {isCompact && (
-        <Typography
-          variant="caption"
-          sx={{
-            color: "rgba(232,220,190,0.65)",
-            textAlign: "center",
-            letterSpacing: "0.06em"
-          }}
-        >
-          {playbackMode === "repeat-one"
-            ? "1x"
-            : playbackMode === "repeat-all"
-            ? "∞"
-            : playbackMode === "shuffle"
-            ? "⇄"
-            : "▶"}
-        </Typography>
-      )}
       {!collapsed && (
         <Box
           data-resize-handle
