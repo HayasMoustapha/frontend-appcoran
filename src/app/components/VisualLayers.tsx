@@ -183,6 +183,32 @@ export function VisualLayers() {
             {item.text}
           </span>
         ))}
+        {[
+          { top: "12%", left: "62%" },
+          { top: "28%", left: "22%" },
+          { top: "46%", left: "52%" },
+          { top: "63%", left: "80%" },
+          { top: "78%", left: "10%" }
+        ].map((item, index) => (
+          <span
+            key={`hbm-${item.top}-${item.left}`}
+            style={{
+              position: "absolute",
+              top: item.top,
+              left: item.left,
+              color: "rgba(248, 246, 241, 0.16)",
+              fontSize: "clamp(12px, 1.2vw, 18px)",
+              fontFamily: "var(--font-heading)",
+              letterSpacing: "0.28em",
+              textTransform: "uppercase",
+              opacity: 0.6,
+              animation: `floatY ${14 + index * 2}s ease-in-out infinite`,
+              mixBlendMode: "screen"
+            }}
+          >
+            HBM
+          </span>
+        ))}
       </div>
     </>
   );
