@@ -8,6 +8,7 @@ import {
   RepeatOne,
   Shuffle,
   QueueMusic,
+  OpenInFull,
   Close
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router";
@@ -31,43 +32,23 @@ export function MiniPlayer() {
   } = useAudioPlayer();
 
   const [position, setPosition] = useState({ x: 16, y: 16 });
-  const [size, setSize] = useState({ w: 240, h: 190 });
   const [collapsed, setCollapsed] = useState(false);
   const draggingRef = useRef(false);
-  const resizingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
-  const sizeRef = useRef(size);
   const targetRef = useRef<HTMLDivElement | null>(null);
+  const fixedSize = { w: 260, h: 210 };
 
   useEffect(() => {
     posRef.current = position;
   }, [position]);
 
   useEffect(() => {
-    sizeRef.current = size;
-  }, [size]);
-
-  useEffect(() => {
     const onMove = (event: PointerEvent) => {
-      if (!draggingRef.current && !resizingRef.current) return;
-      const dx = event.clientX - startRef.current.x;
-      const dy = event.clientY - startRef.current.y;
+      if (!draggingRef.current) return;
 
-      if (resizingRef.current) {
-        const nextW = Math.max(200, Math.min(window.innerWidth - 24, sizeRef.current.w + dx));
-        const nextH = Math.max(160, Math.min(window.innerHeight - 24, sizeRef.current.h + dy));
-        sizeRef.current = { w: nextW, h: nextH };
-        if (targetRef.current) {
-          targetRef.current.style.width = `${nextW}px`;
-          targetRef.current.style.height = `${nextH}px`;
-        }
-        startRef.current = { x: event.clientX, y: event.clientY };
-        return;
-      }
-
-      const boundW = collapsed ? 120 : sizeRef.current.w;
-      const boundH = collapsed ? 120 : sizeRef.current.h;
+      const boundW = collapsed ? 120 : fixedSize.w;
+      const boundH = collapsed ? 120 : fixedSize.h;
       const nextX = Math.max(8, Math.min(window.innerWidth - boundW - 8, event.clientX));
       const nextY = Math.max(8, Math.min(window.innerHeight - boundH - 8, event.clientY));
       posRef.current = { x: nextX, y: nextY };
@@ -77,10 +58,8 @@ export function MiniPlayer() {
     };
     const onUp = () => {
       draggingRef.current = false;
-      resizingRef.current = false;
       document.body.style.userSelect = "";
       setPosition(posRef.current);
-      setSize(sizeRef.current);
       // no-op
     };
     window.addEventListener("pointermove", onMove);
@@ -96,7 +75,7 @@ export function MiniPlayer() {
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation?.slug || currentRecitation?.id;
-  const isCompact = size.w < 190;
+  const isCompact = fixedSize.w < 190;
   const innerPadding = collapsed ? 0.7 : 1.1;
   const modeIcon =
     playbackMode === "repeat-one" ? (
@@ -140,8 +119,8 @@ export function MiniPlayer() {
 
   if (!currentRecitation || isPlayerPage || !targetId) return null;
 
-  const effectiveWidth = collapsed ? 120 : size.w;
-  const effectiveHeight = collapsed ? 120 : size.h;
+  const effectiveWidth = collapsed ? 120 : fixedSize.w;
+  const effectiveHeight = collapsed ? 120 : fixedSize.h;
 
   return (
     <Box
@@ -261,12 +240,12 @@ export function MiniPlayer() {
             >
               <SkipNext fontSize="small" />
             </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              cyclePlaybackMode();
-            }}
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                cyclePlaybackMode();
+              }}
               sx={{
                 ...iconSx,
                 color:
@@ -275,12 +254,22 @@ export function MiniPlayer() {
                     : "rgba(212,175,55,0.95)"
               }}
             >
-            {modeIcon}
-          </IconButton>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
+              {modeIcon}
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/recitation/${targetId}`);
+              }}
+              sx={iconSx}
+            >
+              <OpenInFull fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
                 stopPlayback();
               }}
               sx={iconSx}
@@ -356,30 +345,6 @@ export function MiniPlayer() {
           </Typography>
         )}
       </Box>
-      {!collapsed && (
-        <Box
-          data-resize-handle
-          onPointerDown={(event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            resizingRef.current = true;
-            startRef.current = { x: event.clientX, y: event.clientY };
-            document.body.style.userSelect = "none";
-            (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-          }}
-          sx={{
-            position: "absolute",
-            right: 6,
-            bottom: 6,
-            width: 14,
-            height: 14,
-            borderRadius: 1,
-            background: "rgba(212,175,55,0.7)",
-            border: "1px solid rgba(255,255,255,0.24)",
-            cursor: "nwse-resize"
-          }}
-        />
-      )}
     </Box>
   );
 }
