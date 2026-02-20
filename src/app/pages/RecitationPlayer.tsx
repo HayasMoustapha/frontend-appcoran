@@ -400,7 +400,7 @@ export function RecitationPlayer() {
                   textShadow: "0 2px 8px rgba(0, 0, 0, 0.45)"
                 }}
               >
-                Sourate {recitation.surahNumber} • Verset {recitation.ayatRange}
+                {t("home.table.surah")} {recitation.surahNumber} • {t("home.table.verses")} {recitation.ayatRange}
               </Typography>
             </Box>
 

@@ -19,7 +19,8 @@ import { useTranslation } from "react-i18next";
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === "ar";
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,7 +62,8 @@ export function LoginPage() {
         background:
           "radial-gradient(circle at top, rgba(15, 38, 52, 0.9) 0%, rgba(11, 31, 42, 1) 55%, rgba(8, 20, 28, 1) 100%)",
         position: "relative",
-        overflow: "hidden"
+        overflow: "hidden",
+        direction: isRtl ? "rtl" : "ltr"
       }}
     >
       {/* Background Pattern */}
@@ -127,12 +129,16 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               sx={{ mb: 3 }}
-              InputLabelProps={{ shrink: true }}
+              InputLabelProps={{
+                shrink: true,
+                sx: { right: isRtl ? 14 : "auto", left: isRtl ? "auto" : 14, transformOrigin: isRtl ? "top right" : "top left" }
+              }}
               InputProps={{
                 sx: {
                   borderRadius: 2,
                   background: "rgba(8, 18, 25, 0.6)",
-                  color: "text.primary"
+                  color: "text.primary",
+                  textAlign: isRtl ? "right" : "left"
                 }
               }}
             />
@@ -144,12 +150,16 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               sx={{ mb: 3 }}
-              InputLabelProps={{ shrink: true }}
+              InputLabelProps={{
+                shrink: true,
+                sx: { right: isRtl ? 14 : "auto", left: isRtl ? "auto" : 14, transformOrigin: isRtl ? "top right" : "top left" }
+              }}
               InputProps={{
                 sx: {
                   borderRadius: 2,
                   background: "rgba(8, 18, 25, 0.6)",
-                  color: "text.primary"
+                  color: "text.primary",
+                  textAlign: isRtl ? "right" : "left"
                 },
                 endAdornment: (
                   <InputAdornment position="end">

@@ -41,7 +41,7 @@ type RecordingState = "idle" | "recording" | "recorded" | "uploading" | "success
 
 export function RecordPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -87,7 +87,7 @@ export function RecordPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [i18n.language]);
 
   useEffect(() => {
     if (!uploadedFile) {
@@ -123,9 +123,10 @@ export function RecordPage() {
     }
     const selected = sortedSurahs.find((surah) => surah.number.toString() === selectedSurah);
     if (selected) {
-      setTitle(`${selected.number}. ${selected.name_fr} (${selected.name_phonetic})`);
+      const localName = selected.name_local ?? selected.name_fr;
+      setTitle(`${selected.number}. ${localName} (${selected.name_phonetic})`);
     }
-  }, [selectedSurah, sortedSurahs]);
+  }, [selectedSurah, sortedSurahs, i18n.language]);
 
   useEffect(() => {
     if (!title) return;

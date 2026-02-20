@@ -41,7 +41,7 @@ import { useTranslation } from "react-i18next";
 
 export function ImamProfilePage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<ImamProfile>({
@@ -96,7 +96,7 @@ export function ImamProfilePage() {
       if (intervalId) window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, []);
+  }, [i18n.language]);
 
   const handleSave = async () => {
     const formData = new FormData();
@@ -127,7 +127,7 @@ export function ImamProfilePage() {
       setToast({ message: "Profil enregistré avec succès.", severity: "success" });
     } catch (err) {
       if (isNetworkError(err)) return;
-      setToast({ message: err instanceof Error ? err.message : "Enregistrement impossible", severity: "error" });
+      setToast({ message: err instanceof Error ? err.message : t("profile.saveFailed"), severity: "error" });
     }
   };
 

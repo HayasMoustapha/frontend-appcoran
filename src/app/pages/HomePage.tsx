@@ -59,7 +59,7 @@ export function HomePage() {
     avatar: ""
   });
   const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     let active = true;
@@ -139,7 +139,7 @@ export function HomePage() {
       if (intervalId) window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, []);
+  }, [i18n.language]);
 
   const handleSearchSubmit = () => {
     if (recitationsRef.current) {
@@ -398,7 +398,7 @@ export function HomePage() {
                 {allRecitations.reduce((acc, r) => acc + r.listens, 0).toLocaleString()}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Écoutes
+                {t("home.statsListens")}
               </Typography>
             </Box>
             <Box sx={{ textAlign: "center" }}>
@@ -406,7 +406,7 @@ export function HomePage() {
                 {allRecitations.reduce((acc, r) => acc + r.downloads, 0).toLocaleString()}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Téléchargements
+                {t("home.statsDownloads")}
               </Typography>
             </Box>
           </Box>

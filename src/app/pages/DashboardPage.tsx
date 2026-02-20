@@ -53,7 +53,7 @@ import { getSurahReference } from "../api/surahReference";
 
 export function DashboardPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRecitation, setSelectedRecitation] = useState<Recitation | null>(null);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
@@ -115,7 +115,7 @@ export function DashboardPage() {
       if (intervalId) window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, []);
+  }, [i18n.language]);
 
   useEffect(() => {
     let active = true;
@@ -138,7 +138,7 @@ export function DashboardPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [i18n.language]);
 
   const totalRecitations = overview?.totalRecitations ?? recitations.length;
   const totalListens = overview?.totalListens ?? 0;
