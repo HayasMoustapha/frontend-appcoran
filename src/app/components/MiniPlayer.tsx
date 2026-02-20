@@ -109,6 +109,16 @@ export function MiniPlayer() {
     ) : (
       <QueueMusic fontSize="small" />
     );
+  const iconSx = {
+    color: "rgba(232,220,190,0.78)",
+    backgroundColor: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    transition: "all 180ms ease",
+    "&:hover": {
+      backgroundColor: "rgba(255,255,255,0.08)",
+      color: "rgba(246,233,198,0.92)"
+    }
+  } as const;
 
   useEffect(() => {
     if (!currentRecitation || isPlayerPage) return;
@@ -136,20 +146,23 @@ export function MiniPlayer() {
         zIndex: 1300,
         width: effectiveWidth,
         height: effectiveHeight,
-        background: "rgba(12, 24, 34, 0.85)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        borderRadius: 3,
-        p: 1,
-        boxShadow: "0 12px 30px rgba(0,0,0,0.4)",
-        backdropFilter: "blur(14px)",
+        background:
+          "linear-gradient(145deg, rgba(10,25,36,0.94), rgba(9,22,32,0.88))",
+        border: "1px solid rgba(212,175,55,0.2)",
+        borderRadius: 4,
+        p: collapsed ? 0.7 : 1.1,
+        boxShadow:
+          "0 14px 32px rgba(2,6,12,0.55), inset 0 1px 0 rgba(255,255,255,0.08)",
+        backdropFilter: "blur(18px) saturate(120%)",
         display: "grid",
-        gap: 0.75,
+        gap: 0.6,
         cursor: "grab",
-        opacity: 0.9,
+        opacity: 0.95,
         userSelect: "none",
         touchAction: "none",
         transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
         willChange: "transform, width, height",
+        transition: "box-shadow 240ms ease, opacity 240ms ease",
         "&:active": { cursor: "grabbing" }
       }}
       onPointerDown={(event) => {
@@ -178,7 +191,7 @@ export function MiniPlayer() {
               e.stopPropagation();
               playPrevious();
             }}
-            sx={{ color: "text.secondary" }}
+            sx={iconSx}
           >
             <SkipPrevious fontSize="small" />
           </IconButton>
@@ -189,8 +202,11 @@ export function MiniPlayer() {
               togglePlay();
             }}
             sx={{
+              ...iconSx,
               color: "#0B1F2A",
-              background: "linear-gradient(135deg, rgba(212,175,55,0.95), rgba(15,118,110,0.9))"
+              background:
+                "linear-gradient(135deg, rgba(212,175,55,0.98), rgba(15,118,110,0.92))",
+              border: "1px solid rgba(212,175,55,0.45)"
             }}
           >
             {isPlaying ? <Pause fontSize="small" /> : <PlayArrow fontSize="small" />}
@@ -201,7 +217,7 @@ export function MiniPlayer() {
               e.stopPropagation();
               playNext();
             }}
-            sx={{ color: "text.secondary" }}
+            sx={iconSx}
           >
             <SkipNext fontSize="small" />
           </IconButton>
@@ -211,7 +227,13 @@ export function MiniPlayer() {
               e.stopPropagation();
               cyclePlaybackMode();
             }}
-            sx={{ color: playbackMode === "sequence" ? "text.secondary" : "primary.main" }}
+            sx={{
+              ...iconSx,
+              color:
+                playbackMode === "sequence"
+                  ? "rgba(232,220,190,0.7)"
+                  : "rgba(212,175,55,0.95)"
+            }}
           >
             {modeIcon}
           </IconButton>
@@ -221,7 +243,7 @@ export function MiniPlayer() {
               e.stopPropagation();
               setCollapsed((prev) => (location.pathname === "/" ? true : !prev));
             }}
-            sx={{ color: "text.secondary" }}
+            sx={iconSx}
           >
             {collapsed ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
           </IconButton>
@@ -231,7 +253,7 @@ export function MiniPlayer() {
               e.stopPropagation();
               stopPlayback();
             }}
-            sx={{ color: "text.secondary" }}
+            sx={iconSx}
           >
             <Close fontSize="small" />
           </IconButton>
@@ -239,12 +261,13 @@ export function MiniPlayer() {
         <Typography
           variant="caption"
           sx={{
-            color: "text.secondary",
+            color: "rgba(232,220,190,0.78)",
             textAlign: "center",
             maxWidth: "100%",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            whiteSpace: "nowrap"
+            whiteSpace: "nowrap",
+            letterSpacing: "0.02em"
           }}
         >
           {collapsed ? currentRecitation.surah : currentRecitation.title}
@@ -256,9 +279,11 @@ export function MiniPlayer() {
         sx={{
           height: 4,
           borderRadius: 999,
-          backgroundColor: "rgba(255,255,255,0.08)",
+          backgroundColor: "rgba(255,255,255,0.1)",
+          border: "1px solid rgba(255,255,255,0.06)",
           "& .MuiLinearProgress-bar": {
-            background: "linear-gradient(135deg, rgba(212,175,55,0.95), rgba(15,118,110,0.9))"
+            background:
+              "linear-gradient(135deg, rgba(212,175,55,0.98), rgba(15,118,110,0.92))"
           }
         }}
       />
@@ -266,7 +291,7 @@ export function MiniPlayer() {
         <Typography
           variant="caption"
           sx={{
-            color: "text.secondary",
+            color: "rgba(232,220,190,0.65)",
             textAlign: "center",
             letterSpacing: "0.06em"
           }}
@@ -298,8 +323,8 @@ export function MiniPlayer() {
             width: 14,
             height: 14,
             borderRadius: 1,
-            background: "rgba(212,175,55,0.6)",
-            border: "1px solid rgba(255,255,255,0.2)",
+            background: "rgba(212,175,55,0.7)",
+            border: "1px solid rgba(255,255,255,0.24)",
             cursor: "nwse-resize"
           }}
         />
