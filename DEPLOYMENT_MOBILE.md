@@ -4,8 +4,8 @@ This guide explains how to access **appcoran.com** from your phone on the same W
 
 ## 1) Requirements
 - Phone and PC are on the **same Wi‑Fi**.
-- Backend running on `http://localhost:4000`
-- Frontend running on `http://localhost:5173`
+- Backend running on `http://0.0.0.0:4000`
+- Frontend running on `http://0.0.0.0:5173`
 
 Note: this guide is **without Docker**.
 
