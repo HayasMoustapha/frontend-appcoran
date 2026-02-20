@@ -3,6 +3,7 @@ import { PlayArrow, Download, Visibility } from "@mui/icons-material";
 import type { Recitation } from "../domain/types";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { formatNumber, formatNumericText } from "../utils/formatNumber";
 
 interface RecitationCardProps {
   recitation: Recitation;
@@ -11,7 +12,7 @@ interface RecitationCardProps {
 
 export function RecitationCard({ recitation, featured = false }: RecitationCardProps) {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const targetId = recitation.slug || recitation.id;
 
@@ -131,7 +132,8 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
               fontWeight: 600,
             }}
           >
-            {t("home.table.surah")} {recitation.surahNumber} • {t("home.table.verses")} {recitation.ayatRange}
+            {t("home.table.surah")} {formatNumber(recitation.surahNumber, i18n.language)} •{" "}
+            {t("home.table.verses")} {formatNumericText(recitation.ayatRange, i18n.language)}
           </Typography>
         </Box>
 
@@ -228,13 +230,13 @@ export function RecitationCard({ recitation, featured = false }: RecitationCardP
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <Visibility sx={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }} />
               <Typography variant="caption" color="rgba(255,255,255,0.7)">
-                {recitation.listens.toLocaleString()}
+                {formatNumber(recitation.listens, i18n.language)}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <Download sx={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }} />
               <Typography variant="caption" color="rgba(255,255,255,0.7)">
-                {recitation.downloads.toLocaleString()}
+                {formatNumber(recitation.downloads, i18n.language)}
               </Typography>
             </Box>
           </Box>

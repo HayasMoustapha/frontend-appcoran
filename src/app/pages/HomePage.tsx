@@ -34,6 +34,7 @@ import type { ImamProfile, Recitation, SurahReference } from "../domain/types";
 import { useNavigate } from "react-router";
 import { getSurahReference } from "../api/surahReference";
 import { useTranslation } from "react-i18next";
+import { formatNumber, formatNumericText } from "../utils/formatNumber";
 
 export function HomePage() {
   const heroRef = useRef<HTMLDivElement | null>(null);
@@ -403,7 +404,10 @@ export function HomePage() {
             </Box>
             <Box sx={{ textAlign: "center" }}>
               <Typography variant="h3" fontWeight={800}>
-                {allRecitations.reduce((acc, r) => acc + r.listens, 0).toLocaleString()}
+                {formatNumber(
+                  allRecitations.reduce((acc, r) => acc + r.listens, 0),
+                  i18n.language
+                )}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
                 {t("home.statsListens")}
@@ -411,7 +415,10 @@ export function HomePage() {
             </Box>
             <Box sx={{ textAlign: "center" }}>
               <Typography variant="h3" fontWeight={800}>
-                {allRecitations.reduce((acc, r) => acc + r.downloads, 0).toLocaleString()}
+                {formatNumber(
+                  allRecitations.reduce((acc, r) => acc + r.downloads, 0),
+                  i18n.language
+                )}
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
                 {t("home.statsDownloads")}
@@ -493,12 +500,12 @@ export function HomePage() {
                   {recitation.title}
                 </Typography>
                 <Typography variant="caption" sx={{ color: "rgba(248,246,241,0.7)" }}>
-                  {recitation.surah} • {recitation.ayatRange || "—"}
+                  {recitation.surah} • {formatNumericText(recitation.ayatRange || "—", i18n.language)}
                 </Typography>
                 <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
                   <Chip
                     size="small"
-                    label={`${recitation.listens.toLocaleString()} ${t("player.listens")}`}
+                    label={`${formatNumber(recitation.listens, i18n.language)} ${t("player.listens")}`}
                     sx={{
                       background: "rgba(4,120,87,0.25)",
                       color: "#F8F6F1"
@@ -506,7 +513,7 @@ export function HomePage() {
                   />
                   <Chip
                     size="small"
-                    label={`${recitation.downloads.toLocaleString()} ${t("player.downloads")}`}
+                    label={`${formatNumber(recitation.downloads, i18n.language)} ${t("player.downloads")}`}
                     sx={{
                       background: "rgba(212,175,55,0.25)",
                       color: "#F8F6F1"
@@ -904,10 +911,16 @@ export function HomePage() {
                         </Typography>
                       </TableCell>
                       <TableCell sx={{ color: "text.primary" }}>{recitation.surah}</TableCell>
-                      <TableCell sx={{ color: "text.primary" }}>{recitation.ayatRange}</TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>
+                        {formatNumericText(recitation.ayatRange, i18n.language)}
+                      </TableCell>
                       <TableCell sx={{ color: "text.primary" }}>{recitation.date}</TableCell>
-                      <TableCell sx={{ color: "text.primary" }}>{recitation.listens.toLocaleString()}</TableCell>
-                      <TableCell sx={{ color: "text.primary" }}>{recitation.downloads.toLocaleString()}</TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>
+                        {formatNumber(recitation.listens, i18n.language)}
+                      </TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>
+                        {formatNumber(recitation.downloads, i18n.language)}
+                      </TableCell>
                       <TableCell align="right">
                         <Button
                           variant="contained"

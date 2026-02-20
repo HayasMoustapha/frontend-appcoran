@@ -36,6 +36,7 @@ import { isNetworkError } from "../api/client";
 import { mapAudioToRecitation, mapPublicAudioToRecitation } from "../api/mappers";
 import type { Recitation } from "../domain/types";
 import { useTranslation } from "react-i18next";
+import { formatNumber, formatNumericText } from "../utils/formatNumber";
 
 export function RecitationPlayer() {
   const { id } = useParams();
@@ -400,7 +401,8 @@ export function RecitationPlayer() {
                   textShadow: "0 2px 8px rgba(0, 0, 0, 0.45)"
                 }}
               >
-                {t("home.table.surah")} {recitation.surahNumber} • {t("home.table.verses")} {recitation.ayatRange}
+                {t("home.table.surah")} {formatNumber(recitation.surahNumber, i18n.language)} •{" "}
+                {t("home.table.verses")} {formatNumericText(recitation.ayatRange, i18n.language)}
               </Typography>
             </Box>
 
@@ -445,12 +447,12 @@ export function RecitationPlayer() {
                 </Typography>
                 <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                   <Chip
-                    label={`${recitation.listens.toLocaleString()} ${t("player.listens")}`}
+                    label={`${formatNumber(recitation.listens, i18n.language)} ${t("player.listens")}`}
                     size="small"
                     sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
                   />
                   <Chip
-                    label={`${recitation.downloads.toLocaleString()} ${t("player.downloads")}`}
+                    label={`${formatNumber(recitation.downloads, i18n.language)} ${t("player.downloads")}`}
                     size="small"
                     sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
                   />

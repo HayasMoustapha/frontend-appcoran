@@ -44,6 +44,7 @@ import {
 import { Navbar } from "../components/Navbar";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { formatNumber, formatNumericText } from "../utils/formatNumber";
 import { getDashboardOverview, getDashboardPerformance, getDashboardStats } from "../api/dashboard";
 import { isNetworkError } from "../api/client";
 import { deleteAudio, listAudios, updateAudio, type UpdateAudioPayload } from "../api/audios";
@@ -388,7 +389,7 @@ export function DashboardPage() {
                   <Visibility sx={{ fontSize: 40, opacity: 0.9 }} />
                 </Box>
                 <Typography variant="h3" fontWeight={800}>
-                  {totalListens.toLocaleString()}
+                  {formatNumber(totalListens, i18n.language)}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   {t("dashboard.stats.listens")}
@@ -414,7 +415,7 @@ export function DashboardPage() {
                   <Download sx={{ fontSize: 40, opacity: 0.9 }} />
                 </Box>
                 <Typography variant="h3" fontWeight={800}>
-                  {totalDownloads.toLocaleString()}
+                  {formatNumber(totalDownloads, i18n.language)}
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   {t("dashboard.stats.downloads")}
@@ -517,13 +518,13 @@ export function DashboardPage() {
                         <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
                           <Chip
                             icon={<Visibility />}
-                            label={`${recitation.listen_count.toLocaleString()} écoutes`}
+                            label={`${formatNumber(recitation.listen_count, i18n.language)} ${t("dashboard.listens")}`}
                             size="small"
                             sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
                           />
                           <Chip
                             icon={<Download />}
-                            label={`${recitation.download_count.toLocaleString()} téléchargements`}
+                            label={`${formatNumber(recitation.download_count, i18n.language)} ${t("dashboard.downloads")}`}
                             size="small"
                             sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
                           />
@@ -616,7 +617,7 @@ export function DashboardPage() {
                         fontWeight: 700
                       }}
                     >
-                      {recitation.surahNumber}
+                      {formatNumber(recitation.surahNumber, i18n.language)}
                     </Box>
 
                     <Box sx={{ flexGrow: 1 }}>
@@ -624,7 +625,8 @@ export function DashboardPage() {
                         {recitation.title}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {recitation.surah} • {t("home.table.verses")} {recitation.ayatRange} • {recitation.duration || "—"}
+                        {recitation.surah} • {t("home.table.verses")}{" "}
+                        {formatNumericText(recitation.ayatRange, i18n.language)} • {recitation.duration || "—"}
                       </Typography>
                       <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
                         {recitation.withBasmala && (
@@ -649,7 +651,7 @@ export function DashboardPage() {
 
                     <Box sx={{ textAlign: "right", display: { xs: "none", md: "block" } }}>
                       <Typography variant="h6" fontWeight={700} color="primary">
-                        {recitation.listens.toLocaleString()}
+                        {formatNumber(recitation.listens, i18n.language)}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {t("dashboard.listens")}
@@ -830,7 +832,7 @@ export function DashboardPage() {
                 <ListItem key={item.day} divider>
                   <ListItemText
                     primary={item.day}
-                    secondary={`${t("home.table.listens")}: ${item.listens} • ${t("home.table.downloads")}: ${item.downloads} • ${t("dashboard.shares")}: ${item.shares}`}
+                    secondary={`${t("home.table.listens")}: ${formatNumber(item.listens, i18n.language)} • ${t("home.table.downloads")}: ${formatNumber(item.downloads, i18n.language)} • ${t("dashboard.shares")}: ${formatNumber(item.shares, i18n.language)}`}
                   />
                 </ListItem>
               ))}

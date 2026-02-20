@@ -36,6 +36,7 @@ import { isNetworkError } from "../api/client";
 import { getSurahReference } from "../api/surahReference";
 import type { SurahReference } from "../domain/types";
 import { useTranslation } from "react-i18next";
+import { formatNumber } from "../utils/formatNumber";
 
 type RecordingState = "idle" | "recording" | "recorded" | "uploading" | "success";
 
@@ -635,7 +636,8 @@ export function RecordPage() {
                   >
                     {sortedSurahs.map((surah) => (
                       <MenuItem key={surah.number} value={surah.number.toString()}>
-                        {surah.number}. {surah.name_local ?? surah.name_fr} • {surah.name_ar} ({surah.name_phonetic})
+                        {formatNumber(surah.number, i18n.language)}. {surah.name_local ?? surah.name_fr} •{" "}
+                        {surah.name_ar} ({surah.name_phonetic})
                       </MenuItem>
                     ))}
                   </Select>
@@ -668,7 +670,7 @@ export function RecordPage() {
                   >
                     {verseOptions.map((value) => (
                       <MenuItem key={value} value={value}>
-                        {value}
+                        {formatNumber(value, i18n.language)}
                       </MenuItem>
                     ))}
                   </Select>
@@ -701,7 +703,7 @@ export function RecordPage() {
                   >
                     {verseEndOptions.map((value) => (
                       <MenuItem key={value} value={value}>
-                        {value}
+                        {formatNumber(value, i18n.language)}
                       </MenuItem>
                     ))}
                   </Select>
