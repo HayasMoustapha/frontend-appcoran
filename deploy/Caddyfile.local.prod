@@ -1,0 +1,15 @@
+{
+  auto_https off
+}
+
+http://appcoran.com {
+  encode zstd gzip
+  root * /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/dist
+  try_files {path} /index.html
+  file_server
+}
+
+http://api.appcoran.com {
+  encode zstd gzip
+  reverse_proxy 127.0.0.1:4000
+}

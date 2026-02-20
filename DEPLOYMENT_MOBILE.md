@@ -14,6 +14,23 @@ Make sure frontend env points to local domains:
 - `VITE_PUBLIC_APP_URL=http://appcoran.com`
 - `VITE_PUBLIC_BASE_URL=http://api.appcoran.com`
 
+## iPhone (style stable) - recommandé
+Le mode `dev` de Vite peut provoquer des styles qui disparaissent lors d’un reload iOS.
+Utilise le build de production pour une stabilité parfaite.
+
+1) Build frontend
+```bash
+npm run build
+```
+
+2) Démarrer Caddy en mode production
+```bash
+caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local.prod
+```
+
+3) Accès depuis l’iPhone
+- `http://appcoran.com`
+
 ## 2) Reverse proxy local (Caddy)
 Use the local proxy config:
 - `frontend-appcoran/deploy/Caddyfile.local`
