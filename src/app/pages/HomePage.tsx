@@ -172,13 +172,14 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
-    setIsSearching(true);
-    const timer = window.setTimeout(() => setIsSearching(false), 120);
     const query = searchQuery.trim();
     if (!query) {
       setSearchResults(allRecitations);
+      setIsSearching(false);
       return;
     }
+    setIsSearching(true);
+    const timer = window.setTimeout(() => setIsSearching(false), 120);
 
     const normalize = (value: string) =>
       value
