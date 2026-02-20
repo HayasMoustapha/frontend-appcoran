@@ -31,6 +31,16 @@ caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/
 3) Accès depuis l’iPhone
 - `http://appcoran.com`
 
+4) Si les données backend ne chargent pas
+- Vérifie que `VITE_API_BASE_URL` pointe vers `http://api.appcoran.com`
+- Rebuild obligatoire après modification de `.env`:
+```bash
+npm run build
+```
+
+5) Cache iOS
+- Vider l’historique Safari ou ouvrir en navigation privée
+
 ## 2) Reverse proxy local (Caddy)
 Use the local proxy config:
 - `frontend-appcoran/deploy/Caddyfile.local`

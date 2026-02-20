@@ -127,6 +127,12 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -136,6 +142,13 @@
     background-size: auto, 26px 26px;
     background-position: center, 0 0;
     background-attachment: fixed;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  #root {
+    min-height: 100dvh;
   }
 
   h1,
@@ -158,6 +171,13 @@
       radial-gradient(circle at 78% 78%, rgba(5, 150, 105, 0.2), transparent 45%),
       linear-gradient(180deg, #0b1f2a 0%, #102f3d 55%, #0b1f2a 100%);
     --app-pattern: radial-gradient(circle, rgba(212, 175, 55, 0.14) 1px, transparent 1px);
+  }
+
+  /* iOS Safari: avoid background-attachment fixed glitches */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      background-attachment: scroll;
+    }
   }
 
   @keyframes floatY {

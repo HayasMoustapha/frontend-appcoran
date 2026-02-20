@@ -5,6 +5,7 @@
 http://appcoran.com {
   encode zstd gzip
   root * /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/dist
+  header /index.html Cache-Control "no-store"
   try_files {path} /index.html
   file_server
 }
