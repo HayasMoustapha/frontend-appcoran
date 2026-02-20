@@ -19,9 +19,14 @@ sudo apt-get update
 sudo apt-get install -y caddy dnsmasq
 ```
 
-Run:
+Run (frontend must listen on all interfaces):
 ```bash
 caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local
+```
+
+Note: if styles don’t load on phone, ensure Vite is started with:
+```bash
+npm run dev -- --host 0.0.0.0
 ```
 
 ### Script automatique (recommandé)

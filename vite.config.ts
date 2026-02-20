@@ -10,6 +10,23 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    host: true,
+    port: 5173,
+    strictPort: true,
+    allowedHosts: [
+      'appcoran.com',
+      'api.appcoran.com',
+      'localhost',
+      '127.0.0.1',
+      '192.168.1.179'
+    ],
+    hmr: {
+      host: 'appcoran.com',
+      clientPort: 80,
+      protocol: 'ws'
+    }
+  },
   resolve: {
     alias: {
       // Alias @ to the src directory
