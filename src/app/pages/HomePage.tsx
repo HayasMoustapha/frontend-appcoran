@@ -27,7 +27,7 @@ import { Search, TrendingUp, AccessTime, Star } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { RecitationCard } from "../components/RecitationCard";
 import { getPopular, getRecent, listAudios } from "../api/audios";
-import { isNetworkError } from "../api/client";
+import { isNetworkError, PUBLIC_BASE_URL } from "../api/client";
 import { getPublicProfile } from "../api/profile";
 import { mapAudioToRecitation, mapPublicProfile } from "../api/mappers";
 import type { ImamProfile, Recitation, SurahReference } from "../domain/types";
@@ -91,7 +91,15 @@ export function HomePage() {
         }
 
         if (allResult.status === "fulfilled") {
-          const mappedAll = allResult.value.map(mapAudioToRecitation);
+          const mappedAll = allResult.value.map(mapAudioToRecitation).map((item) =>
+            item.slug
+              ? {
+                  ...item,
+                  streamUrl: `${PUBLIC_BASE_URL}/public/audios/${item.slug}/stream`,
+                  downloadUrl: `${PUBLIC_BASE_URL}/public/audios/${item.slug}/download`
+                }
+              : item
+          );
           setAllRecitations(mappedAll);
           setSearchResults(mappedAll);
         } else if (!isNetworkError(allResult.reason)) {
@@ -482,7 +490,12 @@ export function HomePage() {
               animation: "orbitScroll 26s linear infinite"
             }}
           >
-            {uniqueConstellationRecitations.map((recitation) => (
+            {uniqueConstellationRecitations.map((recitation) => {
+              const isActiveRecitation =
+                Boolean(currentRecitation) &&
+                (currentRecitation?.slug === recitation.slug ||
+                  currentRecitation?.id === recitation.id);
+              return (
               <Box
                 key={recitation.id || recitation.slug}
                 sx={{
@@ -498,7 +511,13 @@ export function HomePage() {
                   transition: "transform 0.3s ease",
                   "&:hover": {
                     transform: "translateY(-6px)"
-                  }
+                  },
+                  ...(isActiveRecitation
+                    ? {
+                        boxShadow: "0 16px 30px rgba(15, 118, 110, 0.25)",
+                        transform: "translateY(-6px)"
+                      }
+                    : {})
                 }}
                 onClick={() => navigate(`/recitation/${recitation.slug || recitation.id}`)}
               >
@@ -508,6 +527,26 @@ export function HomePage() {
                 <Typography variant="caption" sx={{ color: "rgba(248,246,241,0.7)" }}>
                   {recitation.surah} • {formatNumericText(recitation.ayatRange || "—", i18n.language)}
                 </Typography>
+                {isActiveRecitation && isPlaying && (
+                  <Box sx={{ display: "flex", gap: 0.5, mt: 1, height: 14 }}>
+                    {[0, 1, 2, 3].map((bar) => (
+                      <Box
+                        key={bar}
+                        sx={{
+                          width: 3,
+                          height: 6,
+                          borderRadius: 2,
+                          background: "rgba(212,175,55,0.85)",
+                          animation: `voicePulse 1.2s ${bar * 0.2}s ease-in-out infinite`,
+                          "@keyframes voicePulse": {
+                            "0%, 100%": { height: 6, opacity: 0.6 },
+                            "50%": { height: 14, opacity: 1 }
+                          }
+                        }}
+                      />
+                    ))}
+                  </Box>
+                )}
                 <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
                   <Chip
                     size="small"
@@ -527,7 +566,7 @@ export function HomePage() {
                   />
                 </Box>
               </Box>
-            ))}
+            )})}
           </Box>
         </Box>
       </Container>

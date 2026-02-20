@@ -20,6 +20,7 @@ type AudioPlayerContextValue = {
   playPrevious: () => void;
   setPlaybackMode: (mode: PlaybackMode) => void;
   cyclePlaybackMode: () => void;
+  stopPlayback: () => void;
 };
 
 const AudioPlayerContext = createContext<AudioPlayerContextValue | null>(null);
@@ -248,7 +249,8 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     playNext,
     playPrevious,
     setPlaybackMode,
-    cyclePlaybackMode
+    cyclePlaybackMode,
+    stopPlayback
   };
 
   return (

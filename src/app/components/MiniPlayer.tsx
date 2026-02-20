@@ -1,5 +1,17 @@
 import { Box, IconButton, LinearProgress, Typography } from "@mui/material";
-import { Pause, PlayArrow, SkipNext, SkipPrevious, Repeat, RepeatOne, Shuffle, QueueMusic } from "@mui/icons-material";
+import {
+  Pause,
+  PlayArrow,
+  SkipNext,
+  SkipPrevious,
+  Repeat,
+  RepeatOne,
+  Shuffle,
+  QueueMusic,
+  Close,
+  ExpandLess,
+  ExpandMore
+} from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router";
 import { useEffect, useRef, useState } from "react";
 import { useAudioPlayer } from "./AudioPlayerProvider";
@@ -16,11 +28,13 @@ export function MiniPlayer() {
     playNext,
     playPrevious,
     playbackMode,
-    cyclePlaybackMode
+    cyclePlaybackMode,
+    stopPlayback
   } = useAudioPlayer();
 
   const [position, setPosition] = useState({ x: 16, y: 16 });
   const [size, setSize] = useState({ w: 170, h: 160 });
+  const [collapsed, setCollapsed] = useState(false);
   const draggingRef = useRef(false);
   const resizingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
@@ -54,8 +68,10 @@ export function MiniPlayer() {
         return;
       }
 
-      const nextX = Math.max(8, Math.min(window.innerWidth - sizeRef.current.w - 8, event.clientX));
-      const nextY = Math.max(8, Math.min(window.innerHeight - sizeRef.current.h - 8, event.clientY));
+      const boundW = collapsed ? 120 : sizeRef.current.w;
+      const boundH = collapsed ? 120 : sizeRef.current.h;
+      const nextX = Math.max(8, Math.min(window.innerWidth - boundW - 8, event.clientX));
+      const nextY = Math.max(8, Math.min(window.innerHeight - boundH - 8, event.clientY));
       posRef.current = { x: nextX, y: nextY };
       if (targetRef.current) {
         targetRef.current.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
@@ -95,6 +111,17 @@ export function MiniPlayer() {
       <QueueMusic fontSize="small" />
     );
 
+  useEffect(() => {
+    if (location.pathname === "/") {
+      setCollapsed(true);
+    } else {
+      setCollapsed(false);
+    }
+  }, [location.pathname]);
+
+  const effectiveWidth = collapsed ? 120 : size.w;
+  const effectiveHeight = collapsed ? 120 : size.h;
+
   return (
     <Box
       ref={targetRef}
@@ -105,8 +132,8 @@ export function MiniPlayer() {
         bottom: "auto",
         top: 0,
         zIndex: 1300,
-        width: size.w,
-        height: size.h,
+        width: effectiveWidth,
+        height: effectiveHeight,
         background: "rgba(12, 24, 34, 0.85)",
         border: "1px solid rgba(255,255,255,0.08)",
         borderRadius: 3,
@@ -186,6 +213,26 @@ export function MiniPlayer() {
           >
             {modeIcon}
           </IconButton>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              setCollapsed((prev) => (location.pathname === "/" ? true : !prev));
+            }}
+            sx={{ color: "text.secondary" }}
+          >
+            {collapsed ? <ExpandMore fontSize="small" /> : <ExpandLess fontSize="small" />}
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              stopPlayback();
+            }}
+            sx={{ color: "text.secondary" }}
+          >
+            <Close fontSize="small" />
+          </IconButton>
         </Box>
         <Typography
           variant="caption"
@@ -198,7 +245,7 @@ export function MiniPlayer() {
             whiteSpace: "nowrap"
           }}
         >
-          {currentRecitation.surah}
+          {collapsed ? currentRecitation.surah : currentRecitation.title}
         </Typography>
       </Box>
       <LinearProgress
@@ -231,28 +278,30 @@ export function MiniPlayer() {
             : "▶"}
         </Typography>
       )}
-      <Box
-        data-resize-handle
-        onPointerDown={(event) => {
-          event.stopPropagation();
-          event.preventDefault();
-          resizingRef.current = true;
-          startRef.current = { x: event.clientX, y: event.clientY };
-          document.body.style.userSelect = "none";
-          (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-        }}
-        sx={{
-          position: "absolute",
-          right: 6,
-          bottom: 6,
-          width: 14,
-          height: 14,
-          borderRadius: 1,
-          background: "rgba(212,175,55,0.6)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          cursor: "nwse-resize"
-        }}
-      />
+      {!collapsed && (
+        <Box
+          data-resize-handle
+          onPointerDown={(event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            resizingRef.current = true;
+            startRef.current = { x: event.clientX, y: event.clientY };
+            document.body.style.userSelect = "none";
+            (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+          }}
+          sx={{
+            position: "absolute",
+            right: 6,
+            bottom: 6,
+            width: 14,
+            height: 14,
+            borderRadius: 1,
+            background: "rgba(212,175,55,0.6)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            cursor: "nwse-resize"
+          }}
+        />
+      )}
     </Box>
   );
 }
