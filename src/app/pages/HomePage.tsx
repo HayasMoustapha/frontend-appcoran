@@ -207,6 +207,14 @@ export function HomePage() {
 
   const constellationRecitations =
     popularRecitations.length > 0 ? popularRecitations : allRecitations.slice(0, 8);
+  const uniqueConstellationRecitations = Array.from(
+    new Map(
+      constellationRecitations.map((recitation) => [
+        recitation.id || recitation.slug || recitation.title,
+        recitation
+      ])
+    ).values()
+  );
 
   const navigate = useNavigate();
 
@@ -461,9 +469,9 @@ export function HomePage() {
               animation: "orbitScroll 26s linear infinite"
             }}
           >
-            {[...constellationRecitations, ...constellationRecitations].map((recitation, index) => (
+            {uniqueConstellationRecitations.map((recitation) => (
               <Box
-                key={`${recitation.id}-${index}`}
+                key={recitation.id || recitation.slug}
                 sx={{
                   minWidth: 240,
                   maxWidth: 260,
