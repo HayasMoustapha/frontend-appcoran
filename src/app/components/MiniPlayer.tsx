@@ -36,7 +36,7 @@ export function MiniPlayer() {
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
   const targetRef = useRef<HTMLDivElement | null>(null);
-  const fixedSize = { w: 780, h: 210 };
+  const fixedSize = { w: 630, h: 210 };
 
   useEffect(() => {
     posRef.current = position;
@@ -203,16 +203,6 @@ export function MiniPlayer() {
               justifyContent: "space-between"
             }}
           >
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                playPrevious();
-              }}
-              sx={iconSx}
-            >
-              <SkipPrevious fontSize="small" />
-            </IconButton>
             <Box
               sx={{
                 display: "flex",
@@ -222,6 +212,16 @@ export function MiniPlayer() {
                 justifyContent: "center"
               }}
             >
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playPrevious();
+                }}
+                sx={iconSx}
+              >
+                <SkipPrevious fontSize="small" />
+              </IconButton>
               <IconButton
                 size="small"
                 onClick={(e) => {
