@@ -113,6 +113,11 @@ export function RecordPage() {
     setVerseEnd("");
   }, [selectedSurah]);
 
+  const sortedSurahs = useMemo(
+    () => [...surahReference].sort((a, b) => a.number - b.number),
+    [surahReference]
+  );
+
   useEffect(() => {
     if (!isComplete) return;
     const entry = sortedSurahs.find((surah) => surah.number.toString() === selectedSurah);
@@ -120,11 +125,6 @@ export function RecordPage() {
     setVerseStart(1);
     setVerseEnd(entry.verses);
   }, [isComplete, selectedSurah, sortedSurahs]);
-
-  const sortedSurahs = useMemo(
-    () => [...surahReference].sort((a, b) => a.number - b.number),
-    [surahReference]
-  );
 
   useEffect(() => {
     if (!selectedSurah) {
