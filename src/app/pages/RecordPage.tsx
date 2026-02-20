@@ -264,7 +264,7 @@ export function RecordPage() {
       return;
     }
     setRecordingState("uploading");
-    setUploadProgress(10);
+    setUploadProgress(0);
     setError("");
 
     const selected = sortedSurahs.find((surah) => surah.number.toString() === selectedSurah);
@@ -292,7 +292,9 @@ export function RecordPage() {
     formData.append("isComplete", String(isComplete));
 
     try {
-      await uploadAudio(formData);
+      await uploadAudio(formData, (progress) => {
+        setUploadProgress(Math.min(99, Math.max(0, progress)));
+      });
       setUploadProgress(100);
       setRecordingState("success");
       setToast({ message: t("record.publishedSuccess"), severity: "success" });

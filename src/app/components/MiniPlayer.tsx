@@ -71,6 +71,9 @@ export function MiniPlayer() {
   }, []);
 
   const isPlayerPage = location.pathname.startsWith("/recitation/");
+  const isHomePage = location.pathname === "/";
+  const isLoginPage = location.pathname.startsWith("/login");
+  const hasStartedPlayback = isPlaying || currentTime > 0;
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation?.slug || currentRecitation?.id;
@@ -108,7 +111,9 @@ export function MiniPlayer() {
     animation: isPlaying ? `miniPulse 900ms ${index * 120}ms ease-in-out infinite` : "none"
   });
 
-  if (!currentRecitation || isPlayerPage || !targetId) return null;
+  if (!currentRecitation || !hasStartedPlayback || isPlayerPage || isHomePage || isLoginPage || !targetId) {
+    return null;
+  }
 
   const effectiveWidth = fixedSize.w;
   const effectiveHeight = fixedSize.h;

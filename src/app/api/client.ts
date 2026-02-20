@@ -113,6 +113,73 @@ export async function postForm<T>(path: string, formData: FormData, options: Req
   });
 }
 
+export async function postFormWithProgress<T>(
+  path: string,
+  formData: FormData,
+  options: RequestOptions = {},
+  onProgress?: (progress: number) => void
+) {
+  const url = `${API_BASE_URL}${path}`;
+  const headers: Record<string, string> = {
+    ...(options.headers ?? {})
+  };
+  const lang = getLang();
+  headers["Accept-Language"] = lang;
+  headers["X-Lang"] = lang;
+
+  if (options.auth) {
+    const token = getAuthToken();
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+
+    Object.entries(headers).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value);
+    });
+
+    xhr.upload.onprogress = (event) => {
+      if (!onProgress || !event.lengthComputable) return;
+      const next = Math.round((event.loaded / event.total) * 100);
+      onProgress(next);
+    };
+
+    xhr.onload = () => {
+      const contentType = xhr.getResponseHeader("content-type") || "";
+      const isJson = contentType.includes("application/json");
+      let payload: unknown = xhr.responseText;
+      if (isJson) {
+        try {
+          payload = JSON.parse(xhr.responseText || "null");
+        } catch (err) {
+          payload = null;
+        }
+      }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(payload as T);
+        return;
+      }
+      const message =
+        typeof payload === "string"
+          ? payload
+          : (payload as { error?: string; message?: string })?.error ||
+            (payload as { error?: string; message?: string })?.message ||
+            "Erreur serveur";
+      reject(new Error(message));
+    };
+
+    xhr.onerror = () => {
+      reject(new NetworkError());
+    };
+
+    xhr.send(formData);
+  });
+}
+
 export async function putForm<T>(path: string, formData: FormData, options: RequestOptions = {}) {
   return request<T>(path, {
     ...options,

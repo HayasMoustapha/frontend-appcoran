@@ -1,4 +1,4 @@
-import { del, get, post, postForm } from "./client";
+import { del, get, post, postForm, postFormWithProgress } from "./client";
 import type { ApiAudio, ApiPublicAudio } from "./types";
 
 export type UpdateAudioPayload = Partial<ApiAudio> & {
@@ -52,7 +52,13 @@ export async function sharePublicAudio(slug: string) {
   return post<{ share_url: string }>(`/public/audios/${slug}/share`);
 }
 
-export async function uploadAudio(formData: FormData) {
+export async function uploadAudio(
+  formData: FormData,
+  onProgress?: (progress: number) => void
+) {
+  if (onProgress) {
+    return postFormWithProgress<ApiAudio>("/api/audios", formData, { auth: true }, onProgress);
+  }
   return postForm<ApiAudio>("/api/audios", formData, { auth: true });
 }
 
