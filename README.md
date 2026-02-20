@@ -24,7 +24,7 @@ Run `npm run dev` to start the development server.
 
 Use the compose file in this folder to run frontend and backend with custom domains.
 
-1. Add local domain mapping:
+1. Add local domain mapping (desktop only):
 
 ```
 127.0.0.1 appcoran.com api.appcoran.com
@@ -42,6 +42,45 @@ docker compose up --build
 Frontend: http://appcoran.com
 Backend:  http://api.appcoran.com
 ```
+
+## Access From Phone (Android / iOS) With appcoran.com
+
+You can keep the domain **appcoran.com** on your phone using your router DNS
+(recommended). This works on Android and iOS, no app install required.
+
+### Recommended (Router DNS)
+1. Find your PC IP (example: `192.168.1.25`).
+2. In your router admin UI, add local DNS records:
+   - `appcoran.com` → `192.168.1.25`
+   - `api.appcoran.com` → `192.168.1.25`
+3. Make sure your phone uses the router DNS (automatic is fine).
+4. Open on phone: `http://appcoran.com`
+
+### If Router Has No DNS (Optional dnsmasq)
+You can run a lightweight DNS server on your PC and set it as the phone DNS.
+
+1. Create a file `dnsmasq.conf`:
+
+```conf
+address=/appcoran.com/192.168.1.25
+address=/api.appcoran.com/192.168.1.25
+```
+
+2. Run dnsmasq in Docker:
+
+```bash
+docker run -d --name appcoran-dns \
+  -p 53:53/udp \
+  -v "$PWD/dnsmasq.conf":/etc/dnsmasq.conf \
+  --restart unless-stopped \
+  andyshinn/dnsmasq:2.85
+```
+
+3. On the phone, set DNS manually to your PC IP.
+
+### Notes
+- Phone and PC must be on the **same Wi‑Fi network**.
+- Keep `docker compose up --build` running.
 
 ## Installable (PWA)
 
