@@ -1,0 +1,16 @@
+{
+  auto_https off
+}
+
+http://appcoran.com {
+  encode zstd gzip
+  header {
+    Access-Control-Allow-Origin "*"
+  }
+  reverse_proxy 127.0.0.1:5173
+}
+
+http://api.appcoran.com {
+  encode zstd gzip
+  reverse_proxy 127.0.0.1:4000
+}

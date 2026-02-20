@@ -4,13 +4,21 @@ This guide explains how to access **appcoran.com** from your phone on the same W
 
 ## 1) Requirements
 - Phone and PC are on the **same Wi‑Fi**.
-- Docker stack is running:
+- Backend running on `http://localhost:4000`
+- Frontend running on `http://localhost:5173`
 
+Note: this guide is **without Docker**.
+
+## 2) Reverse proxy local (Caddy)
+Use the local proxy config:
+- `frontend-appcoran/deploy/Caddyfile.local`
+
+Run:
 ```bash
-docker compose up --build
+caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local
 ```
 
-## 2) Recommended: Router DNS (Best Option)
+## 3) Recommended: Router DNS (Best Option)
 This keeps the domain **appcoran.com** and **api.appcoran.com**.
 
 1. Find your PC IP (example `192.168.1.25`).
@@ -22,7 +30,7 @@ This keeps the domain **appcoran.com** and **api.appcoran.com**.
 5. Open in phone browser:
    - `http://appcoran.com`
 
-## 3) If Router DNS Is Not Available (dnsmasq)
+## 4) If Router DNS Is Not Available (dnsmasq)
 You can run a local DNS server on the PC and set it on the phone.
 
 1. Create a file `dnsmasq.conf` (same folder as this guide):
@@ -32,19 +40,21 @@ address=/appcoran.com/192.168.1.25
 address=/api.appcoran.com/192.168.1.25
 ```
 
-2. Run dnsmasq in Docker:
+2. Install dnsmasq:
 
 ```bash
-docker run -d --name appcoran-dns \
-  -p 53:53/udp \
-  -v "$PWD/dnsmasq.conf":/etc/dnsmasq.conf \
-  --restart unless-stopped \
-  andyshinn/dnsmasq:2.85
+sudo apt-get install dnsmasq
 ```
 
-3. Set your phone DNS to your PC IP (manual DNS).
-4. Open: `http://appcoran.com`
+3. Add the config to dnsmasq:
+```bash
+sudo cp dnsmasq.conf /etc/dnsmasq.d/appcoran.conf
+sudo systemctl restart dnsmasq
+```
 
-## 4) Notes
-- Keep Docker running.
+4. Set your phone DNS to your PC IP (manual DNS).
+5. Open: `http://appcoran.com`
+
+## 5) Notes
+- Keep backend + frontend running.
 - If the phone can’t resolve the domain, check DNS settings or router cache.
