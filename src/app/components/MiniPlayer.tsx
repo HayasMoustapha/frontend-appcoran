@@ -36,7 +36,7 @@ export function MiniPlayer() {
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
   const targetRef = useRef<HTMLDivElement | null>(null);
-  const fixedSize = { w: 630, h: 210 };
+  const fixedSize = { w: 450, h: 190 };
 
   useEffect(() => {
     posRef.current = position;
@@ -161,6 +161,11 @@ export function MiniPlayer() {
           background:
             "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.18))",
           pointerEvents: "none"
+        },
+        "@keyframes miniPulse": {
+          "0%": { transform: "scaleY(0.4)" },
+          "50%": { transform: "scaleY(1.2)" },
+          "100%": { transform: "scaleY(0.5)" }
         }
       }}
       onPointerDown={(event) => {
@@ -308,13 +313,9 @@ export function MiniPlayer() {
             justifyContent: "center",
             alignItems: "flex-end",
             gap: 0.6,
+            width: "100%",
             height: 18,
-            mt: 0.2,
-            "& @keyframes miniPulse": {
-              "0%": { transform: "scaleY(0.4)" },
-              "50%": { transform: "scaleY(1.2)" },
-              "100%": { transform: "scaleY(0.5)" }
-            }
+            mt: 0.2
           }}
         >
           {[0, 1, 2, 3, 4].map((index) => (
