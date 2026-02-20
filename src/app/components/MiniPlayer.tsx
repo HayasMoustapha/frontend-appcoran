@@ -37,7 +37,7 @@ export function MiniPlayer() {
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
   const targetRef = useRef<HTMLDivElement | null>(null);
-  const fixedSize = { w: 260, h: 210 };
+  const fixedSize = { w: 780, h: 210 };
 
   useEffect(() => {
     posRef.current = position;
