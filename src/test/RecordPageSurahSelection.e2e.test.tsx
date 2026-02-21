@@ -3,14 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { vi } from "vitest";
 import { RecordPage } from "../app/pages/RecordPage";
-import { renderWithProviders } from "./test-utils";
-
-const createJsonResponse = (data: unknown) =>
-  Promise.resolve({
-    ok: true,
-    headers: new Headers({ "content-type": "application/json" }),
-    json: async () => data
-  });
+import { createMockResponse, renderWithProviders } from "./test-utils";
 
 const surahReference = [
   {
@@ -40,12 +33,12 @@ describe("RecordPage surah selection flow", () => {
     const fetchMock = vi.fn((input: RequestInfo) => {
       const url = typeof input === "string" ? input : input.url;
       if (url.includes("/api/surah-reference")) {
-        return createJsonResponse(surahReference);
+        return Promise.resolve(createMockResponse({ body: surahReference }));
       }
       if (url.includes("/api/audios")) {
-        return createJsonResponse({ id: "1" });
+        return Promise.resolve(createMockResponse({ body: { id: "1" } }));
       }
-      return createJsonResponse({});
+      return Promise.resolve(createMockResponse({ body: {} }));
     });
 
     vi.stubGlobal("fetch", fetchMock);

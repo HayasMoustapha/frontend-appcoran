@@ -166,16 +166,36 @@ export function RecordPage() {
     }
   }, [verseStart, verseEnd]);
 
+  const getSupportedRecorderMimeType = () => {
+    if (typeof MediaRecorder === "undefined") return "";
+    const candidates = [
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/mp4",
+      "audio/aac",
+      "audio/mpeg",
+      "audio/ogg;codecs=opus",
+      "audio/ogg"
+    ];
+    for (const mimeType of candidates) {
+      if (MediaRecorder.isTypeSupported(mimeType)) {
+        return mimeType;
+      }
+    }
+    return "";
+  };
+
   const handleStartRecording = async () => {
     setError("");
-    if (!navigator.mediaDevices?.getUserMedia) {
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
       setError(t("record.recordingUnsupported"));
       return;
     }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
-      const recorder = new MediaRecorder(stream);
+      const mimeType = getSupportedRecorderMimeType();
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
       mediaRecorderRef.current = recorder;
       chunksRef.current = [];
 
@@ -185,8 +205,18 @@ export function RecordPage() {
         }
       };
       recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
-        const file = new File([blob], `recitation-${Date.now()}.webm`, { type: blob.type });
+        const recordedType = recorder.mimeType || mimeType || "audio/webm";
+        const blob = new Blob(chunksRef.current, { type: recordedType });
+        const ext = recordedType.includes("mp4")
+          ? "mp4"
+          : recordedType.includes("aac")
+          ? "aac"
+          : recordedType.includes("mpeg")
+          ? "mp3"
+          : recordedType.includes("ogg")
+          ? "ogg"
+          : "webm";
+        const file = new File([blob], `recitation-${Date.now()}.${ext}`, { type: blob.type });
         setUploadedFile(file);
         setRecordingState("recorded");
         setToast({ message: t("record.recordingReadyToast"), severity: "success" });
@@ -480,7 +510,7 @@ export function RecordPage() {
                     {t("record.uploadFile")}
                     <input
                       type="file"
-                      accept="audio/*,video/*,.mp4"
+                      accept="audio/*,video/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.mp4"
                       hidden
                       onChange={handleFileUpload}
                     />

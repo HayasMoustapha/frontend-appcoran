@@ -39,13 +39,35 @@ function resolveBaseUrl(
   return envUrl;
 }
 
+function resolvePublicBaseUrl(envValue?: string): string {
+  const runtimeHost =
+    typeof window !== "undefined" ? window.location.hostname : "localhost";
+  const runtimeProtocol =
+    typeof window !== "undefined" ? window.location.protocol : "http:";
+  const origin = `${runtimeProtocol}//${runtimeHost}`;
+  const envUrl = (envValue || "").trim();
+
+  if (!envUrl) {
+    return origin;
+  }
+  if (envUrl.startsWith("http://") || envUrl.startsWith("https://")) {
+    return envUrl;
+  }
+  if (envUrl === "/" || envUrl === "/api" || envUrl === "/api/") {
+    return origin;
+  }
+  if (envUrl.startsWith("/")) {
+    return `${origin}${envUrl}`;
+  }
+  return envUrl;
+}
+
 export const API_BASE_URL = resolveBaseUrl(
   "4000",
   import.meta.env.VITE_API_BASE_URL
 );
 
-export const PUBLIC_BASE_URL = resolveBaseUrl(
-  "4000",
+export const PUBLIC_BASE_URL = resolvePublicBaseUrl(
   import.meta.env.VITE_PUBLIC_BASE_URL
 );
 
@@ -84,6 +106,14 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
         body: options.body ?? null,
         cache: method === "GET" ? "no-store" : "default"
       });
+      if (
+        method === "GET" &&
+        response.status >= 500 &&
+        attempt < maxAttempts - 1
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        continue;
+      }
       break;
     } catch (err) {
       if (attempt >= maxAttempts - 1) {
@@ -99,7 +129,16 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   const contentType = response.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
-  const payload = isJson ? await response.json() : await response.text();
+  let payload: unknown;
+  if (isJson) {
+    try {
+      payload = await response.clone().json();
+    } catch (err) {
+      payload = await response.text();
+    }
+  } else {
+    payload = await response.text();
+  }
 
   if (!response.ok) {
     const errorMessage =

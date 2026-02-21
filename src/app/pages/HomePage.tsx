@@ -93,17 +93,18 @@ export function HomePage() {
           setToast({ message: profileResult.reason.message, severity: "error" });
         }
 
+        const withPublicUrls = (item: Recitation) =>
+          item.slug
+            ? {
+                ...item,
+                streamUrl: `${PUBLIC_BASE_URL}/public/audios/${item.slug}/stream`,
+                downloadUrl: `${PUBLIC_BASE_URL}/public/audios/${item.slug}/download`
+              }
+            : item;
+
         if (allResult.status === "fulfilled") {
           const allItems = ensureArray(allResult.value);
-          const mappedAll = allItems.map(mapAudioToRecitation).map((item) =>
-            item.slug
-              ? {
-                  ...item,
-                  streamUrl: `${PUBLIC_BASE_URL}/public/audios/${item.slug}/stream`,
-                  downloadUrl: `${PUBLIC_BASE_URL}/public/audios/${item.slug}/download`
-                }
-              : item
-          );
+          const mappedAll = allItems.map(mapAudioToRecitation).map(withPublicUrls);
           setAllRecitations(mappedAll);
           setSearchResults(mappedAll);
         } else if (!isNetworkError(allResult.reason)) {
@@ -114,7 +115,7 @@ export function HomePage() {
 
         if (recentResult.status === "fulfilled") {
           const recentItems = ensureArray(recentResult.value);
-          setRecentRecitations(recentItems.map(mapAudioToRecitation));
+          setRecentRecitations(recentItems.map(mapAudioToRecitation).map(withPublicUrls));
         } else if (!isNetworkError(recentResult.reason)) {
           const message =
             recentResult.reason instanceof Error ? recentResult.reason.message : "Erreur lors du chargement";
@@ -123,7 +124,7 @@ export function HomePage() {
 
         if (popularResult.status === "fulfilled") {
           const popularItems = ensureArray(popularResult.value);
-          setPopularRecitations(popularItems.map(mapAudioToRecitation));
+          setPopularRecitations(popularItems.map(mapAudioToRecitation).map(withPublicUrls));
         } else if (!isNetworkError(popularResult.reason)) {
           const message =
             popularResult.reason instanceof Error ? popularResult.reason.message : "Erreur lors du chargement";

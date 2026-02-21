@@ -12,3 +12,29 @@ const AllProviders = ({ children }: { children: React.ReactNode }) => (
 
 export const renderWithProviders = (ui: React.ReactElement, options?: RenderOptions) =>
   render(ui, { wrapper: AllProviders, ...options });
+
+type MockResponseOptions = {
+  ok?: boolean;
+  status?: number;
+  headers?: Record<string, string>;
+  body?: unknown;
+};
+
+export function createMockResponse({
+  ok = true,
+  status = 200,
+  headers = { "content-type": "application/json" },
+  body = {}
+}: MockResponseOptions = {}) {
+  const textBody =
+    typeof body === "string" ? body : JSON.stringify(body ?? {});
+  const response: Response = {
+    ok,
+    status,
+    headers: new Headers(headers),
+    json: async () => (typeof body === "string" ? JSON.parse(body) : body),
+    text: async () => textBody,
+    clone: () => response
+  } as Response;
+  return response;
+}

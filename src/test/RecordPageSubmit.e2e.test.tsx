@@ -5,14 +5,7 @@ import { vi } from "vitest";
 import { RecordPage } from "../app/pages/RecordPage";
 import { setAuthToken, clearAuthToken } from "../app/api/storage";
 import { uploadAudio } from "../app/api/audios";
-import { renderWithProviders } from "./test-utils";
-
-const createJsonResponse = (data: unknown) =>
-  Promise.resolve({
-    ok: true,
-    headers: new Headers({ "content-type": "application/json" }),
-    json: async () => data
-  });
+import { createMockResponse, renderWithProviders } from "./test-utils";
 
 const surahReference = [
   {
@@ -66,54 +59,54 @@ describe("RecordPage submit flow", () => {
     async () => {
       const user = userEvent.setup();
 
-    const fetchMock = vi.fn((input: RequestInfo, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input.url;
-      if (url.includes("/api/surah-reference")) {
-        return createJsonResponse(surahReference);
-      }
-      return createJsonResponse({});
-    });
+      const fetchMock = vi.fn((input: RequestInfo) => {
+        const url = typeof input === "string" ? input : input.url;
+        if (url.includes("/api/surah-reference")) {
+          return Promise.resolve(createMockResponse({ body: surahReference }));
+        }
+        return Promise.resolve(createMockResponse({ body: {} }));
+      });
 
-    vi.stubGlobal("fetch", fetchMock);
+      vi.stubGlobal("fetch", fetchMock);
 
-    renderWithProviders(
-      <MemoryRouter>
-        <RecordPage />
-      </MemoryRouter>
-    );
+      renderWithProviders(
+        <MemoryRouter>
+          <RecordPage />
+        </MemoryRouter>
+      );
 
-    const uploadTrigger = screen.getByText(/Importer un fichier/i);
-    const input =
-      uploadTrigger.closest("label")?.querySelector('input[type="file"]') ??
-      uploadTrigger.parentElement?.querySelector('input[type="file"]');
+      const uploadTrigger = screen.getByText(/Importer un fichier/i);
+      const input =
+        uploadTrigger.closest("label")?.querySelector('input[type="file"]') ??
+        uploadTrigger.parentElement?.querySelector('input[type="file"]');
 
-    const file = new File(["test"], "test.mp3", { type: "audio/mpeg" });
-    await user.upload(input as HTMLInputElement, file);
+      const file = new File(["test"], "test.mp3", { type: "audio/mpeg" });
+      await user.upload(input as HTMLInputElement, file);
 
-    const titleSelect = screen.getByTestId("title-select");
-    const titleButton = within(titleSelect).getByRole("combobox");
-    await user.click(titleButton);
-    await user.click(await screen.findByRole("option", { name: /L'Ouverture/i }));
+      const titleSelect = screen.getByTestId("title-select");
+      const titleButton = within(titleSelect).getByRole("combobox");
+      await user.click(titleButton);
+      await user.click(await screen.findByRole("option", { name: /L'Ouverture/i }));
 
-    const surahSelect = screen.getByTestId("surah-select");
-    const surahButton = within(surahSelect).getByRole("combobox");
-    await user.click(surahButton);
-    await user.click(await screen.findByRole("option", { name: /L'Ouverture/i }));
+      const surahSelect = screen.getByTestId("surah-select");
+      const surahButton = within(surahSelect).getByRole("combobox");
+      await user.click(surahButton);
+      await user.click(await screen.findByRole("option", { name: /L'Ouverture/i }));
 
-    const verseStartSelect = screen.getByTestId("verse-start-select");
-    const verseEndSelect = screen.getByTestId("verse-end-select");
-    await user.click(within(verseStartSelect).getByRole("combobox"));
-    await user.click(await screen.findByRole("option", { name: /^1$/ }));
-    await user.click(within(verseEndSelect).getByRole("combobox"));
-    await user.click(await screen.findByRole("option", { name: /^7$/ }));
+      const verseStartSelect = screen.getByTestId("verse-start-select");
+      const verseEndSelect = screen.getByTestId("verse-end-select");
+      await user.click(within(verseStartSelect).getByRole("combobox"));
+      await user.click(await screen.findByRole("option", { name: /^1$/ }));
+      await user.click(within(verseEndSelect).getByRole("combobox"));
+      await user.click(await screen.findByRole("option", { name: /^7$/ }));
 
-    await user.type(
-      screen.getByLabelText(/Description/i),
-      "Description de test pour la récitation."
-    );
+      await user.type(
+        screen.getByLabelText(/Description/i),
+        "Description de test pour la récitation."
+      );
 
-    const publishButton = screen.getByRole("button", { name: /Publier la récitation/i });
-    expect(publishButton).not.toBeDisabled();
+      const publishButton = screen.getByRole("button", { name: /Publier la récitation/i });
+      expect(publishButton).not.toBeDisabled();
 
       await user.click(publishButton);
 

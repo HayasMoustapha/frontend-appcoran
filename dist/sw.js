@@ -26,6 +26,19 @@ self.addEventListener("message", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  const url = new URL(event.request.url);
+  if (url.pathname.startsWith("/api") || url.pathname.startsWith("/public")) {
+    event.respondWith(
+      fetch(event.request, { cache: "no-store" }).catch(() => {
+        return new Response(JSON.stringify({ error: "Offline" }), {
+          status: 503,
+          headers: { "Content-Type": "application/json" }
+        });
+      })
+    );
+    return;
+  }
+
   if (event.request.mode === "navigate" || event.request.headers.get("accept")?.includes("text/html")) {
     event.respondWith(
       fetch(event.request, { cache: "no-store" })

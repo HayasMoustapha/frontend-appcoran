@@ -3,23 +3,16 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { LoginPage } from "../app/pages/LoginPage";
 import { vi } from "vitest";
-import { renderWithProviders } from "./test-utils";
-
-const createJsonResponse = (data: unknown) =>
-  Promise.resolve({
-    ok: true,
-    headers: new Headers({ "content-type": "application/json" }),
-    json: async () => data
-  });
+import { createMockResponse, renderWithProviders } from "./test-utils";
 
 describe("LoginPage", () => {
   it("submits credentials to backend", async () => {
     const fetchMock = vi.fn((input: RequestInfo) => {
       const url = typeof input === "string" ? input : input.url;
       if (url.includes("/api/auth/login")) {
-        return createJsonResponse({ token: "test-token" });
+        return Promise.resolve(createMockResponse({ body: { token: "test-token" } }));
       }
-      return createJsonResponse({});
+      return Promise.resolve(createMockResponse({ body: {} }));
     });
 
     vi.stubGlobal("fetch", fetchMock);

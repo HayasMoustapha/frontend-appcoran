@@ -2,21 +2,15 @@ import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router";
 import { vi } from "vitest";
 import { RecitationPlayer } from "../app/pages/RecitationPlayer";
-import { renderWithProviders } from "./test-utils";
-
-const createJsonResponse = (data: unknown) =>
-  Promise.resolve({
-    ok: true,
-    headers: new Headers({ "content-type": "application/json" }),
-    json: async () => data
-  });
+import { createMockResponse, renderWithProviders } from "./test-utils";
 
 describe("RecitationPlayer", () => {
   it("loads stream url and triggers share endpoint", async () => {
     const fetchMock = vi.fn((input: RequestInfo) => {
       const url = typeof input === "string" ? input : input.url;
       if (url.includes("/api/audios")) {
-        return createJsonResponse([
+        return Promise.resolve(createMockResponse({
+          body: [
           {
             id: "1",
             title: "Test",
@@ -32,13 +26,16 @@ describe("RecitationPlayer", () => {
             download_count: 1,
             slug: "1-test"
           }
-        ]);
+        ]}));
       }
       if (url.includes("/public/audios/1-test/share")) {
-        return createJsonResponse({ share_url: "http://localhost:5173/recitation/1-test" });
+        return Promise.resolve(createMockResponse({
+          body: { share_url: "http://localhost:5173/recitation/1-test" }
+        }));
       }
       if (url.includes("/public/audios/1-test")) {
-        return createJsonResponse({
+        return Promise.resolve(createMockResponse({
+          body: {
           title: "Test",
           sourate: "الفاتحة",
           numero_sourate: 1,
@@ -53,9 +50,10 @@ describe("RecitationPlayer", () => {
           stream_url: "http://localhost:4000/public/audios/1-test/stream",
           download_url: "http://localhost:4000/public/audios/1-test/download",
           share_url: "http://localhost:5173/recitation/1-test"
-        });
+        }
+        }));
       }
-      return createJsonResponse({});
+      return Promise.resolve(createMockResponse({ body: {} }));
     });
 
     vi.stubGlobal("fetch", fetchMock);

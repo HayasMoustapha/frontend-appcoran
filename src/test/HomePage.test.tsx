@@ -2,14 +2,7 @@ import { screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { HomePage } from "../app/pages/HomePage";
 import { vi } from "vitest";
-import { renderWithProviders } from "./test-utils";
-
-const createJsonResponse = (data: unknown) =>
-  Promise.resolve({
-    ok: true,
-    headers: new Headers({ "content-type": "application/json" }),
-    json: async () => data
-  });
+import { createMockResponse, renderWithProviders } from "./test-utils";
 
 const audio = {
   id: "1",
@@ -32,24 +25,28 @@ describe("HomePage", () => {
     const fetchMock = vi.fn((input: RequestInfo) => {
       const url = typeof input === "string" ? input : input.url;
       if (url.includes("/public/profile")) {
-        return createJsonResponse({
-          name: "Imam Test",
-          biography: "Bio test",
-          parcours: "Experience 1\nExperience 2",
-          statut: "Imam",
-          photo_url: ""
-        });
+        return Promise.resolve(
+          createMockResponse({
+            body: {
+              name: "Imam Test",
+              biography: "Bio test",
+              parcours: "Experience 1\nExperience 2",
+              statut: "Imam",
+              photo_url: ""
+            }
+          })
+        );
       }
       if (url.includes("/api/audios/recent")) {
-        return createJsonResponse([audio]);
+        return Promise.resolve(createMockResponse({ body: [audio] }));
       }
       if (url.includes("/api/audios/popular")) {
-        return createJsonResponse([audio]);
+        return Promise.resolve(createMockResponse({ body: [audio] }));
       }
       if (url.endsWith("/api/audios")) {
-        return createJsonResponse([audio]);
+        return Promise.resolve(createMockResponse({ body: [audio] }));
       }
-      return createJsonResponse([]);
+      return Promise.resolve(createMockResponse({ body: [] }));
     });
 
     vi.stubGlobal("fetch", fetchMock);

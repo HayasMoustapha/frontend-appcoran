@@ -262,7 +262,16 @@ export function ImamProfilePage() {
             />
 
             <Box sx={{ position: "relative", zIndex: 1 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start", mb: 3 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: { xs: "stretch", sm: "start" },
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: { xs: 2, sm: 0 },
+                  mb: 3
+                }}
+              >
                 <Typography variant="h4" fontWeight={800}>
                   {t("profile.title")}
                 </Typography>
@@ -276,6 +285,7 @@ export function ImamProfilePage() {
                       background: "rgba(11, 31, 42, 0.9)",
                       color: "#F8F6F1",
                       border: "1px solid rgba(255, 255, 255, 0.2)",
+                      width: { xs: "100%", sm: "auto" },
                       "&:hover": {
                         background: "rgba(11, 31, 42, 1)"
                       }
@@ -284,7 +294,14 @@ export function ImamProfilePage() {
                     {t("profile.edit")}
                     </Button>
                 ) : (
-                  <Box sx={{ display: "flex", gap: 2 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 2,
+                      flexDirection: { xs: "column", sm: "row" },
+                      width: { xs: "100%", sm: "auto" }
+                    }}
+                  >
                     <Button
                       variant="contained"
                       startIcon={<Save />}
@@ -293,6 +310,7 @@ export function ImamProfilePage() {
                         background: "rgba(11, 31, 42, 0.9)",
                         color: "#F8F6F1",
                         border: "1px solid rgba(255, 255, 255, 0.2)",
+                        width: { xs: "100%", sm: "auto" },
                         "&:hover": {
                           background: "rgba(11, 31, 42, 1)"
                         }
@@ -307,6 +325,7 @@ export function ImamProfilePage() {
                       sx={{
                         borderColor: "rgba(11, 31, 42, 0.8)",
                         color: "rgba(11, 31, 42, 0.9)",
+                        width: { xs: "100%", sm: "auto" },
                         "&:hover": {
                           borderColor: "rgba(11, 31, 42, 1)",
                           background: "rgba(255, 255, 255, 0.2)"
