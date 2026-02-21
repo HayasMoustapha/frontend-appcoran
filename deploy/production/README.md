@@ -85,3 +85,4 @@ Accès :
 - **Page blanche** : vérifiez que le backend est en ligne.
 - **CSS manquant** : assurez-vous que Caddy sert `index.html` sans cache.
 - **Pas de données** : vérifiez `CORS_ORIGIN` et l’URL de l’API.
+- **Upload audio** : formats supportés `mp3`, `mp4`, `m4a`, `ogg`, `wav`, `flac`, `aac`, `webm`.

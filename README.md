@@ -8,6 +8,13 @@ Il parle avec le **backend** (le serveur) pour récupérer les récitations, se 
 
 Si le backend ne tourne pas, le frontend s’ouvre mais **les données n’apparaissent pas**.
 
+## Formats audio supportés (upload)
+Le formulaire d’upload accepte :
+`mp3`, `mp4`, `m4a`, `ogg`, `wav`, `flac`, `aac`, `webm`
+
+**Note mobile :** sur iOS/Android, l’enregistrement direct peut nécessiter **HTTPS**.  
+Si l’enregistrement n’est pas supporté, l’upload reste disponible.
+
 ## 2) Petit glossaire (mots techniques expliqués)
 - **Frontend** : la partie que vous voyez dans le navigateur.
 - **Backend** : le serveur qui stocke et envoie les données.
