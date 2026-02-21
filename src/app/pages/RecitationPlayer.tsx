@@ -38,6 +38,7 @@ import { Navbar } from "../components/Navbar";
 import { getPublicAudioBySlug, listAudios, sharePublicAudio } from "../api/audios";
 import { isNetworkError, PUBLIC_BASE_URL } from "../api/client";
 import { mapAudioToRecitation, mapPublicAudioToRecitation } from "../api/mappers";
+import { ensureArray } from "../utils/ensureArray";
 import type { Recitation } from "../domain/types";
 import { useTranslation } from "react-i18next";
 import { formatNumber, formatNumericText } from "../utils/formatNumber";
@@ -89,7 +90,8 @@ export function RecitationPlayer() {
       try {
         const all = await listAudios();
         if (!active) return;
-        const mapped = all.map(mapAudioToRecitation).map((item) =>
+        const allItems = ensureArray(all);
+        const mapped = allItems.map(mapAudioToRecitation).map((item) =>
           item.slug
             ? {
                 ...item,

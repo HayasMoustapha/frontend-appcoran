@@ -49,6 +49,7 @@ import { getDashboardOverview, getDashboardPerformance, getDashboardStats } from
 import { isNetworkError } from "../api/client";
 import { deleteAudio, listAudios, updateAudio, type UpdateAudioPayload } from "../api/audios";
 import { mapAudioToRecitation } from "../api/mappers";
+import { ensureArray } from "../utils/ensureArray";
 import type { DashboardOverview, Recitation, DashboardPerformanceItem, SurahReference } from "../domain/types";
 import { getSurahReference } from "../api/surahReference";
 import { useDataRefresh } from "../state/dataRefresh";
@@ -97,8 +98,10 @@ export function DashboardPage() {
         ]);
         if (!active) return;
         setOverview(overviewData);
-        setPerformance(performanceData.slice(0, 3));
-        setRecitations(all.map(mapAudioToRecitation));
+        const performanceItems = ensureArray(performanceData);
+        const allItems = ensureArray(all);
+        setPerformance(performanceItems.slice(0, 3));
+        setRecitations(allItems.map(mapAudioToRecitation));
       } catch (err) {
         if (!active) return;
         if (isNetworkError(err)) return;
@@ -126,7 +129,9 @@ export function DashboardPage() {
       try {
         const data = await getSurahReference();
         if (!active) return;
-        const sorted = [...data].sort((a, b) => a.number - b.number);
+        const sorted = [...data]
+          .filter((surah) => Number.isFinite(surah.number))
+          .sort((a, b) => a.number - b.number);
         setSurahReference(sorted);
       } catch (err) {
         if (!active) return;
@@ -154,7 +159,7 @@ export function DashboardPage() {
     setReportLoading(true);
     try {
       const stats = await getDashboardStats("7d");
-      setReportStats(stats);
+      setReportStats(ensureArray(stats));
       setToast({ message: "Rapport chargé avec succès.", severity: "success" });
     } catch (err) {
       if (!isNetworkError(err)) {

@@ -30,6 +30,7 @@ import { getPopular, getRecent, listAudios } from "../api/audios";
 import { isNetworkError, PUBLIC_BASE_URL } from "../api/client";
 import { getPublicProfile } from "../api/profile";
 import { mapAudioToRecitation, mapPublicProfile } from "../api/mappers";
+import { ensureArray } from "../utils/ensureArray";
 import type { ImamProfile, Recitation, SurahReference } from "../domain/types";
 import { useNavigate } from "react-router";
 import { getSurahReference } from "../api/surahReference";
@@ -93,7 +94,8 @@ export function HomePage() {
         }
 
         if (allResult.status === "fulfilled") {
-          const mappedAll = allResult.value.map(mapAudioToRecitation).map((item) =>
+          const allItems = ensureArray(allResult.value);
+          const mappedAll = allItems.map(mapAudioToRecitation).map((item) =>
             item.slug
               ? {
                   ...item,
@@ -111,7 +113,8 @@ export function HomePage() {
         }
 
         if (recentResult.status === "fulfilled") {
-          setRecentRecitations(recentResult.value.map(mapAudioToRecitation));
+          const recentItems = ensureArray(recentResult.value);
+          setRecentRecitations(recentItems.map(mapAudioToRecitation));
         } else if (!isNetworkError(recentResult.reason)) {
           const message =
             recentResult.reason instanceof Error ? recentResult.reason.message : "Erreur lors du chargement";
@@ -119,7 +122,8 @@ export function HomePage() {
         }
 
         if (popularResult.status === "fulfilled") {
-          setPopularRecitations(popularResult.value.map(mapAudioToRecitation));
+          const popularItems = ensureArray(popularResult.value);
+          setPopularRecitations(popularItems.map(mapAudioToRecitation));
         } else if (!isNetworkError(popularResult.reason)) {
           const message =
             popularResult.reason instanceof Error ? popularResult.reason.message : "Erreur lors du chargement";

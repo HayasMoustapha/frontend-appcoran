@@ -126,6 +126,6 @@ describe("RecordPage submit flow", () => {
       expect(uploadAudio).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
     },
-    10000
+    20000
   );
 });

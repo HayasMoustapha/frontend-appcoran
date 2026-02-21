@@ -6,9 +6,10 @@ export async function login(email: string, password: string) {
     "/api/auth/login",
     { email, password }
   );
-  if (result?.token) {
-    setAuthToken(result.token);
+  if (!result?.token) {
+    throw new Error("Identifiants invalides.");
   }
+  setAuthToken(result.token);
   return result;
 }
 

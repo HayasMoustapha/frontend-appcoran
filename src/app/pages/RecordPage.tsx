@@ -76,7 +76,9 @@ export function RecordPage() {
       try {
         const data = await getSurahReference();
         if (!active) return;
-        const sorted = [...data].sort((a, b) => a.number - b.number);
+        const sorted = [...data]
+          .filter((surah) => Number.isFinite(surah.number))
+          .sort((a, b) => a.number - b.number);
         setSurahReference(sorted);
         setSurahError("");
       } catch (err) {
@@ -122,7 +124,9 @@ export function RecordPage() {
 
   useEffect(() => {
     if (!isComplete) return;
-    const entry = sortedSurahs.find((surah) => surah.number.toString() === selectedSurah);
+    const entry = sortedSurahs.find(
+      (surah) => surah.number && surah.number.toString() === selectedSurah
+    );
     if (!entry) return;
     setVerseStart(1);
     setVerseEnd(entry.verses);
@@ -133,7 +137,9 @@ export function RecordPage() {
       setTitle("");
       return;
     }
-    const selected = sortedSurahs.find((surah) => surah.number.toString() === selectedSurah);
+    const selected = sortedSurahs.find(
+      (surah) => surah.number && surah.number.toString() === selectedSurah
+    );
     if (selected) {
       const localName = selected.name_local ?? selected.name_fr;
       setTitle(`${selected.number}. ${localName} (${selected.name_phonetic})`);
