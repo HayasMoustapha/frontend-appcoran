@@ -1,0 +1,46 @@
+services:
+  backend:
+    image: appcoran-backend:latest
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    ports:
+      - "4000:4000"
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      - redis
+
+  frontend:
+    image: appcoran-frontend:latest
+    restart: unless-stopped
+    volumes:
+      - frontend_dist:/srv/appcoran/frontend
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - frontend_dist:/srv/appcoran/frontend
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  backend_uploads:
+  frontend_dist:
+  redis_data:
+  caddy_data:
+  caddy_config:

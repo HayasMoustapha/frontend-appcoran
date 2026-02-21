@@ -92,3 +92,6 @@ Run `npm run test` to execute the frontend tests.
 
 ## Security & Production
 See `docs/SECURITY_PRODUCTION_GUIDE.md`
+
+## Déploiement Production (DigitalOcean)
+Voir `deploy/production/README.md`

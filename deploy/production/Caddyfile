@@ -1,0 +1,15 @@
+{
+  email admin@appcoran.com
+}
+
+appcoran.com {
+  encode zstd gzip
+  root * /srv/appcoran/frontend
+  try_files {path} /index.html
+  file_server
+}
+
+api.appcoran.com {
+  encode zstd gzip
+  reverse_proxy backend:4000
+}
