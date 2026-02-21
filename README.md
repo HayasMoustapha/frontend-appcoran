@@ -89,3 +89,6 @@ Once running, open the app in a browser and choose “Install” to add it to yo
 ## Tests
 
 Run `npm run test` to execute the frontend tests.
+
+## Security & Production
+See `docs/SECURITY_PRODUCTION_GUIDE.md`
