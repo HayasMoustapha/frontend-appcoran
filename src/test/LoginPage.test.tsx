@@ -1,8 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { LoginPage } from "../app/pages/LoginPage";
 import { vi } from "vitest";
+import { renderWithProviders } from "./test-utils";
 
 const createJsonResponse = (data: unknown) =>
   Promise.resolve({
@@ -23,15 +24,15 @@ describe("LoginPage", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(
+    renderWithProviders(
       <MemoryRouter>
         <LoginPage />
       </MemoryRouter>
     );
 
-    await userEvent.type(screen.getByLabelText(/Email/i), "imam@test.com");
-    await userEvent.type(screen.getByLabelText(/Mot de passe/i), "secret");
-    await userEvent.click(screen.getByRole("button", { name: /Se connecter/i }));
+    await userEvent.type(screen.getByLabelText(/email/i), "imam@test.com");
+    await userEvent.type(screen.getByLabelText(/password|mot de passe/i), "secret");
+    await userEvent.click(screen.getByRole("button", { name: /login|se connecter/i }));
 
     expect(fetchMock).toHaveBeenCalled();
   });

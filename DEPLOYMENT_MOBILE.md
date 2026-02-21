@@ -15,23 +15,27 @@ curl -i http://192.168.1.179:4000/health
 ```
 - Le frontend tourne (dev ou prod).
 
-## 2) Option la plus simple (sans domaine)
-Cette option marche **toujours**, mais on n’utilise pas `appcoran.com`.
+## 2) Option la plus simple et robuste (sans domaine)
+Cette option marche **toujours** et reste la plus fiable en local.
 
 ### Étapes
 1) Dans `.env` du frontend :
 ```
-VITE_API_BASE_URL=http://192.168.1.179:4000
-VITE_PUBLIC_APP_URL=http://192.168.1.179:5173
-VITE_PUBLIC_BASE_URL=http://192.168.1.179:4000
+VITE_API_BASE_URL=/api
+VITE_PUBLIC_BASE_URL=/api
+VITE_PUBLIC_APP_URL=http://localhost
 ```
-2) Lancer le frontend :
+2) Build (production locale) :
 ```bash
-npm run dev -- --host 0.0.0.0
+npm run build
 ```
-3) Sur le téléphone, ouvrir :
+3) Lancer Caddy (proxy + frontend) :
+```bash
+sudo caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local.prod
 ```
-http://192.168.1.179:5173
+4) Sur le téléphone, ouvrir :
+```
+http://192.168.1.179
 ```
 
 **Résultat attendu :** l’app s’ouvre et les récitations apparaissent.
@@ -114,3 +118,20 @@ Le QR est créé ici : `frontend-appcoran/deploy/wifi-setup.png`
 - **Domaine ne fonctionne pas** : DNS mal configuré.
 - **iPhone sans style** : utilisez build + Caddy.
 - **Changement .env** : relancez le frontend.
+
+## 7) Modifier le code : dev ou prod ?
+Si vous changez le code frontend :
+- **Mode dev** : changements visibles immédiatement (recommandé pour coder).\n
+- **Mode prod local** : il faut rebuild + redémarrer Caddy.
+
+### Dev rapide
+```bash
+npm run dev -- --host 0.0.0.0
+```
+
+### Prod local (stable mobile)
+```bash
+npm run build
+sudo caddy stop
+sudo caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local.prod
+```

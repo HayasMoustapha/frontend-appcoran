@@ -57,8 +57,9 @@ Ouvrez : `http://localhost:5173`
 
 **Résultat attendu :** la page d’accueil s’affiche avec le thème.
 
-## 7) Mode production local (recommandé pour iPhone)
+## 7) Mode production local (recommandé pour iPhone et mobile)
 Le mode dev de Vite peut être instable sur iOS (styles qui disparaissent après rechargement).
+Le mode production local est plus stable et garantit la connexion au backend via proxy.
 
 1) Construire le frontend :
 ```bash
@@ -70,7 +71,7 @@ npm run build
 caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local.prod
 ```
 
-**Résultat attendu :** l’interface est stable après rechargement.
+**Résultat attendu :** l’interface est stable après rechargement et les données backend se chargent.
 
 ## 8) Accès depuis téléphone (Android / iPhone)
 Suivez le guide pas à pas ici :
@@ -84,6 +85,24 @@ Ce guide explique :
 ## 9) Tests
 ```bash
 npm run test
+```
+
+## 10) Développement vs production (important)
+Si vous modifiez le code, vous avez **deux choix** :
+
+### Option A — Mode dev (recommandé pour coder)
+- Rechargement instantané
+- Pas besoin de rebuild
+```bash
+npm run dev -- --host 0.0.0.0
+```
+
+### Option B — Mode prod local (stable mobile)
+- Vous devez rebuild à chaque changement
+```bash
+npm run build
+sudo caddy stop
+sudo caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local.prod
 ```
 
 ## 10) Dépannage rapide

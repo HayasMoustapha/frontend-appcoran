@@ -30,6 +30,9 @@ function resolveBaseUrl(
     typeof window !== "undefined" ? window.location.protocol : "http:";
 
   const envUrl = envValue || "";
+  if (envUrl.startsWith("/")) {
+    return `${runtimeProtocol}//${runtimeHost}${envUrl}`;
+  }
   if (!envUrl || envUrl.includes("localhost") || envUrl.includes("127.0.0.1")) {
     return `${runtimeProtocol}//${runtimeHost}:${fallbackPort}`;
   }

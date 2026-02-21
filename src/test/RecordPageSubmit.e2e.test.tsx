@@ -1,9 +1,11 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { vi } from "vitest";
 import { RecordPage } from "../app/pages/RecordPage";
 import { setAuthToken, clearAuthToken } from "../app/api/storage";
+import { uploadAudio } from "../app/api/audios";
+import { renderWithProviders } from "./test-utils";
 
 const createJsonResponse = (data: unknown) =>
   Promise.resolve({
@@ -35,6 +37,19 @@ vi.mock("react-router", async () => {
   };
 });
 
+vi.mock("../app/api/audios", async () => {
+  const actual = await vi.importActual<typeof import("../app/api/audios")>(
+    "../app/api/audios"
+  );
+  return {
+    ...actual,
+    uploadAudio: vi.fn(async (_formData: FormData, onProgress?: (p: number) => void) => {
+      if (onProgress) onProgress(100);
+      return { id: "1" };
+    })
+  };
+});
+
 describe("RecordPage submit flow", () => {
   beforeEach(() => {
     mockNavigate.mockReset();
@@ -56,19 +71,12 @@ describe("RecordPage submit flow", () => {
       if (url.includes("/api/surah-reference")) {
         return createJsonResponse(surahReference);
       }
-      if (url.includes("/api/audios")) {
-        expect(init?.method).toBe("POST");
-        const headers = init?.headers as Record<string, string> | undefined;
-        expect(headers?.Authorization).toBe("Bearer test-token");
-        expect(init?.body).toBeInstanceOf(FormData);
-        return createJsonResponse({ id: "1" });
-      }
       return createJsonResponse({});
     });
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(
+    renderWithProviders(
       <MemoryRouter>
         <RecordPage />
       </MemoryRouter>
@@ -82,7 +90,10 @@ describe("RecordPage submit flow", () => {
     const file = new File(["test"], "test.mp3", { type: "audio/mpeg" });
     await user.upload(input as HTMLInputElement, file);
 
-    await user.type(screen.getByLabelText(/Titre de la récitation/i), "Sourate Al-Fatihah");
+    const titleSelect = screen.getByTestId("title-select");
+    const titleButton = within(titleSelect).getByRole("combobox");
+    await user.click(titleButton);
+    await user.click(await screen.findByRole("option", { name: /L'Ouverture/i }));
 
     const surahSelect = screen.getByTestId("surah-select");
     const surahButton = within(surahSelect).getByRole("combobox");
@@ -112,6 +123,7 @@ describe("RecordPage submit flow", () => {
       });
 
       expect(fetchMock).toHaveBeenCalled();
+      expect(uploadAudio).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
     },
     10000

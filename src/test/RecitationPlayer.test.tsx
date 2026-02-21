@@ -1,7 +1,8 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router";
 import { vi } from "vitest";
 import { RecitationPlayer } from "../app/pages/RecitationPlayer";
+import { renderWithProviders } from "./test-utils";
 
 const createJsonResponse = (data: unknown) =>
   Promise.resolve({
@@ -60,7 +61,7 @@ describe("RecitationPlayer", () => {
     vi.stubGlobal("fetch", fetchMock);
     vi.spyOn(window, "open").mockImplementation(() => null);
 
-    render(
+    renderWithProviders(
       <MemoryRouter initialEntries={["/recitation/1-test"]}>
         <Routes>
           <Route path="/recitation/:id" element={<RecitationPlayer />} />

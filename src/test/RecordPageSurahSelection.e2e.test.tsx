@@ -1,8 +1,9 @@
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { vi } from "vitest";
 import { RecordPage } from "../app/pages/RecordPage";
+import { renderWithProviders } from "./test-utils";
 
 const createJsonResponse = (data: unknown) =>
   Promise.resolve({
@@ -49,7 +50,7 @@ describe("RecordPage surah selection flow", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(
+    renderWithProviders(
       <MemoryRouter>
         <RecordPage />
       </MemoryRouter>
@@ -64,7 +65,7 @@ describe("RecordPage surah selection flow", () => {
     const file = new File(["test"], "test.mp3", { type: "audio/mpeg" });
     await userEvent.upload(input as HTMLInputElement, file);
 
-    await screen.findByLabelText(/Titre de la récitation/i);
+    await screen.findByTestId("title-select");
 
     const surahSelect = screen.getByTestId("surah-select");
     const verseStartSelect = screen.getByTestId("verse-start-select");

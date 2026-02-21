@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { HomePage } from "../app/pages/HomePage";
 import { vi } from "vitest";
+import { renderWithProviders } from "./test-utils";
 
 const createJsonResponse = (data: unknown) =>
   Promise.resolve({
@@ -53,13 +54,14 @@ describe("HomePage", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(
+    renderWithProviders(
       <MemoryRouter>
         <HomePage />
       </MemoryRouter>
     );
 
-    expect(await screen.findByText("Sourate Al-Fatiha")).toBeInTheDocument();
+    const titles = await screen.findAllByText("Sourate Al-Fatiha");
+    expect(titles.length).toBeGreaterThan(0);
     expect(await screen.findByText("Imam Test")).toBeInTheDocument();
   });
 });

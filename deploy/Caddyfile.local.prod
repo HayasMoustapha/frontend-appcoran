@@ -2,11 +2,19 @@
   auto_https off
 }
 
-http://appcoran.com {
+http://appcoran.com, http://localhost, http://127.0.0.1, http://192.168.1.179 {
   encode zstd gzip
   root * /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/dist
   header /index.html Cache-Control "no-store"
   try_files {path} /index.html
+
+  handle_path /api/* {
+    reverse_proxy 127.0.0.1:4000
+  }
+
+  handle_path /public/* {
+    reverse_proxy 127.0.0.1:4000
+  }
   file_server
 }
 

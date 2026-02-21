@@ -611,6 +611,7 @@ export function RecordPage() {
               >
                 <InputLabel sx={{ color: "text.secondary" }}>{t("record.titleSurah")}</InputLabel>
                 <Select
+                  data-testid="title-select"
                   value={title}
                   label={t("record.titleSurah")}
                   onChange={(e) => {
