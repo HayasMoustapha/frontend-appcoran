@@ -22,10 +22,11 @@ import {
   TableRow,
   Paper,
   IconButton,
+  Fab,
   useMediaQuery,
   useTheme
 } from "@mui/material";
-import { Search, TrendingUp, AccessTime, Star, Download, Share, Favorite, FavoriteBorder } from "@mui/icons-material";
+import { Search, TrendingUp, AccessTime, Star, Download, Share, Favorite, FavoriteBorder, KeyboardArrowUp } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { RecitationCard } from "../components/RecitationCard";
 import { getPopular, getRecent, listAudios, listFavoriteAudios, sharePublicAudio, toggleFavoriteAudio } from "../api/audios";
@@ -67,6 +68,7 @@ export function HomePage() {
     avatar: ""
   });
   const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const { t, i18n } = useTranslation();
   const { refreshToken } = useDataRefresh();
   const { currentRecitation, isPlaying, playRecitation, togglePlay } = useAudioPlayer();
@@ -178,6 +180,15 @@ export function HomePage() {
     };
   }, [i18n.language, refreshToken]);
 
+  useEffect(() => {
+    const onScroll = () => {
+      setShowScrollTop(window.scrollY > 500);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const updateRecitationState = (
     target: Recitation,
     updater: (item: Recitation) => Recitation
@@ -266,6 +277,10 @@ export function HomePage() {
     if (recitationsRef.current) {
       recitationsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  const handleScrollTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -1309,6 +1324,24 @@ export function HomePage() {
           </Box>
         </Container>
       </Box>
+
+      {showScrollTop && (
+        <Fab
+          color="primary"
+          onClick={handleScrollTop}
+          sx={{
+            position: "fixed",
+            bottom: 28,
+            right: 28,
+            zIndex: 1200,
+            background: "linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(15, 118, 110, 0.95))",
+            color: "#0B1F2A",
+            boxShadow: "0 16px 30px rgba(0,0,0,0.35)"
+          }}
+        >
+          <KeyboardArrowUp />
+        </Fab>
+      )}
 
       <Snackbar
         open={Boolean(toast)}

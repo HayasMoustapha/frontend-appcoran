@@ -40,28 +40,62 @@ export function MiniPlayer() {
     stopPlayback
   } = useAudioPlayer();
 
-  const [position, setPosition] = useState({ x: 16, y: 16 });
+  const [position, setPosition] = useState(() => {
+    if (typeof window === "undefined") return { x: 16, y: 16 };
+    const saved = window.localStorage.getItem("appcoran-miniplayer-pos");
+    if (!saved) return { x: 16, y: 16 };
+    try {
+      const parsed = JSON.parse(saved);
+      if (typeof parsed?.x === "number" && typeof parsed?.y === "number") {
+        return { x: parsed.x, y: parsed.y };
+      }
+    } catch {
+      // ignore
+    }
+    return { x: 16, y: 16 };
+  });
   const [minimized, setMinimized] = useState(false);
   const draggingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
   const targetRef = useRef<HTMLDivElement | null>(null);
   const fixedSize = { w: 450, h: 190 };
+  const minimizedSize = { w: 56, h: 56 };
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     posRef.current = position;
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("appcoran-miniplayer-pos", JSON.stringify(position));
+    }
   }, [position]);
 
   useEffect(() => {
     const onMove = (event: PointerEvent) => {
       if (!draggingRef.current) return;
 
-      const boundW = collapsed ? 120 : fixedSize.w;
-      const boundH = collapsed ? 120 : fixedSize.h;
-      const nextX = Math.max(8, Math.min(window.innerWidth - boundW - 8, event.clientX));
-      const nextY = Math.max(8, Math.min(window.innerHeight - boundH - 8, event.clientY));
+      const isCollapsed = minimized;
+      const boundW = isCollapsed ? minimizedSize.w : fixedSize.w;
+      const boundH = isCollapsed ? minimizedSize.h : fixedSize.h;
+      const padding = 8;
+      const safeTop = 12;
+      const safeRight = 12;
+      const safeBottom = 12 + 16;
+      const safeLeft = 12;
+
+      let nextX = Math.max(padding + safeLeft, Math.min(window.innerWidth - boundW - padding - safeRight, event.clientX));
+      let nextY = Math.max(padding + safeTop, Math.min(window.innerHeight - boundH - padding - safeBottom, event.clientY));
+
+      if (isCollapsed) {
+        const fabSafe = 104;
+        const maxX = window.innerWidth - boundW - fabSafe;
+        const maxY = window.innerHeight - boundH - fabSafe;
+        if (nextX > maxX && nextY > maxY) {
+          nextX = Math.max(padding, maxX);
+          nextY = Math.max(padding, maxY);
+        }
+      }
       posRef.current = { x: nextX, y: nextY };
       if (targetRef.current) {
         targetRef.current.style.transform = `translate3d(${nextX}px, ${nextY}px, 0)`;
@@ -80,7 +114,7 @@ export function MiniPlayer() {
       window.removeEventListener("pointerup", onUp);
       // no-op
     };
-  }, []);
+  }, [minimized]);
 
   const isPlayerPage = location.pathname.startsWith("/recitation/");
   const hasStartedPlayback = hasPlaybackStarted || isPlaying || currentTime > 0;
@@ -88,7 +122,7 @@ export function MiniPlayer() {
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const targetId = currentRecitation?.slug || currentRecitation?.id;
   const isCompact = fixedSize.w < 190;
-  const collapsed = false;
+  const collapsed = minimized;
   const innerPadding = "10px";
   const modeIcon =
     playbackMode === "repeat-one" ? (
@@ -121,30 +155,52 @@ export function MiniPlayer() {
     animation: isPlaying ? `miniPulse 900ms ${index * 120}ms ease-in-out infinite` : "none"
   });
 
+  useEffect(() => {
+    if (!minimized) return;
+    const safeX = Math.min(position.x, Math.max(16, window.innerWidth - minimizedSize.w - 104));
+    const safeY = Math.min(position.y, Math.max(16, window.innerHeight - minimizedSize.h - 104));
+    setPosition({ x: Math.max(16, safeX), y: Math.max(16, safeY) });
+  }, [minimized]);
+
   if (!currentRecitation || !hasStartedPlayback || isPlayerPage || !targetId) {
     return null;
   }
 
+  const safeBottom = isSmallScreen ? "calc(env(safe-area-inset-bottom, 0px) + 10px)" : "auto";
   const effectiveWidth = isSmallScreen ? "100vw" : fixedSize.w;
   const effectiveHeight = isSmallScreen ? 110 : fixedSize.h;
 
   if (minimized) {
     return (
       <Box
+        ref={targetRef}
         sx={{
           position: "fixed",
-          right: 16,
-          bottom: 16,
+          left: 0,
+          top: 0,
           zIndex: 1300,
-          width: 56,
-          height: 56,
+          width: minimizedSize.w,
+          height: minimizedSize.h,
           borderRadius: "50%",
           background:
             "linear-gradient(145deg, rgba(10,25,36,0.96), rgba(9,22,32,0.9))",
           border: "1px solid rgba(212,175,55,0.25)",
           boxShadow: "0 10px 22px rgba(2,6,12,0.5)",
           display: "grid",
-          placeItems: "center"
+          placeItems: "center",
+          cursor: "grab",
+          userSelect: "none",
+          touchAction: "none",
+          transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+          "&:active": { cursor: "grabbing" }
+        }}
+        onPointerDown={(event) => {
+          if (isSmallScreen) return;
+          event.preventDefault();
+          draggingRef.current = true;
+          startRef.current = { x: event.clientX, y: event.clientY };
+          document.body.style.userSelect = "none";
+          (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
         }}
       >
         <IconButton
@@ -168,7 +224,7 @@ export function MiniPlayer() {
         position: "fixed",
         right: "auto",
         left: isSmallScreen ? 0 : 0,
-        bottom: isSmallScreen ? 0 : "auto",
+        bottom: isSmallScreen ? safeBottom : "auto",
         top: isSmallScreen ? "auto" : 0,
         zIndex: 1300,
         width: effectiveWidth,
@@ -193,6 +249,9 @@ export function MiniPlayer() {
         boxSizing: "border-box",
         overflow: "hidden",
         "&:active": { cursor: "grabbing" },
+        "&.mini-snap-active": {
+          boxShadow: "0 0 0 2px rgba(212,175,55,0.35), 0 16px 36px rgba(2,6,12,0.65)"
+        },
         "&::before": {
           content: '""',
           position: "absolute",
@@ -225,6 +284,32 @@ export function MiniPlayer() {
         startRef.current = { x: event.clientX, y: event.clientY };
         document.body.style.userSelect = "none";
         (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+      }}
+      onPointerUp={() => {
+        if (isSmallScreen) return;
+        const boundW = fixedSize.w;
+        const boundH = fixedSize.h;
+        const margin = 12;
+        const leftSnap = margin;
+        const rightSnap = window.innerWidth - boundW - margin;
+        const topSnap = margin;
+        const bottomSnap = window.innerHeight - boundH - margin;
+        let nextX = position.x;
+        let nextY = position.y;
+        const snapThreshold = 32;
+        const shouldSnapX = Math.abs(nextX - leftSnap) < snapThreshold || Math.abs(nextX - rightSnap) < snapThreshold;
+        const shouldSnapY = Math.abs(nextY - topSnap) < snapThreshold || Math.abs(nextY - bottomSnap) < snapThreshold;
+        if (Math.abs(nextX - leftSnap) < snapThreshold) nextX = leftSnap;
+        if (Math.abs(nextX - rightSnap) < snapThreshold) nextX = rightSnap;
+        if (Math.abs(nextY - topSnap) < snapThreshold) nextY = topSnap;
+        if (Math.abs(nextY - bottomSnap) < snapThreshold) nextY = bottomSnap;
+        if (nextX !== position.x || nextY !== position.y) {
+          setPosition({ x: nextX, y: nextY });
+        }
+        if (shouldSnapX || shouldSnapY) {
+          targetRef.current?.classList.add("mini-snap-active");
+          window.setTimeout(() => targetRef.current?.classList.remove("mini-snap-active"), 280);
+        }
       }}
     >
       <Box

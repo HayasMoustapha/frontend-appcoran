@@ -35,13 +35,14 @@ import {
   QueueMusic
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
-import { getPublicAudioBySlug, listAudios, sharePublicAudio } from "../api/audios";
+import { getPublicAudioBySlug, listAudios, sharePublicAudio, listFavoriteAudios, toggleFavoriteAudio } from "../api/audios";
 import { isNetworkError, PUBLIC_BASE_URL } from "../api/client";
 import { mapAudioToRecitation, mapPublicAudioToRecitation } from "../api/mappers";
 import { ensureArray } from "../utils/ensureArray";
 import type { Recitation } from "../domain/types";
 import { useTranslation } from "react-i18next";
 import { formatNumber, formatNumericText } from "../utils/formatNumber";
+import { getAuthToken } from "../api/storage";
 import { useAudioPlayer } from "../components/AudioPlayerProvider";
 import { useDataRefresh } from "../state/dataRefresh";
 
@@ -56,6 +57,8 @@ export function RecitationPlayer() {
   const [recitation, setRecitation] = useState<Recitation | null>(null);
   const [allRecitations, setAllRecitations] = useState<Recitation[]>([]);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [favoritePulse, setFavoritePulse] = useState(false);
   const [error, setError] = useState("");
   const [audioLoadError, setAudioLoadError] = useState("");
   const [hasTriedPlay, setHasTriedPlay] = useState(false);
@@ -118,6 +121,35 @@ export function RecitationPlayer() {
       active = false;
     };
   }, [refreshToken]);
+
+  useEffect(() => {
+    let active = true;
+    const loadFavorites = async () => {
+      if (!recitation) return;
+      const token = getAuthToken();
+      if (!token) {
+        setIsFavorite(false);
+        return;
+      }
+      try {
+        const result = await listFavoriteAudios();
+        if (!active) return;
+        const ids = result?.audioIds ?? [];
+        setIsFavorite(ids.includes(recitation.id) || (recitation.slug ? ids.includes(recitation.slug) : false));
+      } catch {
+        // ignore favorites fetch errors on public page
+      }
+    };
+    loadFavorites();
+    return () => {
+      active = false;
+    };
+  }, [recitation?.id, recitation?.slug]);
+
+  useEffect(() => {
+    if (!recitation) return;
+    setLikesCount(recitation.likes ?? 0);
+  }, [recitation?.id, recitation?.likes]);
 
   useEffect(() => {
     let active = true;
@@ -481,14 +513,47 @@ export function RecitationPlayer() {
                     size="small"
                     sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
                   />
+                  <Chip
+                    label={`${formatNumber(likesCount, i18n.language)} ${t("player.likes")}`}
+                    size="small"
+                    sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }}
+                  />
                   <Chip label={recitation.date} size="small" sx={{ background: "rgba(255,255,255,0.08)", color: "text.primary" }} />
                 </Box>
               </Box>
 
               <IconButton
-                onClick={() => setIsFavorite(!isFavorite)}
+                onClick={async () => {
+                  const token = getAuthToken();
+                  if (!token) {
+                    setToast({ message: t("login.failed"), severity: "error" });
+                    return;
+                  }
+                  try {
+                    const result = await toggleFavoriteAudio(recitation.id);
+                    const nextLiked = result?.liked ?? !isFavorite;
+                    const nextLikes = result?.like_count ?? likesCount;
+                    setIsFavorite(nextLiked);
+                    setLikesCount(nextLikes);
+                    setFavoritePulse(true);
+                    window.setTimeout(() => setFavoritePulse(false), 500);
+                  } catch (err) {
+                    setToast({
+                      message: err instanceof Error ? err.message : "Action impossible",
+                      severity: "error"
+                    });
+                  }
+                }}
                 sx={{
-                  color: isFavorite ? "error.main" : "text.secondary"
+                  color: isFavorite ? "error.main" : "text.secondary",
+                  transition: "transform 0.2s ease",
+                  transform: favoritePulse ? "scale(1.15)" : "scale(1)",
+                  "@keyframes heartPop": {
+                    "0%": { transform: "scale(1)" },
+                    "50%": { transform: "scale(1.2)" },
+                    "100%": { transform: "scale(1)" }
+                  },
+                  animation: favoritePulse ? "heartPop 0.45s ease" : "none"
                 }}
               >
                 {isFavorite ? <Favorite /> : <FavoriteBorder />}
