@@ -49,7 +49,15 @@ export async function getPublicAudioBySlug(slug: string) {
 }
 
 export async function sharePublicAudio(slug: string) {
-  return post<{ share_url: string }>(`/public/audios/${slug}/share`);
+  return post<{ share_url: string; like_count?: number }>(`/public/audios/${slug}/share`);
+}
+
+export async function listFavoriteAudios() {
+  return get<{ audioIds: string[] }>(`/api/audios/favorites`, { auth: true });
+}
+
+export async function toggleFavoriteAudio(id: string) {
+  return post<{ liked: boolean; like_count: number }>(`/api/audios/${id}/favorite`, undefined, { auth: true });
 }
 
 export async function uploadAudio(

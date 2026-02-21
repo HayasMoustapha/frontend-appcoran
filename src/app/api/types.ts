@@ -15,6 +15,7 @@ export interface ApiAudio {
   download_count?: number;
   view_count?: number;
   share_count?: number;
+  like_count?: number;
   duration_seconds?: number | null;
   is_complete?: boolean | null;
 }
@@ -30,6 +31,7 @@ export interface ApiPublicAudio {
   view_count: number;
   listen_count: number;
   download_count: number;
+  like_count: number;
   created_at: string;
   share_url: string;
   stream_url: string;

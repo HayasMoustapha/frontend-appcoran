@@ -39,7 +39,8 @@ import {
   Delete,
   Add,
   Assessment,
-  CloudUpload
+  CloudUpload,
+  Favorite
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { useNavigate } from "react-router";
@@ -66,7 +67,7 @@ export function DashboardPage() {
   const [toast, setToast] = useState<{ message: string; severity: "error" | "success" } | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
-  const [reportStats, setReportStats] = useState<{ day: string; listens: number; downloads: number; shares: number }[]>([]);
+  const [reportStats, setReportStats] = useState<{ day: string; listens: number; downloads: number; shares: number; likes?: number }[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editTitle, setEditTitle] = useState("");
@@ -151,6 +152,7 @@ export function DashboardPage() {
   const totalRecitations = overview?.totalRecitations ?? recitations.length;
   const totalListens = overview?.totalListens ?? 0;
   const totalDownloads = overview?.totalDownloads ?? 0;
+  const totalLikes = overview?.totalLikes ?? 0;
   const averageListens = overview?.averageListensPerRecitation ?? 0;
 
   const handleOpenReport = async () => {
@@ -454,6 +456,32 @@ export function DashboardPage() {
                 </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   {t("dashboard.stats.average")}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Card
+              sx={{
+                borderRadius: 3,
+                background: "rgba(15, 28, 39, 0.85)",
+                color: "text.primary",
+                boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                backdropFilter: "blur(10px)",
+                animation: "fadeUp 1s ease both"
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+                  <Favorite sx={{ fontSize: 40, opacity: 0.9 }} />
+                </Box>
+                <Typography variant="h3" fontWeight={800}>
+                  {formatNumber(totalLikes, i18n.language)}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  {t("dashboard.stats.likes")}
                 </Typography>
               </CardContent>
             </Card>
@@ -841,7 +869,7 @@ export function DashboardPage() {
                 <ListItem key={item.day} divider>
                   <ListItemText
                     primary={item.day}
-                    secondary={`${t("home.table.listens")}: ${formatNumber(item.listens, i18n.language)} • ${t("home.table.downloads")}: ${formatNumber(item.downloads, i18n.language)} • ${t("dashboard.shares")}: ${formatNumber(item.shares, i18n.language)}`}
+                    secondary={`${t("home.table.listens")}: ${formatNumber(item.listens, i18n.language)} • ${t("home.table.downloads")}: ${formatNumber(item.downloads, i18n.language)} • ${t("dashboard.shares")}: ${formatNumber(item.shares, i18n.language)} • ${t("dashboard.likes")}: ${formatNumber(item.likes ?? 0, i18n.language)}`}
                   />
                 </ListItem>
               ))}

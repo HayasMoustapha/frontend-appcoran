@@ -10,8 +10,10 @@ export interface Recitation {
   withBasmala: boolean;
   listens: number;
   downloads: number;
+  likes?: number;
   views?: number;
   shares?: number;
+  isFavorite?: boolean;
   isComplete?: boolean;
   description?: string | null;
   streamUrl?: string;
@@ -38,6 +40,7 @@ export interface DashboardOverview {
   totalListens: number;
   totalDownloads: number;
   totalShares: number;
+  totalLikes?: number;
   averageListensPerRecitation: number;
   mostPopularAudio?: Recitation | null;
   mostListenedSurah?: {
@@ -61,6 +64,7 @@ export interface DashboardPeriodStat {
   listens: number;
   downloads: number;
   shares: number;
+  likes?: number;
 }
 
 export interface SurahReference {

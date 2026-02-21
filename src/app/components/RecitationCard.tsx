@@ -1,5 +1,5 @@
-import { Card, CardContent, Typography, Box, IconButton, Chip } from "@mui/material";
-import { PlayArrow, Pause, Download, Visibility } from "@mui/icons-material";
+import { Card, CardContent, Typography, Box, IconButton, Chip, Tooltip } from "@mui/material";
+import { PlayArrow, Pause, Download, Visibility, Share, Favorite, FavoriteBorder } from "@mui/icons-material";
 import type { Recitation } from "../domain/types";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,9 @@ interface RecitationCardProps {
   isActive?: boolean;
   isPlaying?: boolean;
   onPlayToggle?: () => void;
+  onDownload?: (recitation: Recitation) => void;
+  onShare?: (recitation: Recitation) => void;
+  onToggleFavorite?: (recitation: Recitation) => void;
 }
 
 export function RecitationCard({
@@ -18,7 +21,10 @@ export function RecitationCard({
   featured = false,
   isActive = false,
   isPlaying = false,
-  onPlayToggle
+  onPlayToggle,
+  onDownload,
+  onShare,
+  onToggleFavorite
 }: RecitationCardProps) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -28,7 +34,7 @@ export function RecitationCard({
   return (
     <Card
       onClick={(event) => {
-        if ((event.target as HTMLElement)?.closest("[data-play-button]")) return;
+        if ((event.target as HTMLElement)?.closest("[data-play-button],[data-action-button]")) return;
         navigate(`/recitation/${targetId}`);
       }}
       sx={{
@@ -230,6 +236,78 @@ export function RecitationCard({
             }}
           />
         )}
+
+        <Box
+          sx={{
+            position: "absolute",
+            top: 12,
+            left: 12,
+            display: "flex",
+            gap: 1,
+            alignItems: "center"
+          }}
+        >
+          <Tooltip title={t("player.download")}>
+            <IconButton
+              data-action-button
+              size="small"
+              onClick={(event) => {
+                event.stopPropagation();
+                onDownload?.(recitation);
+              }}
+              sx={{
+                width: 36,
+                height: 36,
+                background: "rgba(15, 28, 39, 0.55)",
+                color: "rgba(255,255,255,0.9)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                "&:hover": { background: "rgba(15, 28, 39, 0.75)" }
+              }}
+            >
+              <Download sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t("player.share")}>
+            <IconButton
+              data-action-button
+              size="small"
+              onClick={(event) => {
+                event.stopPropagation();
+                onShare?.(recitation);
+              }}
+              sx={{
+                width: 36,
+                height: 36,
+                background: "rgba(15, 28, 39, 0.55)",
+                color: "rgba(255,255,255,0.9)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                "&:hover": { background: "rgba(15, 28, 39, 0.75)" }
+              }}
+            >
+              <Share sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={recitation.isFavorite ? t("player.unlike") : t("player.like")}>
+            <IconButton
+              data-action-button
+              size="small"
+              onClick={(event) => {
+                event.stopPropagation();
+                onToggleFavorite?.(recitation);
+              }}
+              sx={{
+                width: 36,
+                height: 36,
+                background: recitation.isFavorite ? "rgba(212, 175, 55, 0.85)" : "rgba(15, 28, 39, 0.55)",
+                color: recitation.isFavorite ? "#0B1F2A" : "rgba(255,255,255,0.9)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                "&:hover": { background: "rgba(212, 175, 55, 0.95)" }
+              }}
+            >
+              {recitation.isFavorite ? <Favorite sx={{ fontSize: 18 }} /> : <FavoriteBorder sx={{ fontSize: 18 }} />}
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
 
       <CardContent
@@ -291,6 +369,12 @@ export function RecitationCard({
               <Download sx={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }} />
               <Typography variant="caption" color="rgba(255,255,255,0.7)">
                 {formatNumber(recitation.downloads, i18n.language)}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <Favorite sx={{ fontSize: 16, color: "rgba(255,255,255,0.7)" }} />
+              <Typography variant="caption" color="rgba(255,255,255,0.7)">
+                {formatNumber(recitation.likes ?? 0, i18n.language)}
               </Typography>
             </Box>
           </Box>

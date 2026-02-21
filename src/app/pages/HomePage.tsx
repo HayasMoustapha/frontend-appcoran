@@ -25,10 +25,10 @@ import {
   useMediaQuery,
   useTheme
 } from "@mui/material";
-import { Search, TrendingUp, AccessTime, Star } from "@mui/icons-material";
+import { Search, TrendingUp, AccessTime, Star, Download, Share, Favorite, FavoriteBorder } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
 import { RecitationCard } from "../components/RecitationCard";
-import { getPopular, getRecent, listAudios } from "../api/audios";
+import { getPopular, getRecent, listAudios, listFavoriteAudios, sharePublicAudio, toggleFavoriteAudio } from "../api/audios";
 import { isNetworkError, PUBLIC_BASE_URL } from "../api/client";
 import { getPublicProfile } from "../api/profile";
 import { mapAudioToRecitation, mapPublicProfile } from "../api/mappers";
@@ -53,6 +53,7 @@ export function HomePage() {
   const [searchResults, setSearchResults] = useState<Recitation[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [surahReference, setSurahReference] = useState<SurahReference[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [imamProfile, setImamProfile] = useState<ImamProfile>({
     name: "",
     arabicName: "",
@@ -77,13 +78,15 @@ export function HomePage() {
     let intervalId: number | null = null;
     const loadData = async () => {
       try {
-        const [profileResult, allResult, recentResult, popularResult, surahResult] = await Promise.allSettled([
-          getPublicProfile(),
-          listAudios(),
-          getRecent(6),
-          getPopular(6),
-          getSurahReference()
-        ]);
+        const [profileResult, allResult, recentResult, popularResult, surahResult, favoritesResult] =
+          await Promise.allSettled([
+            getPublicProfile(),
+            listAudios(),
+            getRecent(6),
+            getPopular(6),
+            getSurahReference(),
+            listFavoriteAudios()
+          ]);
         if (!active) return;
 
         if (profileResult.status === "fulfilled") {
@@ -97,6 +100,12 @@ export function HomePage() {
           setToast({ message: profileResult.reason.message, severity: "error" });
         }
 
+        const favoriteSet =
+          favoritesResult.status === "fulfilled"
+            ? new Set(favoritesResult.value?.audioIds ?? [])
+            : new Set<string>();
+        setFavoriteIds(favoriteSet);
+
         const withPublicUrls = (item: Recitation) =>
           item.slug
             ? {
@@ -106,9 +115,14 @@ export function HomePage() {
               }
             : item;
 
+        const withFavorites = (item: Recitation) => ({
+          ...item,
+          isFavorite: favoriteSet.has(item.id) || (item.slug ? favoriteSet.has(item.slug) : false)
+        });
+
         if (allResult.status === "fulfilled") {
           const allItems = ensureArray(allResult.value);
-          const mappedAll = allItems.map(mapAudioToRecitation).map(withPublicUrls);
+          const mappedAll = allItems.map(mapAudioToRecitation).map(withPublicUrls).map(withFavorites);
           setAllRecitations(mappedAll);
           setSearchResults(mappedAll);
         } else if (!isNetworkError(allResult.reason)) {
@@ -119,7 +133,7 @@ export function HomePage() {
 
         if (recentResult.status === "fulfilled") {
           const recentItems = ensureArray(recentResult.value);
-          setRecentRecitations(recentItems.map(mapAudioToRecitation).map(withPublicUrls));
+          setRecentRecitations(recentItems.map(mapAudioToRecitation).map(withPublicUrls).map(withFavorites));
         } else if (!isNetworkError(recentResult.reason)) {
           const message =
             recentResult.reason instanceof Error ? recentResult.reason.message : "Erreur lors du chargement";
@@ -128,7 +142,7 @@ export function HomePage() {
 
         if (popularResult.status === "fulfilled") {
           const popularItems = ensureArray(popularResult.value);
-          setPopularRecitations(popularItems.map(mapAudioToRecitation).map(withPublicUrls));
+          setPopularRecitations(popularItems.map(mapAudioToRecitation).map(withPublicUrls).map(withFavorites));
         } else if (!isNetworkError(popularResult.reason)) {
           const message =
             popularResult.reason instanceof Error ? popularResult.reason.message : "Erreur lors du chargement";
@@ -163,6 +177,90 @@ export function HomePage() {
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [i18n.language, refreshToken]);
+
+  const updateRecitationState = (
+    target: Recitation,
+    updater: (item: Recitation) => Recitation
+  ) => {
+    const matches = (item: Recitation) =>
+      item.id === target.id || (target.slug && item.slug === target.slug);
+
+    setAllRecitations((prev) => prev.map((item) => (matches(item) ? updater(item) : item)));
+    setRecentRecitations((prev) => prev.map((item) => (matches(item) ? updater(item) : item)));
+    setPopularRecitations((prev) => prev.map((item) => (matches(item) ? updater(item) : item)));
+    setSearchResults((prev) => prev.map((item) => (matches(item) ? updater(item) : item)));
+  };
+
+  const handleDownload = (recitation: Recitation) => {
+    const url =
+      recitation.downloadUrl ||
+      (recitation.slug ? `${PUBLIC_BASE_URL}/public/audios/${recitation.slug}/download` : "");
+    if (!url) {
+      setToast({ message: "Lien de téléchargement indisponible.", severity: "error" });
+      return;
+    }
+    window.open(url, "_blank", "noopener");
+  };
+
+  const handleShare = async (recitation: Recitation) => {
+    try {
+      let shareUrl = recitation.shareUrl || "";
+      if (recitation.slug) {
+        const result = await sharePublicAudio(recitation.slug);
+        shareUrl = result?.share_url || shareUrl;
+      }
+
+      if (!shareUrl && recitation.slug) {
+        shareUrl = `${window.location.origin}/recitation/${recitation.slug}`;
+      }
+
+      if (navigator.share) {
+        await navigator.share({
+          title: recitation.title,
+          text: t("player.shareText", { title: recitation.title }),
+          url: shareUrl
+        });
+      } else if (navigator.clipboard && shareUrl) {
+        await navigator.clipboard.writeText(shareUrl);
+        setToast({ message: t("player.linkCopied"), severity: "success" });
+      }
+
+      if (recitation.slug) {
+        updateRecitationState(recitation, (item) => ({
+          ...item,
+          shares: (item.shares ?? 0) + 1
+        }));
+      }
+    } catch (err) {
+      if (!isNetworkError(err)) {
+        setToast({ message: err instanceof Error ? err.message : "Partage impossible", severity: "error" });
+      }
+    }
+  };
+
+  const handleToggleFavorite = async (recitation: Recitation) => {
+    try {
+      const result = await toggleFavoriteAudio(recitation.id);
+      const nextLiked = result?.liked ?? !recitation.isFavorite;
+      const nextLikes = result?.like_count ?? recitation.likes ?? 0;
+      const nextSet = new Set(favoriteIds);
+      if (nextLiked) {
+        nextSet.add(recitation.id);
+      } else {
+        nextSet.delete(recitation.id);
+      }
+      setFavoriteIds(nextSet);
+      updateRecitationState(recitation, (item) => ({
+        ...item,
+        isFavorite: nextLiked,
+        likes: nextLikes
+      }));
+    } catch (err) {
+      if (!isNetworkError(err)) {
+        setToast({ message: err instanceof Error ? err.message : "Action impossible", severity: "error" });
+      }
+    }
+  };
 
   const handleSearchSubmit = () => {
     if (recitationsRef.current) {
@@ -944,6 +1042,9 @@ export function HomePage() {
                         playRecitation(recitation, true);
                       }
                     }}
+                    onDownload={handleDownload}
+                    onShare={handleShare}
+                    onToggleFavorite={handleToggleFavorite}
                   />
                 </Grid>
               ))}
@@ -967,6 +1068,32 @@ export function HomePage() {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                     {recitation.description || t("home.defaultDescription")}
                   </Typography>
+                  <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 1.4 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDownload(recitation)}
+                      sx={{ color: "text.primary" }}
+                    >
+                      <Download fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleShare(recitation)}
+                      sx={{ color: "text.primary" }}
+                    >
+                      <Share fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleToggleFavorite(recitation)}
+                      sx={{ color: recitation.isFavorite ? "#D4AF37" : "text.primary" }}
+                    >
+                      {recitation.isFavorite ? <Favorite fontSize="small" /> : <FavoriteBorder fontSize="small" />}
+                    </IconButton>
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                      {formatNumber(recitation.likes ?? 0, i18n.language)} {t("home.table.likes")}
+                    </Typography>
+                  </Box>
                   <Box
                     sx={{
                       display: "grid",
@@ -1057,6 +1184,9 @@ export function HomePage() {
                     <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>
                       {t("home.table.downloads")}
                     </TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: "text.primary" }}>
+                      {t("home.table.likes")}
+                    </TableCell>
                     <TableCell align="right" sx={{ fontWeight: 800, color: "text.primary" }}>
                       {t("home.table.action")}
                     </TableCell>
@@ -1090,24 +1220,46 @@ export function HomePage() {
                       <TableCell sx={{ color: "text.primary" }}>
                         {formatNumber(recitation.downloads, i18n.language)}
                       </TableCell>
+                      <TableCell sx={{ color: "text.primary" }}>
+                        {formatNumber(recitation.likes ?? 0, i18n.language)}
+                      </TableCell>
                       <TableCell align="right">
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() =>
-                            navigate(`/recitation/${recitation.slug || recitation.id}`)
-                          }
-                          sx={{
-                            borderRadius: 2,
-                            textTransform: "none",
-                            fontWeight: 700,
-                            color: "#0B1F2A",
-                            background:
-                              "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)"
-                          }}
-                        >
-                          {t("home.table.listen")}
-                        </Button>
+                        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                          <IconButton size="small" onClick={() => handleDownload(recitation)}>
+                            <Download fontSize="small" />
+                          </IconButton>
+                          <IconButton size="small" onClick={() => handleShare(recitation)}>
+                            <Share fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleToggleFavorite(recitation)}
+                            sx={{ color: recitation.isFavorite ? "#D4AF37" : "inherit" }}
+                          >
+                            {recitation.isFavorite ? (
+                              <Favorite fontSize="small" />
+                            ) : (
+                              <FavoriteBorder fontSize="small" />
+                            )}
+                          </IconButton>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={() =>
+                              navigate(`/recitation/${recitation.slug || recitation.id}`)
+                            }
+                            sx={{
+                              borderRadius: 2,
+                              textTransform: "none",
+                              fontWeight: 700,
+                              color: "#0B1F2A",
+                              background:
+                                "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)"
+                            }}
+                          >
+                            {t("home.table.listen")}
+                          </Button>
+                        </Box>
                       </TableCell>
                     </TableRow>
                   ))}
