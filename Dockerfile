@@ -6,8 +6,10 @@ RUN npm ci
 COPY . .
 ARG VITE_API_BASE_URL=http://api.appcoran.com
 ARG VITE_PUBLIC_APP_URL=http://appcoran.com
+ARG VITE_PUBLIC_BASE_URL=http://api.appcoran.com
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_PUBLIC_APP_URL=$VITE_PUBLIC_APP_URL
+ENV VITE_PUBLIC_BASE_URL=$VITE_PUBLIC_BASE_URL
 RUN npm run build
 
 FROM nginx:1.27-alpine AS runtime
