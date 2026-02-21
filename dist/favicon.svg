@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="AppCoran Logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#047857" />
+      <stop offset="55%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#D4AF37" />
+    </linearGradient>
+    <mask id="crescent">
+      <rect width="256" height="256" fill="black" />
+      <circle cx="116" cy="128" r="64" fill="white" />
+      <circle cx="148" cy="128" r="52" fill="black" />
+    </mask>
+  </defs>
+
+  <rect width="256" height="256" rx="64" fill="url(#g)" />
+
+  <g mask="url(#crescent)">
+    <rect width="256" height="256" fill="#FFFFFF" opacity="0.92" />
+  </g>
+
+  <polygon
+    points="174,78 183,102 208,103 188,118 195,142 174,128 153,142 160,118 140,103 165,102"
+    fill="#FFFFFF"
+    opacity="0.95"
+  />
+</svg>
