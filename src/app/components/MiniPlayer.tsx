@@ -56,6 +56,7 @@ export function MiniPlayer() {
   });
   const [minimized, setMinimized] = useState(false);
   const draggingRef = useRef(false);
+  const dragMovedRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
   const targetRef = useRef<HTMLDivElement | null>(null);
@@ -74,6 +75,13 @@ export function MiniPlayer() {
   useEffect(() => {
     const onMove = (event: PointerEvent) => {
       if (!draggingRef.current) return;
+      if (!dragMovedRef.current) {
+        const dx = Math.abs(event.clientX - startRef.current.x);
+        const dy = Math.abs(event.clientY - startRef.current.y);
+        if (dx > 3 || dy > 3) {
+          dragMovedRef.current = true;
+        }
+      }
 
       const isCollapsed = minimized;
       const boundW = isCollapsed ? minimizedSize.w : fixedSize.w;
@@ -105,7 +113,10 @@ export function MiniPlayer() {
       draggingRef.current = false;
       document.body.style.userSelect = "";
       setPosition(posRef.current);
-      // no-op
+      if (minimized && !dragMovedRef.current) {
+        setMinimized(false);
+      }
+      dragMovedRef.current = false;
     };
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
@@ -157,8 +168,10 @@ export function MiniPlayer() {
 
   useEffect(() => {
     if (!minimized) return;
-    const safeX = Math.min(position.x, Math.max(16, window.innerWidth - minimizedSize.w - 104));
-    const safeY = Math.min(position.y, Math.max(16, window.innerHeight - minimizedSize.h - 104));
+    const targetX = Math.max(16, Math.round(window.innerWidth / 2 - minimizedSize.w - 16));
+    const targetY = Math.max(16, Math.round(window.innerHeight - minimizedSize.h - 28));
+    const safeX = Math.min(targetX, Math.max(16, window.innerWidth - minimizedSize.w - 104));
+    const safeY = Math.min(targetY, Math.max(16, window.innerHeight - minimizedSize.h - 104));
     setPosition({ x: Math.max(16, safeX), y: Math.max(16, safeY) });
   }, [minimized]);
 
@@ -198,9 +211,14 @@ export function MiniPlayer() {
           if (isSmallScreen) return;
           event.preventDefault();
           draggingRef.current = true;
+          dragMovedRef.current = false;
           startRef.current = { x: event.clientX, y: event.clientY };
           document.body.style.userSelect = "none";
           (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+        }}
+        onClick={() => {
+          if (dragMovedRef.current) return;
+          setMinimized(false);
         }}
       >
         <IconButton
