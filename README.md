@@ -1,97 +1,96 @@
-# Web app for Imam's recitations
+# AppCoran — Frontend (guide très simple)
 
-This is a code bundle for Web app for Imam's recitations. The original project is available at https://www.figma.com/design/LDkJH4ybNhOy0mH7yUuywa/Web-app-for-Imam-s-recitations.
+Bienvenue ! Ce guide explique **pas à pas** comment lancer l’interface web, même si vous débutez.
 
-## Configuration
+## 1) Ce que fait le frontend (en mots simples)
+Le **frontend** est l’interface visible : pages, boutons, formulaires, lecture audio, etc.
+Il parle avec le **backend** (le serveur) pour récupérer les récitations, se connecter, publier, etc.
 
-Create a `.env` file based on `.env.example`:
+Si le backend ne tourne pas, le frontend s’ouvre mais **les données n’apparaissent pas**.
 
-- `VITE_API_BASE_URL` — URL of the backend API (Express server)
-- `VITE_PUBLIC_APP_URL` — URL of the frontend app (used for share links)
+## 2) Petit glossaire (mots techniques expliqués)
+- **Frontend** : la partie que vous voyez dans le navigateur.
+- **Backend** : le serveur qui stocke et envoie les données.
+- **API** : une “porte” du backend pour envoyer/recevoir des données.
+- **.env** : un fichier de configuration (adresses, clés, options).
+- **Port** : un numéro qui fait partie de l’adresse (ex. : `:5173`).
+- **localhost** : votre propre ordinateur.
+- **Build** : version “finale” plus stable, utilisée en production ou sur iPhone.
 
-## Streaming
+## 3) Prérequis (ce qu’il faut installer)
+- **Node.js** (version 18+)
+- **npm** (installé avec Node.js)
 
-Audio playback relies on the backend streaming endpoints. If an uploaded file
-is not browser‑compatible, the backend converts it to MP3 for streaming.
-
-## Running the code
-
-Run `npm i` to install the dependencies.
-
-Run `npm run dev` to start the development server.
-
-## Docker (Full Stack)
-
-Use the compose file in this folder to run frontend and backend with custom domains.
-
-1. Add local domain mapping (desktop only):
-
-```
-127.0.0.1 appcoran.com api.appcoran.com
-```
-
-2. Start from this folder:
-
+Vérifiez que c’est installé :
 ```bash
-docker compose up --build
+node -v
+npm -v
 ```
 
-3. Access:
-
-```
-Frontend: http://appcoran.com
-Backend:  http://api.appcoran.com
-```
-
-## Access From Phone (Android / iOS) With appcoran.com
-
-You can keep the domain **appcoran.com** on your phone using your router DNS
-(recommended). This works on Android and iOS, no app install required.
-
-### Recommended (Router DNS)
-1. Find your PC IP (example: `192.168.1.25`).
-2. In your router admin UI, add local DNS records:
-   - `appcoran.com` → `192.168.1.25`
-   - `api.appcoran.com` → `192.168.1.25`
-3. Make sure your phone uses the router DNS (automatic is fine).
-4. Open on phone: `http://appcoran.com`
-
-### If Router Has No DNS (Optional dnsmasq)
-You can run a lightweight DNS server on your PC and set it as the phone DNS.
-
-1. Create a file `dnsmasq.conf`:
-
-```conf
-address=/appcoran.com/192.168.1.25
-address=/api.appcoran.com/192.168.1.25
-```
-
-2. Run dnsmasq in Docker:
-
+## 4) Installation (première fois)
+Depuis le dossier `frontend-appcoran` :
 ```bash
-docker run -d --name appcoran-dns \
-  -p 53:53/udp \
-  -v "$PWD/dnsmasq.conf":/etc/dnsmasq.conf \
-  --restart unless-stopped \
-  andyshinn/dnsmasq:2.85
+npm install
 ```
 
-3. On the phone, set DNS manually to your PC IP.
+**Résultat attendu :** les dépendances s’installent sans erreur.
 
-### Notes
-- Phone and PC must be on the **same Wi‑Fi network**.
-- Keep `docker compose up --build` running.
+## 5) Configuration `.env`
+Copiez le modèle :
+```bash
+cp .env.example .env
+```
 
-## Installable (PWA)
+Puis ouvrez `.env` et renseignez :
+- `VITE_API_BASE_URL` : l’adresse du backend (ex. : `http://localhost:4000`)
+- `VITE_PUBLIC_APP_URL` : l’adresse du frontend (ex. : `http://localhost:5173`)
+- `VITE_PUBLIC_BASE_URL` : souvent identique au backend
 
-Once running, open the app in a browser and choose “Install” to add it to your device.
+**Important :** si vous changez `.env`, **relancez** le frontend.
 
-## Tests
+## 6) Démarrer en mode développement (PC)
+```bash
+npm run dev
+```
 
-Run `npm run test` to execute the frontend tests.
+Ouvrez : `http://localhost:5173`
 
-## Security & Production
-See `docs/SECURITY_PRODUCTION_GUIDE.md`
+**Résultat attendu :** la page d’accueil s’affiche avec le thème.
 
-## Déploiement Production (DigitalOcean)
-Voir `deploy/production/README.md`
+## 7) Mode production local (recommandé pour iPhone)
+Le mode dev de Vite peut être instable sur iOS (styles qui disparaissent après rechargement).
+
+1) Construire le frontend :
+```bash
+npm run build
+```
+
+2) Lancer le serveur Caddy (fourni) :
+```bash
+caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local.prod
+```
+
+**Résultat attendu :** l’interface est stable après rechargement.
+
+## 8) Accès depuis téléphone (Android / iPhone)
+Suivez le guide pas à pas ici :
+- `frontend-appcoran/DEPLOYMENT_MOBILE.md`
+
+Ce guide explique :
+- comment garder le domaine `appcoran.com`
+- comment configurer le DNS
+- comment éviter les problèmes de style sur iPhone
+
+## 9) Tests
+```bash
+npm run test
+```
+
+## 10) Dépannage rapide
+- **Les données n’apparaissent pas** : vérifiez `VITE_API_BASE_URL` et que le backend tourne.
+- **Styles manquants sur iPhone** : utilisez le build + Caddy (section 7).
+- **Changement .env** : redémarrez le frontend.
+
+## 11) Production et sécurité
+- Guide sécurité : `frontend-appcoran/docs/SECURITY_PRODUCTION_GUIDE.md`
+- Déploiement complet : `frontend-appcoran/deploy/production/README.md`

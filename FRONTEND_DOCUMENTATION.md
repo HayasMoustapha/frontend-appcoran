@@ -1,222 +1,172 @@
-# Documentation Frontend — AppCoran
+# Documentation Frontend — AppCoran (version débutant)
 
-Cette documentation est la référence complète du frontend basé uniquement sur le code actuel. Elle est structurée pour permettre à un débutant de reconstruire l’interface et les fonctionnalités sans ambiguïté.
+Ce document explique **comment le frontend fonctionne**, **pourquoi il est organisé ainsi**, et **comment le reconstruire** pas à pas.
 
-## 1. Vue d’ensemble
-- Application web de récitations coraniques.
-- Frontend Vite + React + MUI + React Router + i18next.
-- Thème “Nuit céleste” avec animations Three.js et motifs SVG.
-- Lecture audio persistante avec MiniPlayer déplaçable.
+> Objectif : qu’un débutant puisse comprendre et relancer l’interface sans assistance.
 
-## 2. Structure du projet
-Racine frontend: `frontend-appcoran/`
+---
 
-Chemins principaux:
-- `src/main.tsx` — point d’entrée React.
-- `src/app/App.tsx` — thème global, VisualLayers, Router.
-- `src/app/routes.tsx` — routes applicatives.
-- `src/app/components/` — composants partagés.
-- `src/app/pages/` — pages (Home, Player, Record, Dashboard, Login, Profile).
-- `src/app/api/` — client HTTP et endpoints.
-- `src/app/i18n/` — traduction FR/EN/AR.
-- `src/styles/` — CSS global, variables et polices.
+## 1) Vue d’ensemble (en mots simples)
+- Le frontend est une application web (React + Vite).
+- Il affiche les récitations, le lecteur audio et les pages admin.
+- Il communique avec un serveur (backend) via une API.
 
-## 3. Démarrage rapide (reproduire à zéro)
-1. Créer un projet Vite React TypeScript.
-2. Installer les dépendances:
-```
-npm i @mui/material @mui/icons-material @emotion/react @emotion/styled
-npm i react-router react-router-dom i18next react-i18next
-npm i three
-```
-3. Ajouter la structure de dossiers `src/app`, `src/styles`.
-4. Créer `src/main.tsx` et monter `App`.
-5. Importer `styles/index.css`.
-6. Créer le thème global dans `src/app/App.tsx`.
-7. Ajouter `RouterProvider` et routes.
-8. Ajouter `AudioPlayerProvider` pour lecture persistante.
-9. Ajouter `VisualLayers` pour le fond animé.
-10. Implémenter les pages une par une.
+### Ce que l’utilisateur final voit
+- Page d’accueil avec recherche, tabs et carrousel.
+- Page de lecture complète.
+- MiniPlayer qui reste visible en dehors de la page de lecture.
+- Pages admin : login, dashboard, profil, enregistrement.
 
-## 4. Charte graphique et thème
-Fichiers:
-- `src/app/App.tsx`
+---
+
+## 2) Glossaire rapide
+- **React** : librairie pour créer des interfaces.
+- **Vite** : outil qui lance l’app en dev et construit la version finale.
+- **MUI** : bibliothèque de composants (boutons, cards…)
+- **i18n** : traduction (français, anglais, arabe).
+- **RTL** : affichage de droite à gauche (arabe).
+
+---
+
+## 3) Structure du projet (où est quoi)
+Dossier racine : `frontend-appcoran/`
+
+- `src/main.tsx` : point d’entrée de l’app.
+- `src/app/App.tsx` : thème global + routes + couches visuelles.
+- `src/app/routes.tsx` : définition des pages (routes).
+- `src/app/pages/` : pages complètes (Home, Player, Record…).
+- `src/app/components/` : composants réutilisables (Navbar, MiniPlayer…).
+- `src/app/api/` : appels au backend.
+- `src/app/i18n/` : traductions FR / EN / AR.
+- `src/styles/` : CSS global (thème, polices).
+
+**Résultat attendu :** on sait où modifier chaque partie.
+
+---
+
+## 4) Charte graphique (thème Nuit Céleste)
+Objectif : un style islamique moderne, lisible et cohérent.
+
+### Couleurs principales
+- Fond principal : `#0B1F2A`
+- Or (accent) : `#D4AF37`
+- Texte clair : `#F8F6F1`
+
+### Polices
+- Titres : `Cormorant Garamond`
+- Texte : `Source Serif 4`
+- Arabe : `Amiri` / `Noto Naskh Arabic`
+
+### Où c’est défini
 - `src/styles/theme.css`
 - `src/styles/fonts.css`
 
-Palette principale (extraits):
-- Fond principal: `#0B1F2A`
-- Or: `#D4AF37`
-- Vert sarcelle: `#0F766E`
-- Texte clair: `#F8F6F1`
-- Texte secondaire: `rgba(248,246,241,0.7)`
+**Résultat attendu :** chaque page respecte le même style.
 
-Variables CSS:
-- `--app-bg` et `--app-pattern` pour le fond.
-- `--primary`, `--secondary`, `--border`, `--muted` pour la cohérence visuelle.
+---
 
-Typographies:
-- Corps: `Source Serif 4` → `--font-body`
-- Titres: `Cormorant Garamond` → `--font-display`
-- Arabe: `Amiri` + `Noto Naskh Arabic` → `--font-arabic`
+## 5) Routes principales
+Définies dans `src/app/routes.tsx` :
+- `/` → HomePage
+- `/login` → LoginPage
+- `/recitation/:id` → RecitationPlayer
+- `/record` → RecordPage
+- `/dashboard` → DashboardPage
+- `/profile` → ImamProfilePage
 
-Mode Nuit:
-- Toggle via `Navbar` (classe `body.night-mode`).
-- Modifie gradients et pattern dans `theme.css`.
+**Résultat attendu :** chaque lien mène à la bonne page.
 
-## 5. Architecture des pages
-Routes définies dans `src/app/routes.tsx`:
-- `/` → `HomePage`
-- `/login` → `LoginPage`
-- `/recitation/:id` → `RecitationPlayer`
-- `/record` → `RecordPage`
-- `/dashboard` → `DashboardPage`
-- `/profile` → `ImamProfilePage`
+---
 
-`AppShell`:
-- Contient `Outlet` + `MiniPlayer`.
-- Garantit que le MiniPlayer est toujours dans le contexte Router.
+## 6) Lecture audio (logique centrale)
+Le cœur audio est géré par un **AudioPlayerProvider**.
 
-## 6. Animations et Three.js
-Fichier clé: `src/app/components/VisualLayers.tsx`
+### Pourquoi un Provider ?
+- La lecture continue même si l’utilisateur change de page.
+- Un seul “player” pour toute l’app.
 
-Contenu:
-- Three.js (canvas plein écran).
-- Nuage d’étoiles (`PointsMaterial`) animé en rotation.
-- Dunes en wireframe (`PlaneGeometry`) animées par sinusoïdes.
-- SVG pattern d’arabesques en fond.
-- Calligraphies flottantes (CSS `@keyframes floatY`).
-- Watermark “HBM” aux bords, masqué au centre (mask radial).
+### Modes de lecture
+- `sequence` (par défaut)
+- `repeat-all`
+- `repeat-one`
+- `shuffle`
 
-Animations CSS (dans `theme.css`):
-- `floatY` pour flottement vertical.
-- `fadeUp` pour apparition douce.
-- `glowPulse` pour halo lumineux.
-- `starDrift` pour mouvement du ciel étoilé.
-- `shimmer` pour gradient en mouvement.
+**Résultat attendu :** lecture fluide et continue.
 
-Intégration:
-- `VisualLayers` est injecté dans `App.tsx`.
-- Le canvas est fixe avec `zIndex: 0` et `pointerEvents: none`.
+---
 
-## 7. Couche audio (lecture persistante)
-Fichier clé: `src/app/components/AudioPlayerProvider.tsx`
+## 7) MiniPlayer
+- Visible uniquement hors page de lecture.
+- Toujours synchronisé avec l’audio en cours.
+- Boutons : play/pause, prev, next, mode.
 
-Rôle:
-- Centralise un `<audio>` unique.
-- Conserve la lecture entre les pages.
-- Expose l’état via un context.
+**Résultat attendu :** le mini‑player reflète la récitation en cours.
 
-Fonctionnalités:
-- Play/pause, seek, volume.
-- Playlist globale.
-- Modes de lecture:
-  - `sequence` (par défaut).
-  - `repeat-all`.
-  - `repeat-one`.
-  - `shuffle`.
-- Arrêt automatique:
-  - Si `sequence` et fin de playlist → stop et mini-player disparaît.
+---
 
-Extrait clé:
-```tsx
-const [playbackMode, setPlaybackMode] = useState<PlaybackMode>("sequence");
-```
+## 8) Page d’accueil (HomePage)
+- Barre de recherche intelligente.
+- Tabs : Toutes / Récentes / Populaires.
+- Carrousel “constellations”.
+- Cartes de récitations avec action rapide.
 
-## 8. MiniPlayer
-Fichier clé: `src/app/components/MiniPlayer.tsx`
+**Résultat attendu :** navigation rapide et claire.
 
-Caractéristiques:
-- Visible uniquement hors page `/recitation/:id`.
-- Déplaçable (drag fluide, sans sélection de texte).
-- Redimensionnable via poignée en bas-droite.
-- Compact, discret, avec progression.
-- Boutons: prev / play-pause / next / mode.
+---
 
-## 9. RecitationPlayer
-Fichier clé: `src/app/pages/RecitationPlayer.tsx`
-
-Fonctionnalités:
-- Lecture audio via `AudioPlayerProvider`.
-- Contrôles complets (play/pause, seek, volume, next/prev).
-- Mode de lecture (icône cycle).
-- Partage, téléchargement.
-- Gestion conversion (badge).
-- MediaSession API (lockscreen controls).
-
-## 10. HomePage
-Fichier clé: `src/app/pages/HomePage.tsx`
-
-Fonctionnalités:
-- Héros + statistiques (écoutes, téléchargements).
-- Recherche intelligente (sourate, numéro, titre).
-- Tabs (Tous, Récent, Populaire).
-- Affichage en mode cartes ou liste.
-- Carousel “constellations” sans doublons.
-
-## 11. RecordPage
-Fichier clé: `src/app/pages/RecordPage.tsx`
-
-Fonctionnalités:
-- Formulaire de création audio.
-- Sélection sourate + versets dynamique.
-- Upload MP3/MP4/OGG.
+## 9) Page d’enregistrement (RecordPage)
+- Formulaire complet.
+- Sélection de sourate + versets.
+- Upload ou enregistrement direct.
 - Option basmala.
 
-## 12. DashboardPage
-Fichier clé: `src/app/pages/DashboardPage.tsx`
+**Résultat attendu :** création d’une récitation sans erreur.
 
-Fonctionnalités:
-- Statistiques globales.
-- Table de récitations.
-- Actions CRUD.
-- Graphiques (chart component).
+---
 
-## 13. Internationalisation (i18n)
-Fichier clé: `src/app/i18n/index.ts`
+## 10) Internationalisation (FR / EN / AR)
+- Fichier principal : `src/app/i18n/index.ts`
+- Le texte est traduit automatiquement.
+- En arabe, l’interface passe en **RTL**.
 
-Langues:
-- Français, Anglais, Arabe.
-- Direction RTL pour arabe.
-- Nombres localisés via `formatNumber`.
+**Résultat attendu :** 100% du texte s’adapte à la langue choisie.
 
-## 14. Exemples de code (points clés)
-Mode lecture:
-```tsx
-cyclePlaybackMode();
+---
+
+## 11) Reproduire l’interface (pas à pas)
+1) Créer un projet Vite React.
+2) Installer MUI, React Router, i18next, Three.js.
+3) Créer la structure `src/app` et `src/styles`.
+4) Ajouter le thème global et les variables CSS.
+5) Créer les pages principales.
+6) Ajouter le provider audio + mini‑player.
+7) Ajouter les routes.
+8) Connecter l’API (backend).
+
+**Résultat attendu :** une app identique au projet actuel.
+
+---
+
+## 12) Conseils simples pour éviter les bugs
+- Ne jamais changer l’ordre des hooks React.
+- Toujours vérifier que les données existent avant de les afficher.
+- Ne pas mettre de logique complexe directement dans le JSX.
+
+---
+
+## 13) Prompts IA utiles (exemples)
+**Pour une carte de récitation :**
+```
+Crée une carte MUI dans un thème nuit céleste, fond sombre, texte clair,
+accent or, hover doux, et un bouton play discret.
 ```
 
-MiniPlayer conditionnel:
-```tsx
-if (!currentRecitation || isPlayerPage) return null;
+**Pour le mini-player :**
+```
+Implémente un mini-player React persistant avec play/pause, next/prev,
+progression et mode de lecture. Design discret et compatible RTL.
 ```
 
-## 15. Prompts IA (exemples)
-Prompt UI:
-```
-Crée une card MUI dans le thème Nuit Céleste (#0B1F2A) avec bordures translucides,
-texte clair, accent or (#D4AF37) et animation de survol douce.
-```
+---
 
-Prompt Audio:
-```
-Implémente un MiniPlayer persistant dans React avec contrôles play/pause, next, previous,
-mode de lecture (sequence, repeat, shuffle) et un design discret compatible RTL.
-```
-
-Prompt Three.js:
-```
-Ajoute un fond Three.js avec étoiles en points lumineux et dunes wireframe animées.
-Le canvas doit être fixé en arrière-plan et non interactif.
-```
-
-## 16. Checklist reproduction complète
-- Thème global MUI + variables CSS.
-- i18n + RTL.
-- VisualLayers (Three.js + SVG).
-- Pages + routes.
-- API client + mappers.
-- AudioPlayerProvider + MiniPlayer.
-- Tests (Vitest).
-
-Fin de documentation.
+Fin de la documentation.

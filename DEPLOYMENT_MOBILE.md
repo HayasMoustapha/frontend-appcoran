@@ -1,145 +1,116 @@
-# Mobile Access Guide (Android / iOS)
+# Accès Mobile (Android / iPhone) — Guide ultra simple
 
-This guide explains how to access **appcoran.com** from your phone on the same Wi‑Fi network.
+Objectif : ouvrir **appcoran** sur le téléphone, **avec les données du backend**.
 
-## 1) Requirements
-- Phone and PC are on the **same Wi‑Fi**.
-- Backend running on `http://0.0.0.0:4000`
-- Frontend running on `http://0.0.0.0:5173`
+## 0) Comprendre le problème (en mots simples)
+- Le téléphone doit trouver **le backend**.
+- Si l’adresse du backend n’est pas correcte, **aucune donnée** ne s’affiche.
+- Garder le domaine `appcoran.com` demande un **DNS local** (routeur ou DNS manuel).
 
-Note: this guide is **without Docker**.
-
-Make sure frontend env points to reachable addresses:
-- If DNS is not configured, use IP:
-  - `VITE_API_BASE_URL=http://192.168.1.179:4000`
-  - `VITE_PUBLIC_APP_URL=http://192.168.1.179:5173`
-  - `VITE_PUBLIC_BASE_URL=http://192.168.1.179:4000`
-- If DNS is configured, use domains:
-  - `VITE_API_BASE_URL=http://api.appcoran.com`
-  - `VITE_PUBLIC_APP_URL=http://appcoran.com`
-  - `VITE_PUBLIC_BASE_URL=http://api.appcoran.com`
-
-## iPhone (style stable) - recommandé
-Le mode `dev` de Vite peut provoquer des styles qui disparaissent lors d’un reload iOS.
-Utilise le build de production pour une stabilité parfaite.
-
-1) Build frontend
+## 1) Prérequis indispensables
+- Le **PC** et le **téléphone** sont sur **le même Wi‑Fi**.
+- Le backend tourne et répond :
 ```bash
-npm run build
+curl -i http://192.168.1.179:4000/health
+```
+- Le frontend tourne (dev ou prod).
+
+## 2) Option la plus simple (sans domaine)
+Cette option marche **toujours**, mais on n’utilise pas `appcoran.com`.
+
+### Étapes
+1) Dans `.env` du frontend :
+```
+VITE_API_BASE_URL=http://192.168.1.179:4000
+VITE_PUBLIC_APP_URL=http://192.168.1.179:5173
+VITE_PUBLIC_BASE_URL=http://192.168.1.179:4000
+```
+2) Lancer le frontend :
+```bash
+npm run dev -- --host 0.0.0.0
+```
+3) Sur le téléphone, ouvrir :
+```
+http://192.168.1.179:5173
 ```
 
-2) Démarrer Caddy en mode production
-```bash
-caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local.prod
+**Résultat attendu :** l’app s’ouvre et les récitations apparaissent.
+
+---
+
+## 3) Option recommandée (garder appcoran.com)
+Pour garder `appcoran.com` et `api.appcoran.com`, il faut un **DNS local**.
+
+### A) Si votre routeur supporte le DNS local (idéal)
+1) Ouvrir l’interface du routeur.
+2) Créer 2 entrées DNS locales :
+   - `appcoran.com` → IP du PC (ex. : `192.168.1.179`)
+   - `api.appcoran.com` → IP du PC
+3) Sur le téléphone, laisser le DNS en **Automatique**.
+4) Ouvrir :
+```
+http://appcoran.com
 ```
 
-3) Accès depuis l’iPhone
-- `http://appcoran.com`
+**Résultat attendu :** le domaine fonctionne sans configuration sur le téléphone.
 
-4) Si les données backend ne chargent pas
-- Vérifie que `VITE_API_BASE_URL` pointe vers `http://api.appcoran.com`
-- Rebuild obligatoire après modification de `.env`:
-```bash
-npm run build
-```
+### B) Si le routeur ne supporte pas le DNS local
+Vous allez forcer le DNS **dans le téléphone** (manuel).
 
-5) Cache iOS
-- Vider l’historique Safari ou ouvrir en navigation privée
-
-## Configuration téléphone (DNS manuel)
-Comme la HomeBox T30PLUS ne gère pas les hostnames locaux, il faut forcer le DNS sur chaque appareil.
-
-### Android
-1) Wi‑Fi → Modifier réseau → Options avancées  
-2) DNS 1 : `192.168.1.179`  
+#### Android
+1) Wi‑Fi → Modifier → Options avancées
+2) DNS 1 : `192.168.1.179`
 3) DNS 2 : (laisser vide)
 
-### iPhone
-1) Wi‑Fi → (i) → Configurer DNS → Manuel  
+#### iPhone
+1) Wi‑Fi → (i) → Configurer DNS → Manuel
 2) Ajouter : `192.168.1.179`
 
-### Vérification
-Ouvrir :
+#### Vérifier
+Ouvrez dans le navigateur :
 - `http://api.appcoran.com/health`
 - `http://appcoran.com`
 
-## QR Code Wi‑Fi (optionnel)
-Un script est fourni pour générer un QR Code Wi‑Fi (incluant DNS).
+**Résultat attendu :** `/health` renvoie `{"status":"ok"}`.
 
+---
+
+## 4) iPhone : stabilité des styles (important)
+Le mode **dev** de Vite peut faire disparaître le style sur iOS.
+Solution : utiliser le **build de production**.
+
+### Étapes
+1) Build :
+```bash
+npm run build
+```
+2) Lancer Caddy :
+```bash
+caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local.prod
+```
+3) Ouvrir :
+```
+http://appcoran.com
+```
+
+**Résultat attendu :** le style reste stable même après rechargement.
+
+---
+
+## 5) Outil pratique : QR code Wi‑Fi (optionnel)
+Un script peut créer un QR code avec le Wi‑Fi + DNS.
 ```bash
 python3 /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/generate_wifi_qr.py \
   --ssid "ISCAI 4G" \
   --password "VOTRE_MOT_DE_PASSE_WIFI" \
   --dns "192.168.1.179"
 ```
+Le QR est créé ici : `frontend-appcoran/deploy/wifi-setup.png`
 
-Le QR est généré ici :
-`frontend-appcoran/deploy/wifi-setup.png`
+---
 
-## 2) Reverse proxy local (Caddy)
-Use the local proxy config:
-- `frontend-appcoran/deploy/Caddyfile.local`
-
-Install prerequisites (Linux Mint 22.3):
-```bash
-sudo apt-get update
-sudo apt-get install -y caddy dnsmasq
-```
-
-Run (frontend must listen on all interfaces):
-```bash
-caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/Caddyfile.local
-```
-
-Note: if styles don’t load on phone, ensure Vite is started with:
-```bash
-npm run dev -- --host 0.0.0.0
-```
-
-### Script automatique (recommandé)
-Un script est fourni pour tout configurer d’un coup (Caddy + dnsmasq).
-```bash
-sudo bash /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/setup-local-domain.sh 192.168.1.50
-```
-Remplace `192.168.1.50` par l’IP de ton PC.
-
-## 3) Recommended: Router DNS (Best Option)
-This keeps the domain **appcoran.com** and **api.appcoran.com**.
-
-1. Find your PC IP (example `192.168.1.25`).
-2. Open your router admin interface.
-3. Add local DNS entries:
-   - `appcoran.com` → `192.168.1.25`
-   - `api.appcoran.com` → `192.168.1.25`
-4. On your phone, keep DNS on **Automatic**.
-5. Open in phone browser:
-   - `http://appcoran.com`
-
-## 4) If Router DNS Is Not Available (dnsmasq)
-You can run a local DNS server on the PC and set it on the phone.
-
-1. Create a file `dnsmasq.conf` (same folder as this guide):
-
-```conf
-address=/appcoran.com/192.168.1.25
-address=/api.appcoran.com/192.168.1.25
-```
-
-2. Install dnsmasq:
-
-```bash
-sudo apt-get install dnsmasq
-```
-
-3. Add the config to dnsmasq:
-```bash
-sudo cp dnsmasq.conf /etc/dnsmasq.d/appcoran.conf
-sudo systemctl restart dnsmasq
-```
-
-4. Set your phone DNS to your PC IP (manual DNS).
-5. Open: `http://appcoran.com`
-
-## 5) Notes
-- Keep backend + frontend running.
-- If the phone can’t resolve the domain, check DNS settings or router cache.
+## 6) Dépannage simple
+- **Pas de données** : vérifiez `VITE_API_BASE_URL` + backend actif.
+- **Domaine ne fonctionne pas** : DNS mal configuré.
+- **iPhone sans style** : utilisez build + Caddy.
+- **Changement .env** : relancez le frontend.
