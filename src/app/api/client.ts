@@ -20,11 +20,31 @@ type RequestOptions = {
   auth?: boolean;
 };
 
-export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
+function resolveBaseUrl(
+  fallbackPort: string,
+  envValue?: string
+): string {
+  const runtimeHost =
+    typeof window !== "undefined" ? window.location.hostname : "localhost";
+  const runtimeProtocol =
+    typeof window !== "undefined" ? window.location.protocol : "http:";
 
-export const PUBLIC_BASE_URL =
-  import.meta.env.VITE_PUBLIC_BASE_URL ?? API_BASE_URL;
+  const envUrl = envValue || "";
+  if (!envUrl || envUrl.includes("localhost") || envUrl.includes("127.0.0.1")) {
+    return `${runtimeProtocol}//${runtimeHost}:${fallbackPort}`;
+  }
+  return envUrl;
+}
+
+export const API_BASE_URL = resolveBaseUrl(
+  "4000",
+  import.meta.env.VITE_API_BASE_URL
+);
+
+export const PUBLIC_BASE_URL = resolveBaseUrl(
+  "4000",
+  import.meta.env.VITE_PUBLIC_BASE_URL
+);
 
 function getLang() {
   if (typeof window === "undefined") return "fr";
