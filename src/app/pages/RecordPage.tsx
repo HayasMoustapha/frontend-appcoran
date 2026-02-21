@@ -69,6 +69,11 @@ export function RecordPage() {
   const [surahReference, setSurahReference] = useState<SurahReference[]>([]);
   const [surahLoading, setSurahLoading] = useState(true);
   const [surahError, setSurahError] = useState("");
+  const recordingSupported =
+    typeof window !== "undefined" &&
+    window.isSecureContext &&
+    Boolean(navigator.mediaDevices?.getUserMedia) &&
+    typeof MediaRecorder !== "undefined";
 
   useEffect(() => {
     let active = true;
@@ -458,6 +463,11 @@ export function RecordPage() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                   {t("record.chooseMethod")}
                 </Typography>
+                {!recordingSupported && (
+                  <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>
+                    {t("record.recordingUploadFallback")}
+                  </Alert>
+                )}
 
                 <Box
                   sx={{
@@ -473,6 +483,7 @@ export function RecordPage() {
                     size="large"
                     startIcon={<Mic />}
                     onClick={handleStartRecording}
+                    disabled={!recordingSupported}
                     sx={{
                       borderRadius: 3,
                       px: 4,
