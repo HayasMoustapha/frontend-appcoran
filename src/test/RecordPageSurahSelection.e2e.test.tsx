@@ -49,7 +49,7 @@ describe("RecordPage surah selection flow", () => {
       </MemoryRouter>
     );
 
-    const uploadTrigger = screen.getByText(/Importer un fichier/i);
+    const uploadTrigger = screen.getByRole("button", { name: /Importer un fichier/i });
     const input =
       uploadTrigger.closest("label")?.querySelector('input[type="file"]') ??
       uploadTrigger.parentElement?.querySelector('input[type="file"]');
