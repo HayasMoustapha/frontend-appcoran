@@ -55,3 +55,14 @@ Recommandé:
 - UptimeRobot sur `/health`
 - Logs centralisés (Loki / ELK)
 
+### Monitoring local (Prometheus + Grafana)
+Fichiers prêts dans `deploy/production/monitoring`:
+
+```bash
+cd deploy/production/monitoring
+docker compose -f docker-compose.monitoring.yml up -d
+```
+
+Accès:
+- Prometheus: `http://<SERVER_IP>:9090`
+- Grafana: `http://<SERVER_IP>:3000`
