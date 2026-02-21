@@ -169,11 +169,13 @@ export function RecordPage() {
   const getSupportedRecorderMimeType = () => {
     if (typeof MediaRecorder === "undefined") return "";
     const candidates = [
+      "audio/mp4;codecs=mp4a.40.2",
       "audio/webm;codecs=opus",
       "audio/webm",
       "audio/mp4",
       "audio/aac",
       "audio/mpeg",
+      "audio/x-m4a",
       "audio/ogg;codecs=opus",
       "audio/ogg"
     ];
@@ -187,8 +189,12 @@ export function RecordPage() {
 
   const handleStartRecording = async () => {
     setError("");
+    if (!window.isSecureContext) {
+      setError(t("record.recordingHttpsNotice"));
+      return;
+    }
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-      setError(t("record.recordingUnsupported"));
+      setError(t("record.recordingUploadFallback"));
       return;
     }
     try {
@@ -423,6 +429,12 @@ export function RecordPage() {
               Votre récitation a été publiée avec succès ! Redirection...
             </Alert>
           )}
+          <Alert
+            severity="info"
+            sx={{ mb: 3, borderRadius: 2, textAlign: "left" }}
+          >
+            {t("record.recordingHttpsNotice")}
+          </Alert>
 
           {/* Recording Control */}
           <Box

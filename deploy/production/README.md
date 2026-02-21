@@ -59,6 +59,9 @@ docker compose -f docker-compose.prod.yml up -d
 
 **Résultat attendu :** tous les services démarrent.
 
+**Si le build backend échoue sur `npm ci --omit=dev` :**  
+Vérifiez que l’image backend installe les outils de compilation (`python3`, `make`, `g++`) avant `npm ci`.
+
 ## 8) Vérifier que tout fonctionne
 - Backend : `https://api.appcoran.com/health`
 - Frontend : `https://appcoran.com`

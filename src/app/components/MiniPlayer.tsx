@@ -1,4 +1,11 @@
-import { Box, IconButton, LinearProgress, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  LinearProgress,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from "@mui/material";
 import {
   Pause,
   PlayArrow,
@@ -9,7 +16,8 @@ import {
   Shuffle,
   QueueMusic,
   OpenInFull,
-  Close
+  Close,
+  Remove
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router";
 import { useEffect, useRef, useState } from "react";
@@ -33,11 +41,14 @@ export function MiniPlayer() {
   } = useAudioPlayer();
 
   const [position, setPosition] = useState({ x: 16, y: 16 });
+  const [minimized, setMinimized] = useState(false);
   const draggingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
   const posRef = useRef(position);
   const targetRef = useRef<HTMLDivElement | null>(null);
   const fixedSize = { w: 450, h: 190 };
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     posRef.current = position;
@@ -72,8 +83,6 @@ export function MiniPlayer() {
   }, []);
 
   const isPlayerPage = location.pathname.startsWith("/recitation/");
-  const isHomePage = location.pathname === "/";
-  const isLoginPage = location.pathname.startsWith("/login");
   const hasStartedPlayback = hasPlaybackStarted || isPlaying || currentTime > 0;
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
@@ -112,12 +121,45 @@ export function MiniPlayer() {
     animation: isPlaying ? `miniPulse 900ms ${index * 120}ms ease-in-out infinite` : "none"
   });
 
-  if (!currentRecitation || !hasStartedPlayback || isPlayerPage || isHomePage || isLoginPage || !targetId) {
+  if (!currentRecitation || !hasStartedPlayback || isPlayerPage || !targetId) {
     return null;
   }
 
-  const effectiveWidth = fixedSize.w;
-  const effectiveHeight = fixedSize.h;
+  const effectiveWidth = isSmallScreen ? "100vw" : fixedSize.w;
+  const effectiveHeight = isSmallScreen ? 110 : fixedSize.h;
+
+  if (minimized) {
+    return (
+      <Box
+        sx={{
+          position: "fixed",
+          right: 16,
+          bottom: 16,
+          zIndex: 1300,
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          background:
+            "linear-gradient(145deg, rgba(10,25,36,0.96), rgba(9,22,32,0.9))",
+          border: "1px solid rgba(212,175,55,0.25)",
+          boxShadow: "0 10px 22px rgba(2,6,12,0.5)",
+          display: "grid",
+          placeItems: "center"
+        }}
+      >
+        <IconButton
+          onClick={() => setMinimized(false)}
+          sx={{
+            color: "rgba(246,233,198,0.92)",
+            backgroundColor: "rgba(255,255,255,0.04)",
+            "&:hover": { backgroundColor: "rgba(255,255,255,0.08)" }
+          }}
+        >
+          <OpenInFull fontSize="small" />
+        </IconButton>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -125,9 +167,9 @@ export function MiniPlayer() {
       sx={{
         position: "fixed",
         right: "auto",
-        left: 0,
-        bottom: "auto",
-        top: 0,
+        left: isSmallScreen ? 0 : 0,
+        bottom: isSmallScreen ? 0 : "auto",
+        top: isSmallScreen ? "auto" : 0,
         zIndex: 1300,
         width: effectiveWidth,
         height: effectiveHeight,
@@ -145,7 +187,7 @@ export function MiniPlayer() {
         opacity: 0.95,
         userSelect: "none",
         touchAction: "none",
-        transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+        transform: isSmallScreen ? "translate3d(0,0,0)" : `translate3d(${position.x}px, ${position.y}px, 0)`,
         willChange: "transform, width, height",
         transition: "box-shadow 240ms ease, opacity 240ms ease",
         boxSizing: "border-box",
@@ -175,6 +217,7 @@ export function MiniPlayer() {
         }
       }}
       onPointerDown={(event) => {
+        if (isSmallScreen) return;
         if ((event.target as HTMLElement)?.dataset?.resizeHandle) return;
         if ((event.target as HTMLElement)?.closest("[data-no-drag]")) return;
         event.preventDefault();
@@ -277,6 +320,16 @@ export function MiniPlayer() {
               </IconButton>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMinimized(true);
+                }}
+                sx={iconSx}
+              >
+                <Remove fontSize="small" />
+              </IconButton>
               <IconButton
                 size="small"
                 onClick={(e) => {

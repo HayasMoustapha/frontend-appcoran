@@ -76,8 +76,24 @@ function getLang() {
   return localStorage.getItem("appcoran-lang") || "fr";
 }
 
+function buildUrl(baseUrl: string, path: string) {
+  if (baseUrl.endsWith("/api") && path.startsWith("/api/")) {
+    return `${baseUrl}${path.replace(/^\/api/, "")}`;
+  }
+  if (baseUrl.endsWith("/api") && path.startsWith("/public/")) {
+    return `${baseUrl.replace(/\/api$/, "")}${path}`;
+  }
+  if (baseUrl.endsWith("/") && path.startsWith("/")) {
+    return `${baseUrl}${path.slice(1)}`;
+  }
+  return `${baseUrl}${path}`;
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const url = `${API_BASE_URL}${path}`;
+  const baseUrl = path.startsWith("/public/")
+    ? PUBLIC_BASE_URL
+    : API_BASE_URL;
+  const url = buildUrl(baseUrl, path);
   const method = options.method ?? "GET";
   const headers: Record<string, string> = {
     ...(options.headers ?? {})

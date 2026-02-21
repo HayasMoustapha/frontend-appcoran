@@ -21,7 +21,9 @@ import {
   TableHead,
   TableRow,
   Paper,
-  IconButton
+  IconButton,
+  useMediaQuery,
+  useTheme
 } from "@mui/material";
 import { Search, TrendingUp, AccessTime, Star } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
@@ -67,6 +69,8 @@ export function HomePage() {
   const { t, i18n } = useTranslation();
   const { refreshToken } = useDataRefresh();
   const { currentRecitation, isPlaying, playRecitation, togglePlay } = useAudioPlayer();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     let active = true;
@@ -944,6 +948,77 @@ export function HomePage() {
                 </Grid>
               ))}
             </Grid>
+          ) : isSmallScreen ? (
+            <Box sx={{ display: "grid", gap: 2 }}>
+              {displayedRecitations.map((recitation) => (
+                <Paper
+                  key={recitation.id}
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    background: "rgba(15, 28, 39, 0.9)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)"
+                  }}
+                >
+                  <Typography fontWeight={700} sx={{ mb: 0.5 }}>
+                    {recitation.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    {recitation.description || t("home.defaultDescription")}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gap: 0.6,
+                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                      mb: 1.4
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary">
+                      {t("home.table.surah")}
+                    </Typography>
+                    <Typography variant="body2" color="text.primary">
+                      {recitation.surah}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {t("home.table.verses")}
+                    </Typography>
+                    <Typography variant="body2" color="text.primary">
+                      {formatNumericText(recitation.ayatRange, i18n.language)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {t("home.table.date")}
+                    </Typography>
+                    <Typography variant="body2" color="text.primary">
+                      {recitation.date}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {t("home.table.listens")}
+                    </Typography>
+                    <Typography variant="body2" color="text.primary">
+                      {formatNumber(recitation.listens, i18n.language)}
+                    </Typography>
+                  </Box>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    size="small"
+                    onClick={() => navigate(`/recitation/${recitation.slug || recitation.id}`)}
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: "none",
+                      fontWeight: 700,
+                      color: "#0B1F2A",
+                      background:
+                        "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.9) 100%)"
+                    }}
+                  >
+                    {t("home.table.listen")}
+                  </Button>
+                </Paper>
+              ))}
+            </Box>
           ) : (
             <TableContainer
               component={Paper}
@@ -951,11 +1026,12 @@ export function HomePage() {
               sx={{
                 borderRadius: 4,
                 overflow: "hidden",
+                overflowX: "auto",
                 background: "rgba(15, 28, 39, 0.9)",
                 border: "1px solid rgba(255, 255, 255, 0.08)"
               }}
             >
-              <Table>
+              <Table sx={{ minWidth: 720 }}>
                 <TableHead>
                   <TableRow
                     sx={{

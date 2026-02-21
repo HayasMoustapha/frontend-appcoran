@@ -102,6 +102,10 @@ const resources = {
         subtitle: "Enregistrez et publiez votre récitation sacrée",
         recordingReady: "Prêt à enregistrer",
         recordingUnsupported: "Enregistrement audio non supporté sur ce navigateur.",
+        recordingHttpsNotice:
+          "Enregistrement disponible uniquement en HTTPS sur iOS et Android. Utilisez l'import de fichier si besoin.",
+        recordingUploadFallback:
+          "Votre navigateur ne supporte pas l'enregistrement direct. Veuillez importer un fichier audio.",
         recordingReadyToast: "Enregistrement prêt.",
         recordingDeleted: "Enregistrement supprimé.",
         chooseMethod: "Choisissez votre méthode d'enregistrement",
@@ -264,6 +268,10 @@ const resources = {
         subtitle: "Record and publish your sacred recitation",
         recordingReady: "Ready to record",
         recordingUnsupported: "Audio recording is not supported on this browser.",
+        recordingHttpsNotice:
+          "Recording is available only over HTTPS on iOS and Android. Use file upload if needed.",
+        recordingUploadFallback:
+          "Your browser does not support direct recording. Please upload an audio file.",
         recordingReadyToast: "Recording is ready.",
         recordingDeleted: "Recording deleted.",
         chooseMethod: "Choose your recording method",
@@ -426,6 +434,10 @@ const resources = {
         subtitle: "سجّل وانشر التلاوة المباركة",
         recordingReady: "جاهز للتسجيل",
         recordingUnsupported: "تسجيل الصوت غير مدعوم في هذا المتصفح.",
+        recordingHttpsNotice:
+          "التسجيل متاح فقط عبر HTTPS على iOS وAndroid. استخدم رفع ملف عند الحاجة.",
+        recordingUploadFallback:
+          "متصفحك لا يدعم التسجيل المباشر. يرجى رفع ملف صوتي.",
         recordingReadyToast: "التسجيل جاهز.",
         recordingDeleted: "تم حذف التسجيل.",
         chooseMethod: "اختر طريقة التسجيل",
