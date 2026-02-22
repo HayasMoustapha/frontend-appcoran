@@ -80,6 +80,7 @@ export function DashboardPage() {
   const [surahReference, setSurahReference] = useState<SurahReference[]>([]);
   const [surahLoading, setSurahLoading] = useState(true);
   const [cosmosBoost, setCosmosBoost] = useState(0);
+  const [isSpectacular, setIsSpectacular] = useState(true);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, recitation: Recitation) => {
     setAnchorEl(event.currentTarget);
@@ -254,7 +255,7 @@ export function DashboardPage() {
           downloads={totalDownloads}
           likes={totalLikes}
           recitations={totalRecitations}
-          mode="calm"
+          mode={isSpectacular ? "spectacular" : "calm"}
           themeMode={theme.palette.mode === "light" ? "light" : "dark"}
           boost={cosmosBoost}
         />
@@ -318,7 +319,15 @@ export function DashboardPage() {
         />
 
         <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 4, animation: "fadeUp 0.6s ease both" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              mb: 4,
+              animation: "fadeUp 0.6s ease both"
+            }}
+          >
             <Avatar
               sx={{
                 width: 80,
@@ -381,7 +390,13 @@ export function DashboardPage() {
                 boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(10px)",
-                animation: "fadeUp 0.6s ease both"
+                animation: "fadeUp 0.6s ease both",
+                transition: "transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
+                "&:hover": {
+                  transform: "translateY(-6px) scale(1.015)",
+                  borderColor: "rgba(212,175,55,0.45)",
+                  boxShadow: "0 18px 38px rgba(212,175,55,0.2)"
+                }
               }}
             >
               <CardContent>
@@ -409,7 +424,13 @@ export function DashboardPage() {
                 boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(10px)",
-                animation: "fadeUp 0.7s ease both"
+                animation: "fadeUp 0.7s ease both",
+                transition: "transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
+                "&:hover": {
+                  transform: "translateY(-6px) scale(1.015)",
+                  borderColor: "rgba(212,175,55,0.45)",
+                  boxShadow: "0 18px 38px rgba(212,175,55,0.2)"
+                }
               }}
             >
               <CardContent>
@@ -437,7 +458,13 @@ export function DashboardPage() {
                 boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(10px)",
-                animation: "fadeUp 0.8s ease both"
+                animation: "fadeUp 0.8s ease both",
+                transition: "transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
+                "&:hover": {
+                  transform: "translateY(-6px) scale(1.015)",
+                  borderColor: "rgba(212,175,55,0.45)",
+                  boxShadow: "0 18px 38px rgba(212,175,55,0.2)"
+                }
               }}
             >
               <CardContent>
@@ -465,7 +492,13 @@ export function DashboardPage() {
                 boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(10px)",
-                animation: "fadeUp 0.9s ease both"
+                animation: "fadeUp 0.9s ease both",
+                transition: "transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
+                "&:hover": {
+                  transform: "translateY(-6px) scale(1.015)",
+                  borderColor: "rgba(212,175,55,0.45)",
+                  boxShadow: "0 18px 38px rgba(212,175,55,0.2)"
+                }
               }}
             >
               <CardContent>
@@ -493,7 +526,13 @@ export function DashboardPage() {
                 boxShadow: "0 14px 32px rgba(0, 0, 0, 0.35)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 backdropFilter: "blur(10px)",
-                animation: "fadeUp 1s ease both"
+                animation: "fadeUp 1s ease both",
+                transition: "transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
+                "&:hover": {
+                  transform: "translateY(-6px) scale(1.015)",
+                  borderColor: "rgba(212,175,55,0.45)",
+                  boxShadow: "0 18px 38px rgba(212,175,55,0.2)"
+                }
               }}
             >
               <CardContent>
