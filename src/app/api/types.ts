@@ -21,6 +21,7 @@ export interface ApiAudio {
 }
 
 export interface ApiPublicAudio {
+  id: string;
   title: string;
   sourate: string;
   numero_sourate: number;

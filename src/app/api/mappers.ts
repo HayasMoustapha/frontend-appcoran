@@ -44,7 +44,7 @@ export function mapAudioToRecitation(audio: ApiAudio): Recitation {
 
 export function mapPublicAudioToRecitation(audio: ApiPublicAudio): Recitation {
   return {
-    id: audio.slug,
+    id: audio.id || audio.slug,
     slug: audio.slug,
     title: audio.title,
     surah: audio.sourate,

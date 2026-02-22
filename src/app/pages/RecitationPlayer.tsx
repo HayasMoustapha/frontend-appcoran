@@ -50,7 +50,7 @@ export function RecitationPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { refreshToken } = useDataRefresh();
+  const { refreshToken, triggerRefresh } = useDataRefresh();
   const publicAppUrl =
     import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin;
 
@@ -535,6 +535,16 @@ export function RecitationPlayer() {
                     const nextLikes = result?.like_count ?? likesCount;
                     setIsFavorite(nextLiked);
                     setLikesCount(nextLikes);
+                    setRecitation((prev) => (prev ? { ...prev, likes: nextLikes } : prev));
+                    setCurrentRecitation((prev) => (prev ? { ...prev, likes: nextLikes } : prev));
+                    setAllRecitations((prev) =>
+                      prev.map((item) =>
+                        item.id === recitation.id || item.slug === recitation.slug
+                          ? { ...item, likes: nextLikes }
+                          : item
+                      )
+                    );
+                    triggerRefresh();
                     setFavoritePulse(true);
                     window.setTimeout(() => setFavoritePulse(false), 500);
                   } catch (err) {
