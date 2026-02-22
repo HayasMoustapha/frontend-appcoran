@@ -33,12 +33,18 @@ export function DashboardCosmos({
     const container = containerRef.current;
     if (!canvas || !container) return;
 
+    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
+    const cpuCores = navigator.hardwareConcurrency || 4;
+    const isLowPower = prefersReducedMotion || deviceMemory <= 4 || cpuCores <= 4;
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.set(0, 0, 8);
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    const dpr = window.devicePixelRatio || 1;
+    renderer.setPixelRatio(isLowPower ? Math.min(1, dpr) : dpr);
 
     const group = new THREE.Group();
     scene.add(group);
@@ -132,6 +138,7 @@ export function DashboardCosmos({
     scene.add(ambient);
 
     let frameId = 0;
+    let isRunning = true;
     const pointer = { x: 0, y: 0 };
 
     const resize = () => {
@@ -151,6 +158,7 @@ export function DashboardCosmos({
     container.addEventListener("pointermove", onPointerMove);
 
     const animate = () => {
+      if (!isRunning) return;
       const baseSpeed = mode === "spectacular" ? 0.00065 : 0.00032;
       const time = performance.now() * baseSpeed;
       const boostFactor = boost ? 0.25 + boost * 0.35 : 0;
@@ -178,14 +186,50 @@ export function DashboardCosmos({
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(animate);
     };
-    animate();
+    if (!prefersReducedMotion) {
+      animate();
+    } else {
+      renderer.render(scene, camera);
+    }
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
 
+    const handleVisibility = () => {
+      const shouldRun = document.visibilityState === "visible" && !prefersReducedMotion;
+      if (shouldRun && !isRunning) {
+        isRunning = true;
+        frameId = requestAnimationFrame(animate);
+      } else if (!shouldRun && isRunning) {
+        isRunning = false;
+        cancelAnimationFrame(frameId);
+      }
+    };
+
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.some((entry) => entry.isIntersecting);
+        if (visible && !prefersReducedMotion) {
+          if (!isRunning) {
+            isRunning = true;
+            frameId = requestAnimationFrame(animate);
+          }
+        } else if (!visible) {
+          isRunning = false;
+          cancelAnimationFrame(frameId);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    intersectionObserver.observe(container);
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
+      isRunning = false;
       cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
+      intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
       container.removeEventListener("pointermove", onPointerMove);
       coreGeometry.dispose();
       coreMaterial.dispose();

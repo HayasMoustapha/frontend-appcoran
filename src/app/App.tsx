@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { RouterProvider } from "react-router";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { router } from "./routes";
 import { checkHealth } from "./api/health";
 import { isNetworkError } from "./api/client";
-import { VisualLayers } from "./components/VisualLayers";
 import { AudioPlayerProvider } from "./components/AudioPlayerProvider";
+
+const VisualLayers = lazy(() =>
+  import("./components/VisualLayers").then((mod) => ({ default: mod.VisualLayers }))
+);
 
 const theme = createTheme({
   palette: {
@@ -74,7 +77,9 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AudioPlayerProvider>
-        <VisualLayers />
+        <Suspense fallback={null}>
+          <VisualLayers />
+        </Suspense>
         <RouterProvider router={router} />
       </AudioPlayerProvider>
     </ThemeProvider>

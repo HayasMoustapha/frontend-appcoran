@@ -8,6 +8,11 @@ export function VisualLayers() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
+    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
+    const cpuCores = navigator.hardwareConcurrency || 4;
+    const isLowPower = prefersReducedMotion || deviceMemory <= 4 || cpuCores <= 4;
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
     camera.position.z = 8;
@@ -17,7 +22,8 @@ export function VisualLayers() {
       alpha: true,
       antialias: true
     });
-    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    const dpr = window.devicePixelRatio || 1;
+    renderer.setPixelRatio(isLowPower ? Math.min(1, dpr) : dpr);
 
     const starsGeometry = new THREE.BufferGeometry();
     const starCount = 450;
@@ -65,7 +71,8 @@ export function VisualLayers() {
     dunes.rotation.x = -0.55;
     scene.add(dunes);
 
-    let frameId: number;
+    let frameId = 0;
+    let isRunning = true;
 
     const resize = () => {
       const { innerWidth, innerHeight } = window;
@@ -76,6 +83,7 @@ export function VisualLayers() {
     resize();
 
     const animate = () => {
+      if (!isRunning) return;
       const time = performance.now() * 0.0003;
       stars.rotation.y = time * 0.4;
       stars.rotation.x = Math.sin(time) * 0.08;
@@ -93,12 +101,31 @@ export function VisualLayers() {
       frameId = requestAnimationFrame(animate);
     };
 
-    animate();
+    if (!prefersReducedMotion) {
+      animate();
+    } else {
+      renderer.render(scene, camera);
+    }
+
+    const handleVisibility = () => {
+      const shouldRun = document.visibilityState === "visible" && !prefersReducedMotion;
+      if (shouldRun && !isRunning) {
+        isRunning = true;
+        frameId = requestAnimationFrame(animate);
+      } else if (!shouldRun && isRunning) {
+        isRunning = false;
+        cancelAnimationFrame(frameId);
+      }
+    };
+
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
+      isRunning = false;
       cancelAnimationFrame(frameId);
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", handleVisibility);
       starsGeometry.dispose();
       starsMaterial.dispose();
       dunesGeometry.dispose();
