@@ -77,16 +77,15 @@ function getLang() {
 }
 
 function buildUrl(baseUrl: string, path: string) {
-  if (baseUrl.endsWith("/api") && path.startsWith("/api/")) {
-    return `${baseUrl}${path.replace(/^\/api/, "")}`;
+  const normalizedBase = baseUrl.replace(/\/+$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  if (normalizedBase.endsWith("/api") && normalizedPath.startsWith("/api/")) {
+    return `${normalizedBase}${normalizedPath.replace(/^\/api/, "")}`;
   }
-  if (baseUrl.endsWith("/api") && path.startsWith("/public/")) {
-    return `${baseUrl.replace(/\/api$/, "")}${path}`;
+  if (normalizedBase.endsWith("/api") && normalizedPath.startsWith("/public/")) {
+    return `${normalizedBase.replace(/\/api$/, "")}${normalizedPath}`;
   }
-  if (baseUrl.endsWith("/") && path.startsWith("/")) {
-    return `${baseUrl}${path.slice(1)}`;
-  }
-  return `${baseUrl}${path}`;
+  return `${normalizedBase}${normalizedPath}`;
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {

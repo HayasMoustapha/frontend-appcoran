@@ -44,9 +44,15 @@ vi.mock("../app/api/audios", async () => {
 });
 
 describe("RecordPage submit flow", () => {
+  const createToken = (role = "admin") => {
+    const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+    const payload = btoa(JSON.stringify({ role, exp: Math.floor(Date.now() / 1000) + 3600 }));
+    return `${header}.${payload}.signature`;
+  };
+
   beforeEach(() => {
     mockNavigate.mockReset();
-    setAuthToken("test-token");
+    setAuthToken(createToken());
   });
 
   afterEach(() => {

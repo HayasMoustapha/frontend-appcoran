@@ -5,6 +5,12 @@ import { vi } from "vitest";
 import { RecordPage } from "../app/pages/RecordPage";
 import { createMockResponse, renderWithProviders } from "./test-utils";
 
+const createToken = (role = "admin") => {
+  const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+  const payload = btoa(JSON.stringify({ role, exp: Math.floor(Date.now() / 1000) + 3600 }));
+  return `${header}.${payload}.signature`;
+};
+
 const surahReference = [
   {
     number: 1,
@@ -30,6 +36,7 @@ const surahReference = [
 
 describe("RecordPage surah selection flow", () => {
   it("enables verse selection after choosing a surah and respects verse bounds", async () => {
+    localStorage.setItem("appcoran_token", createToken());
     const fetchMock = vi.fn((input: RequestInfo) => {
       const url = typeof input === "string" ? input : input.url;
       if (url.includes("/api/surah-reference")) {
