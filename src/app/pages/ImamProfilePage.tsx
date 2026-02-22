@@ -32,7 +32,7 @@ import {
   Delete
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import type { ImamProfile } from "../domain/types";
 import { createProfile, getProfile, updateProfile } from "../api/profile";
 import { isNetworkError } from "../api/client";
@@ -42,10 +42,12 @@ import { useDataRefresh } from "../state/dataRefresh";
 
 export function ImamProfilePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t, i18n } = useTranslation();
   const { refreshToken, triggerRefresh } = useDataRefresh();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const isReadOnly = searchParams.get("view") === "public" || searchParams.get("mode") === "read";
   const [profile, setProfile] = useState<ImamProfile>({
     name: "",
     arabicName: "",
@@ -67,6 +69,7 @@ export function ImamProfilePage() {
     let active = true;
     let intervalId: number | null = null;
     const loadProfile = async () => {
+      if (isEditing) return;
       try {
         const data = await getProfile();
         if (!active) return;
@@ -98,7 +101,13 @@ export function ImamProfilePage() {
       if (intervalId) window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [i18n.language, refreshToken]);
+  }, [i18n.language, refreshToken, isEditing]);
+
+  useEffect(() => {
+    if (isReadOnly && isEditing) {
+      setIsEditing(false);
+    }
+  }, [isReadOnly, isEditing]);
 
   const handleSave = async () => {
     const formData = new FormData();
@@ -277,6 +286,7 @@ export function ImamProfilePage() {
                 </Typography>
 
                 {!isEditing ? (
+                  !isReadOnly && (
                     <Button
                       variant="contained"
                       startIcon={<Edit />}
@@ -293,6 +303,7 @@ export function ImamProfilePage() {
                     >
                     {t("profile.edit")}
                     </Button>
+                  )
                 ) : (
                   <Box
                     sx={{

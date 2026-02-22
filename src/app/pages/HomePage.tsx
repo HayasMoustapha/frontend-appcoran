@@ -917,6 +917,36 @@ export function HomePage() {
                   </Box>
                 </Grid>
               </Grid>
+
+              <Box
+                sx={{
+                  mt: 4,
+                  display: "flex",
+                  justifyContent: { xs: "center", md: "flex-start" }
+                }}
+              >
+                <Button
+                  onClick={() => navigate("/profile?view=public")}
+                  variant="contained"
+                  sx={{
+                    px: 3.5,
+                    py: 1.2,
+                    borderRadius: 999,
+                    textTransform: "none",
+                    fontWeight: 700,
+                    background:
+                      "linear-gradient(135deg, rgba(212, 175, 55, 0.95) 0%, rgba(15, 118, 110, 0.95) 100%)",
+                    color: "#0B1F2A",
+                    boxShadow: "0 12px 26px rgba(0,0,0,0.3)",
+                    "&:hover": {
+                      background:
+                        "linear-gradient(135deg, rgba(212, 175, 55, 1) 0%, rgba(15, 118, 110, 1) 100%)"
+                    }
+                  }}
+                >
+                  {t("home.learnMore", { defaultValue: "En savoir plus" })}
+                </Button>
+              </Box>
             </Box>
           </Box>
         </Box>
