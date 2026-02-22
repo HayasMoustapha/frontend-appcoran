@@ -34,6 +34,7 @@ Deux scènes 3D sont actives dans l’application :
   - étoiles réduites selon le device
   - dunes désactivées sur devices “low”
   - FPS limité + pause quand l’onglet est caché
+  - pause automatique si FPS < 20 (sécurité mobile)
   - respect de `prefers-reduced-motion`
 
 ### 2) DashboardCosmos — Header du dashboard admin
@@ -52,6 +53,13 @@ Deux scènes 3D sont actives dans l’application :
   - géométries simplifiées sur mobile
   - FPS limité + pause hors viewport
   - profil device (low/mid/high)
+  - pause automatique si FPS < 20 (sécurité mobile)
+
+## 1.1) Profiling FPS (mobile)
+```bash
+./scripts/profile-fps.sh
+```
+Le script active `VITE_DEBUG_STATS=true` et affiche le FPS dans la console.
 
 ## 2) Petit glossaire (mots techniques expliqués)
 - **Frontend** : la partie que vous voyez dans le navigateur.

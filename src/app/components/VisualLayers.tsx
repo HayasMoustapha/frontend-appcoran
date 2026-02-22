@@ -18,7 +18,8 @@ export function VisualLayers() {
     const renderer = new THREE.WebGLRenderer({
       canvas,
       alpha: true,
-      antialias: true
+      antialias: profile.tier !== "low",
+      powerPreference: profile.tier === "low" ? "low-power" : "high-performance"
     });
     renderer.setPixelRatio(profile.dpr);
 
@@ -56,7 +57,7 @@ export function VisualLayers() {
     const stars = new THREE.Points(starsGeometry, starsMaterial);
     scene.add(stars);
 
-    const dunesSegments = profile.tier === "low" ? 0 : profile.tier === "mid" ? 32 : 64;
+    const dunesSegments = profile.tier === "low" ? 0 : profile.tier === "mid" ? 24 : 48;
     const dunesGeometry =
       dunesSegments > 0 ? new THREE.PlaneGeometry(20, 6, dunesSegments, 16) : null;
     const dunesMaterial =
@@ -79,6 +80,8 @@ export function VisualLayers() {
     let lastFrame = 0;
     let fpsSamples = 0;
     let fpsAccum = 0;
+    let dynamicMaxFps = profile.maxFps;
+    let lowFpsStrikes = 0;
     const logStats = import.meta.env.VITE_DEBUG_STATS === "true";
 
     const resize = () => {
@@ -89,10 +92,13 @@ export function VisualLayers() {
     };
     resize();
 
+    let dunesFrame = 0;
+    const dunesEvery = profile.tier === "high" ? 1 : 2;
+
     const animate = (time: number) => {
       if (!isRunning) return;
       const delta = time - lastFrame;
-      const minFrame = 1000 / profile.maxFps;
+      const minFrame = 1000 / dynamicMaxFps;
       if (delta < minFrame) {
         frameId = requestAnimationFrame(animate);
         return;
@@ -102,7 +108,13 @@ export function VisualLayers() {
       stars.rotation.y = t * 0.4;
       stars.rotation.x = Math.sin(t) * 0.08;
 
-      if (dunesGeometry) {
+      if (dunesGeometry && dunesEvery > 0) {
+        dunesFrame += 1;
+        if (dunesFrame % dunesEvery !== 0) {
+          renderer.render(scene, camera);
+          frameId = requestAnimationFrame(animate);
+          return;
+        }
         const pos = dunesGeometry.attributes.position as THREE.BufferAttribute;
         for (let i = 0; i < pos.count; i++) {
           const x = pos.getX(i);
@@ -114,15 +126,31 @@ export function VisualLayers() {
       }
 
       renderer.render(scene, camera);
-      if (logStats) {
-        fpsAccum += delta;
-        fpsSamples += 1;
-        if (fpsSamples >= 60) {
-          const fps = Math.round(1000 / (fpsAccum / fpsSamples));
+      fpsAccum += delta;
+      fpsSamples += 1;
+      if (fpsSamples >= 60) {
+        const fps = Math.round(1000 / (fpsAccum / fpsSamples));
+        if (fps < profile.maxFps * 0.6) {
+          dynamicMaxFps = Math.max(18, Math.round(dynamicMaxFps - 8));
+        } else if (fps > profile.maxFps * 0.9) {
+          dynamicMaxFps = profile.maxFps;
+        }
+        if (fps < 20) {
+          lowFpsStrikes += 1;
+        } else {
+          lowFpsStrikes = 0;
+        }
+        if (logStats) {
           // eslint-disable-next-line no-console
           console.log(`[VisualLayers] FPS ~ ${fps}`);
-          fpsSamples = 0;
-          fpsAccum = 0;
+        }
+        fpsSamples = 0;
+        fpsAccum = 0;
+        if (lowFpsStrikes >= 2) {
+          isRunning = false;
+          cancelAnimationFrame(frameId);
+          renderer.render(scene, camera);
+          return;
         }
       }
       frameId = requestAnimationFrame(animate);

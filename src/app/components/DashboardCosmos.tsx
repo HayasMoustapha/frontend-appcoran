@@ -40,7 +40,12 @@ export function DashboardCosmos({
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.set(0, 0, 8);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: profile.tier !== "low",
+      powerPreference: profile.tier === "low" ? "low-power" : "high-performance"
+    });
     renderer.setPixelRatio(profile.dpr);
 
     const group = new THREE.Group();
@@ -60,7 +65,7 @@ export function DashboardCosmos({
           ring: 0x2dd4bf
         };
 
-    const coreSegments = profile.tier === "low" ? 18 : profile.tier === "mid" ? 24 : 32;
+    const coreSegments = profile.tier === "low" ? 16 : profile.tier === "mid" ? 22 : 28;
     const coreGeometry = new THREE.SphereGeometry(1.35, coreSegments, coreSegments);
     const coreMaterial = new THREE.MeshStandardMaterial({
       color: palette.core,
@@ -72,7 +77,7 @@ export function DashboardCosmos({
     const core = new THREE.Mesh(coreGeometry, coreMaterial);
     group.add(core);
 
-    const haloSegments = profile.tier === "low" ? 60 : profile.tier === "mid" ? 80 : 100;
+    const haloSegments = profile.tier === "low" ? 48 : profile.tier === "mid" ? 70 : 90;
     const haloGeometry = new THREE.TorusGeometry(2.4, 0.06, 16, haloSegments);
     const haloMaterial = new THREE.MeshBasicMaterial({
       color: palette.halo,
@@ -83,7 +88,7 @@ export function DashboardCosmos({
     halo.rotation.x = Math.PI / 2.4;
     group.add(halo);
 
-    const ringSegments = profile.tier === "low" ? 120 : profile.tier === "mid" ? 160 : 220;
+    const ringSegments = profile.tier === "low" ? 90 : profile.tier === "mid" ? 140 : 200;
     const ringGeometry = new THREE.TorusGeometry(3.2, 0.02, 16, ringSegments);
     const ringMaterial = new THREE.MeshBasicMaterial({
       color: palette.ring,
@@ -96,7 +101,7 @@ export function DashboardCosmos({
     group.add(ring);
 
     const starsGeometry = new THREE.BufferGeometry();
-    const starCount = profile.tier === "low" ? 420 : profile.tier === "mid" ? 650 : 900;
+    const starCount = profile.tier === "low" ? 300 : profile.tier === "mid" ? 520 : 780;
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
     const colorA = new THREE.Color(palette.core);
@@ -142,6 +147,8 @@ export function DashboardCosmos({
     let lastFrame = 0;
     let fpsSamples = 0;
     let fpsAccum = 0;
+    let dynamicMaxFps = profile.maxFps;
+    let lowFpsStrikes = 0;
     const logStats = import.meta.env.VITE_DEBUG_STATS === "true";
     const pointer = { x: 0, y: 0 };
 
@@ -154,17 +161,21 @@ export function DashboardCosmos({
     };
     resize();
 
+    let pointerFrame = 0;
+    const pointerEvery = profile.tier === "low" ? 3 : 1;
     const onPointerMove = (event: PointerEvent) => {
+      pointerFrame += 1;
+      if (pointerFrame % pointerEvery !== 0) return;
       const rect = container.getBoundingClientRect();
       pointer.x = ((event.clientX - rect.left) / rect.width - 0.5) * 0.8;
       pointer.y = ((event.clientY - rect.top) / rect.height - 0.5) * -0.6;
     };
-    container.addEventListener("pointermove", onPointerMove);
+    container.addEventListener("pointermove", onPointerMove, { passive: true });
 
     const animate = (time: number) => {
       if (!isRunning) return;
       const delta = time - lastFrame;
-      const minFrame = 1000 / profile.maxFps;
+      const minFrame = 1000 / dynamicMaxFps;
       if (delta < minFrame) {
         frameId = requestAnimationFrame(animate);
         return;
@@ -195,15 +206,31 @@ export function DashboardCosmos({
       camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
-      if (logStats) {
-        fpsAccum += delta;
-        fpsSamples += 1;
-        if (fpsSamples >= 60) {
-          const fps = Math.round(1000 / (fpsAccum / fpsSamples));
+      fpsAccum += delta;
+      fpsSamples += 1;
+      if (fpsSamples >= 60) {
+        const fps = Math.round(1000 / (fpsAccum / fpsSamples));
+        if (fps < profile.maxFps * 0.6) {
+          dynamicMaxFps = Math.max(18, Math.round(dynamicMaxFps - 8));
+        } else if (fps > profile.maxFps * 0.9) {
+          dynamicMaxFps = profile.maxFps;
+        }
+        if (fps < 20) {
+          lowFpsStrikes += 1;
+        } else {
+          lowFpsStrikes = 0;
+        }
+        if (logStats) {
           // eslint-disable-next-line no-console
           console.log(`[DashboardCosmos] FPS ~ ${fps}`);
-          fpsSamples = 0;
-          fpsAccum = 0;
+        }
+        fpsSamples = 0;
+        fpsAccum = 0;
+        if (lowFpsStrikes >= 2) {
+          isRunning = false;
+          cancelAnimationFrame(frameId);
+          renderer.render(scene, camera);
+          return;
         }
       }
       frameId = requestAnimationFrame(animate);

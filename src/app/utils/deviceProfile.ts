@@ -25,8 +25,9 @@ export function getDeviceProfile(): DeviceProfile {
     ? "mid"
     : "high";
 
-  const dpr = Math.min(window.devicePixelRatio || 1, tier === "high" ? 2 : 1);
-  const maxFps = tier === "low" ? 30 : tier === "mid" ? 45 : 60;
+  const maxDpr = tier === "high" ? 1.5 : tier === "mid" ? 1.25 : 1;
+  const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+  const maxFps = tier === "low" ? 24 : tier === "mid" ? 40 : 60;
 
   return { tier, maxFps, dpr, prefersReducedMotion };
 }
