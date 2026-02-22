@@ -43,8 +43,10 @@ import {
   Favorite
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
+import { DashboardCosmos } from "../components/DashboardCosmos";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "@mui/material/styles";
 import { formatNumber, formatNumericText } from "../utils/formatNumber";
 import { getDashboardOverview, getDashboardPerformance, getDashboardStats } from "../api/dashboard";
 import { isNetworkError } from "../api/client";
@@ -58,6 +60,7 @@ import { useDataRefresh } from "../state/dataRefresh";
 export function DashboardPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
   const { refreshToken, triggerRefresh } = useDataRefresh();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRecitation, setSelectedRecitation] = useState<Recitation | null>(null);
@@ -76,6 +79,7 @@ export function DashboardPage() {
   const [editSaving, setEditSaving] = useState(false);
   const [surahReference, setSurahReference] = useState<SurahReference[]>([]);
   const [surahLoading, setSurahLoading] = useState(true);
+  const [cosmosBoost, setCosmosBoost] = useState(0);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, recitation: Recitation) => {
     setAnchorEl(event.currentTarget);
@@ -245,6 +249,15 @@ export function DashboardPage() {
           overflow: "hidden"
         }}
       >
+        <DashboardCosmos
+          listens={totalListens}
+          downloads={totalDownloads}
+          likes={totalLikes}
+          recitations={totalRecitations}
+          mode="calm"
+          themeMode={theme.palette.mode === "light" ? "light" : "dark"}
+          boost={cosmosBoost}
+        />
         <Box
           sx={{
             position: "absolute",
@@ -359,6 +372,8 @@ export function DashboardPage() {
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
+              onMouseEnter={() => setCosmosBoost(1)}
+              onMouseLeave={() => setCosmosBoost(0)}
               sx={{
                 borderRadius: 3,
                 background: "rgba(15, 28, 39, 0.85)",
@@ -385,6 +400,8 @@ export function DashboardPage() {
 
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
+              onMouseEnter={() => setCosmosBoost(1)}
+              onMouseLeave={() => setCosmosBoost(0)}
               sx={{
                 borderRadius: 3,
                 background: "rgba(15, 28, 39, 0.85)",
@@ -411,6 +428,8 @@ export function DashboardPage() {
 
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
+              onMouseEnter={() => setCosmosBoost(1)}
+              onMouseLeave={() => setCosmosBoost(0)}
               sx={{
                 borderRadius: 3,
                 background: "rgba(15, 28, 39, 0.85)",
@@ -437,6 +456,8 @@ export function DashboardPage() {
 
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
+              onMouseEnter={() => setCosmosBoost(1)}
+              onMouseLeave={() => setCosmosBoost(0)}
               sx={{
                 borderRadius: 3,
                 background: "rgba(15, 28, 39, 0.85)",
@@ -463,6 +484,8 @@ export function DashboardPage() {
 
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card
+              onMouseEnter={() => setCosmosBoost(1)}
+              onMouseLeave={() => setCosmosBoost(0)}
               sx={{
                 borderRadius: 3,
                 background: "rgba(15, 28, 39, 0.85)",
@@ -546,6 +569,8 @@ export function DashboardPage() {
                         },
                         transition: "all 0.2s"
                       }}
+                      onMouseEnter={() => setCosmosBoost(0.6)}
+                      onMouseLeave={() => setCosmosBoost(0)}
                     >
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
                       <Box sx={{ flexGrow: 1 }}>
