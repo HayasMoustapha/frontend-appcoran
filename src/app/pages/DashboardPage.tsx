@@ -109,7 +109,7 @@ export function DashboardPage() {
         const [overviewData, performanceData, all] = await Promise.all([
           getDashboardOverview(),
           getDashboardPerformance(),
-          listAudios()
+          listAudios({ includeProcessing: true })
         ]);
         if (!active) return;
         setOverview(overviewData);
@@ -749,6 +749,28 @@ export function DashboardPage() {
                               background: "rgba(212, 175, 55, 0.2)",
                               color: "text.primary",
                               border: "1px solid rgba(212, 175, 55, 0.4)"
+                            }}
+                          />
+                        )}
+                        {recitation.processingStatus === "processing" && (
+                          <Chip
+                            label={t("dashboard.processing")}
+                            size="small"
+                            sx={{
+                              background: "rgba(59, 130, 246, 0.2)",
+                              color: "rgba(191, 219, 254, 0.95)",
+                              border: "1px solid rgba(59, 130, 246, 0.5)"
+                            }}
+                          />
+                        )}
+                        {recitation.processingStatus === "failed" && (
+                          <Chip
+                            label={t("dashboard.processingFailed")}
+                            size="small"
+                            sx={{
+                              background: "rgba(239, 68, 68, 0.2)",
+                              color: "rgba(254, 202, 202, 0.95)",
+                              border: "1px solid rgba(239, 68, 68, 0.5)"
                             }}
                           />
                         )}

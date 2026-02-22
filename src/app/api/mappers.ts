@@ -38,6 +38,8 @@ export function mapAudioToRecitation(audio: ApiAudio): Recitation {
     views: audio.view_count ?? 0,
     shares: audio.share_count ?? 0,
     isComplete: Boolean(audio.is_complete),
+    processingStatus: audio.processing_status,
+    processingError: audio.processing_error ?? null,
     description: audio.description ?? ""
   };
 }

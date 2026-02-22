@@ -8,8 +8,12 @@ export type UpdateAudioPayload = Partial<ApiAudio> & {
   versetEnd?: number;
 };
 
-export async function listAudios() {
-  return get<ApiAudio[]>("/api/audios");
+export async function listAudios(params?: { sourate?: string; includeProcessing?: boolean }) {
+  const query = new URLSearchParams();
+  if (params?.sourate) query.set("sourate", params.sourate);
+  if (params?.includeProcessing) query.set("includeProcessing", "true");
+  const suffix = query.toString();
+  return get<ApiAudio[]>(`/api/audios${suffix ? `?${suffix}` : ""}`);
 }
 
 export async function searchAudios(params: Record<string, string | number | undefined>) {
