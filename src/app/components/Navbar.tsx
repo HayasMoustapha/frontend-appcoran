@@ -170,6 +170,25 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
             </Button>
           )}
           
+          {isAdmin && (
+            <Button
+              color="inherit"
+              onClick={() => navigate("/dashboard")}
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                fontWeight: 600,
+                border: "1px solid rgba(212, 175, 55, 0.4)",
+                color: "text.primary",
+                "&:hover": {
+                  background: "rgba(212, 175, 55, 0.12)",
+                },
+              }}
+            >
+              {t("navbar.imamSpace")}
+            </Button>
+          )}
+
           {isImam && isAdmin && (
             <>
               <Button
