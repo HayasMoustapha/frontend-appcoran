@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import {
   Container,
   Box,
@@ -55,6 +55,7 @@ import { ensureArray } from "../utils/ensureArray";
 import type { DashboardOverview, Recitation, DashboardPerformanceItem, SurahReference } from "../domain/types";
 import { getSurahReference } from "../api/surahReference";
 import { useDataRefresh } from "../state/dataRefresh";
+import { getUserRole, isAdminRole } from "../api/storage";
 
 const DashboardCosmos = lazy(() =>
   import("../components/DashboardCosmos").then((mod) => ({ default: mod.DashboardCosmos }))
@@ -65,6 +66,7 @@ export function DashboardPage() {
   const { t, i18n } = useTranslation();
   const theme = useTheme();
   const { refreshToken, triggerRefresh } = useDataRefresh();
+  const isAdmin = useMemo(() => isAdminRole(getUserRole()), []);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRecitation, setSelectedRecitation] = useState<Recitation | null>(null);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
@@ -96,6 +98,10 @@ export function DashboardPage() {
   };
 
   useEffect(() => {
+    if (!isAdmin) {
+      navigate("/", { replace: true });
+      return;
+    }
     let active = true;
     let intervalId: number | null = null;
     const loadDashboard = async () => {
@@ -130,7 +136,7 @@ export function DashboardPage() {
       if (intervalId) window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [i18n.language, refreshToken]);
+  }, [i18n.language, refreshToken, isAdmin, navigate]);
 
   useEffect(() => {
     let active = true;
@@ -240,7 +246,7 @@ export function DashboardPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", background: "transparent" }}>
-      <Navbar isImam />
+      <Navbar isImam={isAdmin} />
 
       {/* Hero Section */}
       <Box

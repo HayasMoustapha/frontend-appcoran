@@ -34,11 +34,12 @@ import {
 import { Navbar } from "../components/Navbar";
 import { useNavigate, useSearchParams } from "react-router";
 import type { ImamProfile } from "../domain/types";
-import { createProfile, getProfile, updateProfile } from "../api/profile";
+import { createProfile, getProfile, getPublicProfile, updateProfile } from "../api/profile";
 import { isNetworkError } from "../api/client";
 import { mapPublicProfile } from "../api/mappers";
 import { useTranslation } from "react-i18next";
 import { useDataRefresh } from "../state/dataRefresh";
+import { getUserRole, isAdminRole } from "../api/storage";
 
 export function ImamProfilePage() {
   const navigate = useNavigate();
@@ -46,8 +47,9 @@ export function ImamProfilePage() {
   const { t, i18n } = useTranslation();
   const { refreshToken, triggerRefresh } = useDataRefresh();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const isAdmin = isAdminRole(getUserRole());
   const [isEditing, setIsEditing] = useState(false);
-  const isReadOnly = searchParams.get("view") === "public" || searchParams.get("mode") === "read";
+  const isReadOnly = !isAdmin || searchParams.get("view") === "public" || searchParams.get("mode") === "read";
   const [profile, setProfile] = useState<ImamProfile>({
     name: "",
     arabicName: "",
@@ -71,7 +73,7 @@ export function ImamProfilePage() {
     const loadProfile = async () => {
       if (isEditing) return;
       try {
-        const data = await getProfile();
+        const data = isReadOnly ? await getPublicProfile() : await getProfile();
         if (!active) return;
       if (data) {
         const mapped = mapPublicProfile(data);
@@ -101,7 +103,7 @@ export function ImamProfilePage() {
       if (intervalId) window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [i18n.language, refreshToken, isEditing]);
+  }, [i18n.language, refreshToken, isEditing, isReadOnly]);
 
   useEffect(() => {
     if (isReadOnly && isEditing) {
@@ -222,7 +224,7 @@ export function ImamProfilePage() {
 
   return (
     <Box sx={{ minHeight: "100vh", background: "#0B1F2A" }}>
-      <Navbar isImam />
+      <Navbar isImam={isAdmin && !isReadOnly} />
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Button

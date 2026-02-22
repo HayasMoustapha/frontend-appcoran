@@ -14,6 +14,7 @@ import { Menu as MenuIcon, AccountCircle, NightsStay } from "@mui/icons-material
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getUserRole, isAdminRole } from "../api/storage";
 
 interface NavbarProps {
   showAuth?: boolean;
@@ -23,6 +24,7 @@ interface NavbarProps {
 export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const isAdmin = isAdminRole(getUserRole());
   const [nightMode, setNightMode] = useState(() => {
     if (typeof window === "undefined") return true;
     return localStorage.getItem("appcoran-night") !== "false";
@@ -149,7 +151,7 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
               <NightsStay />
             </IconButton>
           </Tooltip>
-          {showAuth && !isImam && (
+          {showAuth && !isAdmin && (
             <Button
               color="inherit"
               onClick={() => navigate("/login")}
@@ -168,7 +170,7 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
             </Button>
           )}
           
-          {isImam && (
+          {isImam && isAdmin && (
             <>
               <Button
                 color="inherit"

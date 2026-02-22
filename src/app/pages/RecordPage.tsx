@@ -38,6 +38,7 @@ import type { SurahReference } from "../domain/types";
 import { useTranslation } from "react-i18next";
 import { formatNumber } from "../utils/formatNumber";
 import { useDataRefresh } from "../state/dataRefresh";
+import { getUserRole, isAdminRole } from "../api/storage";
 
 type RecordingState = "idle" | "recording" | "recorded" | "uploading" | "success";
 
@@ -45,6 +46,7 @@ export function RecordPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { triggerRefresh } = useDataRefresh();
+  const isAdmin = useMemo(() => isAdminRole(getUserRole()), []);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -76,6 +78,10 @@ export function RecordPage() {
     typeof MediaRecorder !== "undefined";
 
   useEffect(() => {
+    if (!isAdmin) {
+      navigate("/", { replace: true });
+      return;
+    }
     let active = true;
     const loadSurahReference = async () => {
       try {
@@ -98,7 +104,7 @@ export function RecordPage() {
     return () => {
       active = false;
     };
-  }, [i18n.language]);
+  }, [i18n.language, isAdmin, navigate]);
 
   useEffect(() => {
     if (!uploadedFile) {
@@ -376,7 +382,7 @@ export function RecordPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", background: "#0B1F2A" }}>
-      <Navbar isImam />
+      <Navbar isImam={isAdmin} />
 
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Button
