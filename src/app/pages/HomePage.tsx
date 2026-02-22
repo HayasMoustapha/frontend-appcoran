@@ -1351,6 +1351,18 @@ export function HomePage() {
             <Typography variant="caption" sx={{ opacity: 0.7 }}>
               {t("home.footerCopyright")}
             </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                mt: 0.75,
+                opacity: 0.35,
+                letterSpacing: "0.35em",
+                fontSize: "0.65rem"
+              }}
+            >
+              HBM
+            </Typography>
           </Box>
         </Container>
       </Box>

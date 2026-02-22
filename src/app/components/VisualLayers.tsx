@@ -247,33 +247,6 @@ export function VisualLayers() {
               "radial-gradient(circle at center, transparent 0%, transparent 40%, rgba(0,0,0,0.6) 55%, rgba(0,0,0,1) 80%)"
           }}
         >
-          {[
-            { top: "8%", left: "6%" },
-            { top: "12%", left: "84%" },
-            { top: "48%", left: "3%" },
-            { top: "52%", left: "90%" },
-            { top: "82%", left: "8%" },
-            { top: "86%", left: "78%" }
-          ].map((item, index) => (
-            <span
-              key={`hbm-${item.top}-${item.left}`}
-              style={{
-                position: "absolute",
-                top: item.top,
-                left: item.left,
-                color: "rgba(248, 246, 241, 0.14)",
-                fontSize: "clamp(12px, 1.1vw, 18px)",
-                fontFamily: "var(--font-heading)",
-                letterSpacing: "0.28em",
-                textTransform: "uppercase",
-                opacity: 0.55,
-                animation: `floatY ${14 + index * 2}s ease-in-out infinite`,
-                mixBlendMode: "screen"
-              }}
-            >
-              HBM
-            </span>
-          ))}
         </div>
       </div>
     </>
