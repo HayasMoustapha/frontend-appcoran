@@ -15,6 +15,44 @@ Le formulaire d’upload accepte :
 **Note mobile :** sur iOS/Android, l’enregistrement direct peut nécessiter **HTTPS**.  
 Si l’enregistrement n’est pas supporté, l’upload reste disponible.
 
+## Scénarios ThreeJS (3D) implémentés
+Deux scènes 3D sont actives dans l’application :
+
+### 1) VisualLayers — Fond global (toutes les pages)
+- **Fichier** : `frontend-appcoran/src/app/components/VisualLayers.tsx`
+- **Où c’est utilisé** : `frontend-appcoran/src/app/App.tsx` (lazy load)
+- **Rendu** : champ d’étoiles + dunes wireframe
+- **Objets principaux** :
+  - `THREE.Scene`, `PerspectiveCamera`, `WebGLRenderer`
+  - `THREE.Points` (étoiles)
+  - `THREE.PlaneGeometry` + `MeshBasicMaterial` (dunes)
+- **Animations** :
+  - rotation lente des étoiles (X/Y)
+  - ondulation des dunes (sin/cos)
+- **Performance** :
+  - profils device (low/mid/high) via `getDeviceProfile()`
+  - étoiles réduites selon le device
+  - dunes désactivées sur devices “low”
+  - FPS limité + pause quand l’onglet est caché
+  - respect de `prefers-reduced-motion`
+
+### 2) DashboardCosmos — Header du dashboard admin
+- **Fichier** : `frontend-appcoran/src/app/components/DashboardCosmos.tsx`
+- **Où c’est utilisé** : `frontend-appcoran/src/app/pages/DashboardPage.tsx` (lazy load)
+- **Rendu** : noyau lumineux + anneaux + champ d’étoiles
+- **Objets principaux** :
+  - `SphereGeometry` (noyau)
+  - `TorusGeometry` (anneaux)
+  - `Points` (étoiles)
+  - `PointLight` + `AmbientLight`
+- **Animations** :
+  - rotation/pulsation liées aux statistiques (écoutes, téléchargements, likes)
+  - réaction légère au mouvement de souris (parallax)
+- **Performance** :
+  - géométries simplifiées sur mobile
+  - FPS limité + pause hors viewport
+  - profil device (low/mid/high)
+
 ## 2) Petit glossaire (mots techniques expliqués)
 - **Frontend** : la partie que vous voyez dans le navigateur.
 - **Backend** : le serveur qui stocke et envoie les données.
