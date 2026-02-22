@@ -8,12 +8,14 @@ import {
   Avatar,
   Tooltip,
   Select,
+  Menu,
   MenuItem
 } from "@mui/material";
 import { Menu as MenuIcon, AccountCircle, NightsStay } from "@mui/icons-material";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { logout } from "../api/auth";
 import { getUserRole, isAdminRole } from "../api/storage";
 
 interface NavbarProps {
@@ -25,6 +27,8 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isAdmin = isAdminRole(getUserRole());
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
   const [nightMode, setNightMode] = useState(() => {
     if (typeof window === "undefined") return true;
     return localStorage.getItem("appcoran-night") !== "false";
@@ -214,11 +218,12 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
               
               <IconButton
                 color="inherit"
-                onClick={() => navigate("/profile")}
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+                aria-label="menu-admin"
               >
-                <Avatar 
-                  sx={{ 
-                    width: 36, 
+                <Avatar
+                  sx={{
+                    width: 36,
                     height: 36,
                     bgcolor: "rgba(212, 175, 55, 0.25)",
                     border: "2px solid rgba(255, 255, 255, 0.25)"
@@ -228,6 +233,38 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
                   <AccountCircle />
                 </Avatar>
               </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={menuOpen}
+                onClose={() => setAnchorEl(null)}
+                PaperProps={{
+                  sx: {
+                    mt: 1,
+                    background: "rgba(15, 28, 39, 0.98)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    color: "text.primary",
+                    minWidth: 180
+                  }
+                }}
+              >
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    navigate("/profile");
+                  }}
+                >
+                  {t("profile.title")}
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setAnchorEl(null);
+                    logout();
+                    navigate("/", { replace: true });
+                  }}
+                >
+                  {t("navbar.logout", { defaultValue: "Se déconnecter" })}
+                </MenuItem>
+              </Menu>
             </>
           )}
         </Box>
