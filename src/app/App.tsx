@@ -58,6 +58,17 @@ const theme = createTheme({
   shape: {
     borderRadius: 12,
   },
+  components: {
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          background: "rgba(11, 31, 42, 0.96)",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
+          backdropFilter: "blur(10px)"
+        }
+      }
+    }
+  }
 });
 
 export default function App() {

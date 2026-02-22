@@ -347,12 +347,16 @@ export function RecordPage() {
     formData.append("isComplete", String(isComplete));
 
     try {
-      await uploadAudio(formData, (progress) => {
+      const audio = await uploadAudio(formData, (progress) => {
         setUploadProgress(Math.min(99, Math.max(0, progress)));
       });
       setUploadProgress(100);
       setRecordingState("success");
-      setToast({ message: t("record.publishedSuccess"), severity: "success" });
+      const isProcessing = audio?.processing_status && audio.processing_status !== "ready";
+      setToast({
+        message: isProcessing ? t("record.processingNotice") : t("record.publishedSuccess"),
+        severity: "success"
+      });
       triggerRefresh();
       setTimeout(() => {
         navigate("/dashboard");

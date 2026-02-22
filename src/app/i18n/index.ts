@@ -129,8 +129,8 @@ const resources = {
         addBasmala: "Inclure la Basmala",
         publishing: "Publication en cours...",
         publish: "Publier la récitation",
-        publishedSuccess: "Récitation publiée avec succès."
-        ,
+        publishedSuccess: "Récitation publiée avec succès.",
+        processingNotice: "Traitement en cours. La récitation sera disponible dans quelques instants.",
         publishFailed: "Publication impossible"
       },
       player: {
@@ -302,8 +302,8 @@ const resources = {
         addBasmala: "Include Basmala",
         publishing: "Publishing...",
         publish: "Publish recitation",
-        publishedSuccess: "Recitation published successfully."
-        ,
+        publishedSuccess: "Recitation published successfully.",
+        processingNotice: "Processing in progress. The recitation will be available shortly.",
         publishFailed: "Publishing failed"
       },
       player: {
@@ -475,8 +475,8 @@ const resources = {
         addBasmala: "إضافة البسملة",
         publishing: "جارٍ النشر...",
         publish: "نشر التلاوة",
-        publishedSuccess: "تم نشر التلاوة بنجاح."
-        ,
+        publishedSuccess: "تم نشر التلاوة بنجاح.",
+        processingNotice: "المعالجة جارية. ستكون التلاوة متاحة بعد قليل.",
         publishFailed: "تعذر النشر"
       },
       player: {
