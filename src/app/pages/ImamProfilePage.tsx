@@ -227,7 +227,7 @@ export function ImamProfilePage() {
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Button
           startIcon={<ArrowBack />}
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate(isReadOnly ? "/" : "/dashboard")}
           sx={{
             mb: 3,
             fontWeight: 600,
@@ -235,7 +235,7 @@ export function ImamProfilePage() {
             textTransform: "none"
           }}
         >
-          {t("profile.back")}
+          {isReadOnly ? t("profile.backHome", { defaultValue: "Retour à l'accueil" }) : t("profile.back")}
         </Button>
 
         <Paper
