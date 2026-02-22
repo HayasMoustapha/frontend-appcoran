@@ -44,6 +44,26 @@ export default defineConfig({
     },
   },
 
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('three')) return 'three';
+          if (id.includes('@mui') || id.includes('@emotion') || id.includes('@popperjs')) {
+            return 'mui';
+          }
+          if (id.includes('react-router')) return 'router';
+          if (id.includes('i18next') || id.includes('react-i18next')) return 'i18n';
+          if (id.includes('date-fns')) return 'date';
+          if (id.includes('recharts')) return 'charts';
+          if (id.includes('react')) return 'react';
+          return 'vendor';
+        }
+      }
+    }
+  },
+
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 })

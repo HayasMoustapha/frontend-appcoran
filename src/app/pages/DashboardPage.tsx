@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import {
   Container,
   Box,
@@ -43,7 +43,6 @@ import {
   Favorite
 } from "@mui/icons-material";
 import { Navbar } from "../components/Navbar";
-import { DashboardCosmos } from "../components/DashboardCosmos";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
@@ -56,6 +55,10 @@ import { ensureArray } from "../utils/ensureArray";
 import type { DashboardOverview, Recitation, DashboardPerformanceItem, SurahReference } from "../domain/types";
 import { getSurahReference } from "../api/surahReference";
 import { useDataRefresh } from "../state/dataRefresh";
+
+const DashboardCosmos = lazy(() =>
+  import("../components/DashboardCosmos").then((mod) => ({ default: mod.DashboardCosmos }))
+);
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -250,15 +253,17 @@ export function DashboardPage() {
           overflow: "hidden"
         }}
       >
-        <DashboardCosmos
-          listens={totalListens}
-          downloads={totalDownloads}
-          likes={totalLikes}
-          recitations={totalRecitations}
-          mode={isSpectacular ? "spectacular" : "calm"}
-          themeMode={theme.palette.mode === "light" ? "light" : "dark"}
-          boost={cosmosBoost}
-        />
+        <Suspense fallback={null}>
+          <DashboardCosmos
+            listens={totalListens}
+            downloads={totalDownloads}
+            likes={totalLikes}
+            recitations={totalRecitations}
+            mode={isSpectacular ? "spectacular" : "calm"}
+            themeMode={theme.palette.mode === "light" ? "light" : "dark"}
+            boost={cosmosBoost}
+          />
+        </Suspense>
         <Box
           sx={{
             position: "absolute",
