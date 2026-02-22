@@ -246,7 +246,7 @@ export function DashboardPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", background: "transparent" }}>
-      <Navbar isImam={isAdmin} />
+      <Navbar isImam={isAdmin} showAdminPortal={false} />
 
       {/* Hero Section */}
       <Box

@@ -21,9 +21,10 @@ import { getUserRole, isAdminRole } from "../api/storage";
 interface NavbarProps {
   showAuth?: boolean;
   isImam?: boolean;
+  showAdminPortal?: boolean;
 }
 
-export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
+export function Navbar({ showAuth = true, isImam = false, showAdminPortal = true }: NavbarProps) {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isAdmin = isAdminRole(getUserRole());
@@ -174,7 +175,7 @@ export function Navbar({ showAuth = true, isImam = false }: NavbarProps) {
             </Button>
           )}
           
-          {isAdmin && (
+          {isAdmin && showAdminPortal && (
             <Button
               color="inherit"
               onClick={() => navigate("/dashboard")}

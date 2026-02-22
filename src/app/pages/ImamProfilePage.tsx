@@ -224,7 +224,7 @@ export function ImamProfilePage() {
 
   return (
     <Box sx={{ minHeight: "100vh", background: "#0B1F2A" }}>
-      <Navbar isImam={isAdmin && !isReadOnly} />
+      <Navbar isImam={isAdmin && !isReadOnly} showAdminPortal={false} />
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Button
