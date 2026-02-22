@@ -39,6 +39,10 @@ export const router = createBrowserRouter([
         Component: withSuspense(LoginPage),
       },
       {
+        path: "portal",
+        Component: withSuspense(LoginPage),
+      },
+      {
         path: "recitation/:id",
         Component: withSuspense(RecitationPlayer),
       },

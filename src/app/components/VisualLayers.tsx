@@ -56,18 +56,23 @@ export function VisualLayers() {
     const stars = new THREE.Points(starsGeometry, starsMaterial);
     scene.add(stars);
 
-    const dunesSegments = profile.tier === "low" ? 24 : profile.tier === "mid" ? 40 : 64;
-    const dunesGeometry = new THREE.PlaneGeometry(20, 6, dunesSegments, 16);
-    const dunesMaterial = new THREE.MeshBasicMaterial({
-      color: 0x0f2f3b,
-      transparent: true,
-      opacity: 0.5,
-      wireframe: true
-    });
-    const dunes = new THREE.Mesh(dunesGeometry, dunesMaterial);
-    dunes.position.set(0, -3.5, -2.5);
-    dunes.rotation.x = -0.55;
-    scene.add(dunes);
+    const dunesSegments = profile.tier === "low" ? 0 : profile.tier === "mid" ? 32 : 64;
+    const dunesGeometry =
+      dunesSegments > 0 ? new THREE.PlaneGeometry(20, 6, dunesSegments, 16) : null;
+    const dunesMaterial =
+      dunesGeometry && new THREE.MeshBasicMaterial({
+        color: 0x0f2f3b,
+        transparent: true,
+        opacity: 0.5,
+        wireframe: true
+      });
+    const dunes =
+      dunesGeometry && dunesMaterial ? new THREE.Mesh(dunesGeometry, dunesMaterial) : null;
+    if (dunes) {
+      dunes.position.set(0, -3.5, -2.5);
+      dunes.rotation.x = -0.55;
+      scene.add(dunes);
+    }
 
     let frameId = 0;
     let isRunning = true;
@@ -97,14 +102,16 @@ export function VisualLayers() {
       stars.rotation.y = t * 0.4;
       stars.rotation.x = Math.sin(t) * 0.08;
 
-      const pos = dunesGeometry.attributes.position as THREE.BufferAttribute;
-      for (let i = 0; i < pos.count; i++) {
-        const x = pos.getX(i);
-        const y = pos.getY(i);
-        const z = Math.sin(x * 0.4 + t * 4) * 0.15 + Math.cos(y * 0.6 + t * 3) * 0.12;
-        pos.setZ(i, z);
+      if (dunesGeometry) {
+        const pos = dunesGeometry.attributes.position as THREE.BufferAttribute;
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i);
+          const y = pos.getY(i);
+          const z = Math.sin(x * 0.4 + t * 4) * 0.15 + Math.cos(y * 0.6 + t * 3) * 0.12;
+          pos.setZ(i, z);
+        }
+        pos.needsUpdate = true;
       }
-      pos.needsUpdate = true;
 
       renderer.render(scene, camera);
       if (logStats) {
@@ -148,8 +155,8 @@ export function VisualLayers() {
       document.removeEventListener("visibilitychange", handleVisibility);
       starsGeometry.dispose();
       starsMaterial.dispose();
-      dunesGeometry.dispose();
-      dunesMaterial.dispose();
+      if (dunesGeometry) dunesGeometry.dispose();
+      if (dunesMaterial) dunesMaterial.dispose();
       renderer.dispose();
     };
   }, []);
