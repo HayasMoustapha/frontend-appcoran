@@ -37,8 +37,16 @@ export function getAuthPayload(): AuthPayload | null {
   }
 }
 
+export function isTokenExpired(payload?: AuthPayload | null) {
+  if (!payload?.exp) return false;
+  const now = Math.floor(Date.now() / 1000);
+  return payload.exp <= now;
+}
+
 export function getUserRole(): string | null {
-  return getAuthPayload()?.role ?? null;
+  const payload = getAuthPayload();
+  if (!payload || isTokenExpired(payload)) return null;
+  return payload.role ?? null;
 }
 
 export function isAdminRole(role?: string | null) {
