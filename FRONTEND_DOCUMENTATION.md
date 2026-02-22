@@ -147,14 +147,39 @@ Le cœur audio est géré par un **AudioPlayerProvider**.
 
 ---
 
-## 12) Conseils simples pour éviter les bugs
+## 12) Optimisation Three.js (mobile)
+Pour éviter la surchauffe sur smartphones/tablettes, un **profil device** est utilisé :
+- **Low‑power** : moins de polygones, textures légères, DPR réduit, FPS ~30.
+- **Mid** : compromis, FPS ~45.
+- **High** : rendu complet, FPS ~60.
+
+Fichier central :
+- `src/app/utils/deviceProfile.ts`
+
+Comportements clés :
+- DPR adaptatif (évite la résolution desktop sur mobile)
+- Segments réduits (sphères / tores / dunes)
+- Moins d’étoiles
+- Throttling FPS
+- Pause automatique quand l’onglet est masqué
+
+### Mode debug FPS
+```bash
+VITE_DEBUG_STATS=true npm run dev
+```
+
+**Résultat attendu :** animations fluides sans surchauffe.
+
+---
+
+## 13) Conseils simples pour éviter les bugs
 - Ne jamais changer l’ordre des hooks React.
 - Toujours vérifier que les données existent avant de les afficher.
 - Ne pas mettre de logique complexe directement dans le JSX.
 
 ---
 
-## 13) Prompts IA utiles (exemples)
+## 14) Prompts IA utiles (exemples)
 **Pour une carte de récitation :**
 ```
 Crée une carte MUI dans un thème nuit céleste, fond sombre, texte clair,

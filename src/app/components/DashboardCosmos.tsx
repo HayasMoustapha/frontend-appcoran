@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { getDeviceProfile } from "../utils/deviceProfile";
 
 interface DashboardCosmosProps {
   listens: number;
@@ -33,18 +34,14 @@ export function DashboardCosmos({
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
-    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
-    const cpuCores = navigator.hardwareConcurrency || 4;
-    const isLowPower = prefersReducedMotion || deviceMemory <= 4 || cpuCores <= 4;
+    const profile = getDeviceProfile();
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.set(0, 0, 8);
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    const dpr = window.devicePixelRatio || 1;
-    renderer.setPixelRatio(isLowPower ? Math.min(1, dpr) : dpr);
+    renderer.setPixelRatio(profile.dpr);
 
     const group = new THREE.Group();
     scene.add(group);
@@ -63,7 +60,8 @@ export function DashboardCosmos({
           ring: 0x2dd4bf
         };
 
-    const coreGeometry = new THREE.SphereGeometry(1.35, 32, 32);
+    const coreSegments = profile.tier === "low" ? 18 : profile.tier === "mid" ? 24 : 32;
+    const coreGeometry = new THREE.SphereGeometry(1.35, coreSegments, coreSegments);
     const coreMaterial = new THREE.MeshStandardMaterial({
       color: palette.core,
       emissive: palette.emissive,
@@ -74,7 +72,8 @@ export function DashboardCosmos({
     const core = new THREE.Mesh(coreGeometry, coreMaterial);
     group.add(core);
 
-    const haloGeometry = new THREE.TorusGeometry(2.4, 0.06, 16, 100);
+    const haloSegments = profile.tier === "low" ? 60 : profile.tier === "mid" ? 80 : 100;
+    const haloGeometry = new THREE.TorusGeometry(2.4, 0.06, 16, haloSegments);
     const haloMaterial = new THREE.MeshBasicMaterial({
       color: palette.halo,
       transparent: true,
@@ -84,7 +83,8 @@ export function DashboardCosmos({
     halo.rotation.x = Math.PI / 2.4;
     group.add(halo);
 
-    const ringGeometry = new THREE.TorusGeometry(3.2, 0.02, 16, 220);
+    const ringSegments = profile.tier === "low" ? 120 : profile.tier === "mid" ? 160 : 220;
+    const ringGeometry = new THREE.TorusGeometry(3.2, 0.02, 16, ringSegments);
     const ringMaterial = new THREE.MeshBasicMaterial({
       color: palette.ring,
       transparent: true,
@@ -96,7 +96,7 @@ export function DashboardCosmos({
     group.add(ring);
 
     const starsGeometry = new THREE.BufferGeometry();
-    const starCount = 900;
+    const starCount = profile.tier === "low" ? 420 : profile.tier === "mid" ? 650 : 900;
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
     const colorA = new THREE.Color(palette.core);
@@ -139,6 +139,10 @@ export function DashboardCosmos({
 
     let frameId = 0;
     let isRunning = true;
+    let lastFrame = 0;
+    let fpsSamples = 0;
+    let fpsAccum = 0;
+    const logStats = import.meta.env.VITE_DEBUG_STATS === "true";
     const pointer = { x: 0, y: 0 };
 
     const resize = () => {
@@ -157,10 +161,17 @@ export function DashboardCosmos({
     };
     container.addEventListener("pointermove", onPointerMove);
 
-    const animate = () => {
+    const animate = (time: number) => {
       if (!isRunning) return;
+      const delta = time - lastFrame;
+      const minFrame = 1000 / profile.maxFps;
+      if (delta < minFrame) {
+        frameId = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrame = time;
       const baseSpeed = mode === "spectacular" ? 0.00065 : 0.00032;
-      const time = performance.now() * baseSpeed;
+      const t = time * baseSpeed;
       const boostFactor = boost ? 0.25 + boost * 0.35 : 0;
       const { listens, downloads, likes, recitations } = metricsRef.current;
       const energy =
@@ -168,26 +179,37 @@ export function DashboardCosmos({
         Math.log10(likes + 1) * 0.18 +
         Math.log10(recitations + 1) * 0.12;
 
-      core.scale.setScalar(1 + Math.sin(time * 2) * 0.035 + energy * 0.03 + boostFactor * 0.02);
+      core.scale.setScalar(1 + Math.sin(t * 2) * 0.035 + energy * 0.03 + boostFactor * 0.02);
       coreMaterial.emissiveIntensity = 0.35 + energy * 0.3 + boostFactor * 0.35;
 
-      group.rotation.y = time * (mode === "spectacular" ? 1.1 : 0.6) + energy * 0.2;
-      group.rotation.x = Math.sin(time * 0.6) * (mode === "spectacular" ? 0.2 : 0.12);
-      halo.rotation.z = time * (mode === "spectacular" ? 1.6 : 0.8);
-      ring.rotation.z = -time * (mode === "spectacular" ? 1.1 : 0.5);
+      group.rotation.y = t * (mode === "spectacular" ? 1.1 : 0.6) + energy * 0.2;
+      group.rotation.x = Math.sin(t * 0.6) * (mode === "spectacular" ? 0.2 : 0.12);
+      halo.rotation.z = t * (mode === "spectacular" ? 1.6 : 0.8);
+      ring.rotation.z = -t * (mode === "spectacular" ? 1.1 : 0.5);
 
-      stars.rotation.y = time * 0.12 + energy * 0.1 + boostFactor * 0.06;
-      stars.rotation.x = Math.sin(time * 0.4) * 0.05;
+      stars.rotation.y = t * 0.12 + energy * 0.1 + boostFactor * 0.06;
+      stars.rotation.x = Math.sin(t * 0.4) * 0.05;
 
       camera.position.x += (pointer.x - camera.position.x) * 0.03;
       camera.position.y += (pointer.y - camera.position.y) * 0.03;
       camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
+      if (logStats) {
+        fpsAccum += delta;
+        fpsSamples += 1;
+        if (fpsSamples >= 60) {
+          const fps = Math.round(1000 / (fpsAccum / fpsSamples));
+          // eslint-disable-next-line no-console
+          console.log(`[DashboardCosmos] FPS ~ ${fps}`);
+          fpsSamples = 0;
+          fpsAccum = 0;
+        }
+      }
       frameId = requestAnimationFrame(animate);
     };
-    if (!prefersReducedMotion) {
-      animate();
+    if (!profile.prefersReducedMotion) {
+      frameId = requestAnimationFrame(animate);
     } else {
       renderer.render(scene, camera);
     }
@@ -196,7 +218,7 @@ export function DashboardCosmos({
     resizeObserver.observe(container);
 
     const handleVisibility = () => {
-      const shouldRun = document.visibilityState === "visible" && !prefersReducedMotion;
+      const shouldRun = document.visibilityState === "visible" && !profile.prefersReducedMotion;
       if (shouldRun && !isRunning) {
         isRunning = true;
         frameId = requestAnimationFrame(animate);
@@ -209,7 +231,7 @@ export function DashboardCosmos({
     const intersectionObserver = new IntersectionObserver(
       (entries) => {
         const visible = entries.some((entry) => entry.isIntersecting);
-        if (visible && !prefersReducedMotion) {
+        if (visible && !profile.prefersReducedMotion) {
           if (!isRunning) {
             isRunning = true;
             frameId = requestAnimationFrame(animate);

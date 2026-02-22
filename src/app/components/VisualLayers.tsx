@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { getDeviceProfile } from "../utils/deviceProfile";
 
 export function VisualLayers() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -8,10 +9,7 @@ export function VisualLayers() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
-    const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
-    const cpuCores = navigator.hardwareConcurrency || 4;
-    const isLowPower = prefersReducedMotion || deviceMemory <= 4 || cpuCores <= 4;
+    const profile = getDeviceProfile();
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
@@ -22,11 +20,10 @@ export function VisualLayers() {
       alpha: true,
       antialias: true
     });
-    const dpr = window.devicePixelRatio || 1;
-    renderer.setPixelRatio(isLowPower ? Math.min(1, dpr) : dpr);
+    renderer.setPixelRatio(profile.dpr);
 
     const starsGeometry = new THREE.BufferGeometry();
-    const starCount = 450;
+    const starCount = profile.tier === "low" ? 220 : profile.tier === "mid" ? 320 : 450;
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
 
@@ -59,7 +56,8 @@ export function VisualLayers() {
     const stars = new THREE.Points(starsGeometry, starsMaterial);
     scene.add(stars);
 
-    const dunesGeometry = new THREE.PlaneGeometry(20, 6, 64, 16);
+    const dunesSegments = profile.tier === "low" ? 24 : profile.tier === "mid" ? 40 : 64;
+    const dunesGeometry = new THREE.PlaneGeometry(20, 6, dunesSegments, 16);
     const dunesMaterial = new THREE.MeshBasicMaterial({
       color: 0x0f2f3b,
       transparent: true,
@@ -73,6 +71,10 @@ export function VisualLayers() {
 
     let frameId = 0;
     let isRunning = true;
+    let lastFrame = 0;
+    let fpsSamples = 0;
+    let fpsAccum = 0;
+    const logStats = import.meta.env.VITE_DEBUG_STATS === "true";
 
     const resize = () => {
       const { innerWidth, innerHeight } = window;
@@ -82,33 +84,51 @@ export function VisualLayers() {
     };
     resize();
 
-    const animate = () => {
+    const animate = (time: number) => {
       if (!isRunning) return;
-      const time = performance.now() * 0.0003;
-      stars.rotation.y = time * 0.4;
-      stars.rotation.x = Math.sin(time) * 0.08;
+      const delta = time - lastFrame;
+      const minFrame = 1000 / profile.maxFps;
+      if (delta < minFrame) {
+        frameId = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrame = time;
+      const t = time * 0.0003;
+      stars.rotation.y = t * 0.4;
+      stars.rotation.x = Math.sin(t) * 0.08;
 
       const pos = dunesGeometry.attributes.position as THREE.BufferAttribute;
       for (let i = 0; i < pos.count; i++) {
         const x = pos.getX(i);
         const y = pos.getY(i);
-        const z = Math.sin(x * 0.4 + time * 4) * 0.15 + Math.cos(y * 0.6 + time * 3) * 0.12;
+        const z = Math.sin(x * 0.4 + t * 4) * 0.15 + Math.cos(y * 0.6 + t * 3) * 0.12;
         pos.setZ(i, z);
       }
       pos.needsUpdate = true;
 
       renderer.render(scene, camera);
+      if (logStats) {
+        fpsAccum += delta;
+        fpsSamples += 1;
+        if (fpsSamples >= 60) {
+          const fps = Math.round(1000 / (fpsAccum / fpsSamples));
+          // eslint-disable-next-line no-console
+          console.log(`[VisualLayers] FPS ~ ${fps}`);
+          fpsSamples = 0;
+          fpsAccum = 0;
+        }
+      }
       frameId = requestAnimationFrame(animate);
     };
 
-    if (!prefersReducedMotion) {
-      animate();
+    if (!profile.prefersReducedMotion) {
+      frameId = requestAnimationFrame(animate);
     } else {
       renderer.render(scene, camera);
     }
 
     const handleVisibility = () => {
-      const shouldRun = document.visibilityState === "visible" && !prefersReducedMotion;
+      const shouldRun = document.visibilityState === "visible" && !profile.prefersReducedMotion;
       if (shouldRun && !isRunning) {
         isRunning = true;
         frameId = requestAnimationFrame(animate);
