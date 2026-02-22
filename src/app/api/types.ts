@@ -18,7 +18,7 @@ export interface ApiAudio {
   like_count?: number;
   duration_seconds?: number | null;
   is_complete?: boolean | null;
-  processing_status?: "ready" | "processing" | "failed";
+  processing_status?: "uploaded" | "queued" | "processing" | "completed" | "failed" | "ready";
   processing_error?: string | null;
   processing_started_at?: string | null;
   processing_completed_at?: string | null;

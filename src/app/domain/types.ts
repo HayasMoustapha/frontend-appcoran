@@ -15,7 +15,7 @@ export interface Recitation {
   shares?: number;
   isFavorite?: boolean;
   isComplete?: boolean;
-  processingStatus?: "ready" | "processing" | "failed";
+  processingStatus?: "uploaded" | "queued" | "processing" | "completed" | "failed" | "ready";
   processingError?: string | null;
   description?: string | null;
   streamUrl?: string;

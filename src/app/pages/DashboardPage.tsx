@@ -752,6 +752,17 @@ export function DashboardPage() {
                             }}
                           />
                         )}
+                        {recitation.processingStatus === "queued" && (
+                          <Chip
+                            label={t("dashboard.processingQueued")}
+                            size="small"
+                            sx={{
+                              background: "rgba(14, 116, 144, 0.2)",
+                              color: "rgba(186, 230, 253, 0.95)",
+                              border: "1px solid rgba(14, 116, 144, 0.5)"
+                            }}
+                          />
+                        )}
                         {recitation.processingStatus === "processing" && (
                           <Chip
                             label={t("dashboard.processing")}

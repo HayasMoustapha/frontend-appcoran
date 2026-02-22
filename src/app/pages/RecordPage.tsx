@@ -352,7 +352,9 @@ export function RecordPage() {
       });
       setUploadProgress(100);
       setRecordingState("success");
-      const isProcessing = audio?.processing_status && audio.processing_status !== "ready";
+      const status = audio?.processing_status;
+      const isProcessing =
+        status && !["ready", "completed", "failed"].includes(status);
       setToast({
         message: isProcessing ? t("record.processingNotice") : t("record.publishedSuccess"),
         severity: "success"
