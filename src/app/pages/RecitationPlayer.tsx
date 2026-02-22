@@ -87,6 +87,15 @@ export function RecitationPlayer() {
     cyclePlaybackMode
   } = useAudioPlayer();
 
+  const favoriteTargetId = useMemo(() => {
+    if (!recitation) return null;
+    const isUuid = (value?: string | null) =>
+      Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value));
+    if (isUuid(recitation.id)) return recitation.id;
+    const match = allRecitations.find((item) => item.slug && item.slug === recitation.slug);
+    return match?.id ?? null;
+  }, [recitation, allRecitations]);
+
   useEffect(() => {
     let active = true;
     const loadRecitations = async () => {
@@ -135,7 +144,7 @@ export function RecitationPlayer() {
         const result = await listFavoriteAudios();
         if (!active) return;
         const ids = result?.audioIds ?? [];
-        setIsFavorite(ids.includes(recitation.id) || (recitation.slug ? ids.includes(recitation.slug) : false));
+        setIsFavorite(Boolean(favoriteTargetId && ids.includes(favoriteTargetId)));
       } catch {
         // ignore favorites fetch errors on public page
       }
@@ -144,7 +153,7 @@ export function RecitationPlayer() {
     return () => {
       active = false;
     };
-  }, [recitation?.id, recitation?.slug]);
+  }, [recitation?.id, recitation?.slug, favoriteTargetId]);
 
   useEffect(() => {
     if (!recitation) return;
@@ -529,8 +538,12 @@ export function RecitationPlayer() {
                     setToast({ message: t("login.failed"), severity: "error" });
                     return;
                   }
+                  if (!favoriteTargetId) {
+                    setToast({ message: t("player.notFound"), severity: "error" });
+                    return;
+                  }
                   try {
-                    const result = await toggleFavoriteAudio(recitation.id);
+                    const result = await toggleFavoriteAudio(favoriteTargetId);
                     const nextLiked = result?.liked ?? !isFavorite;
                     const nextLikes = result?.like_count ?? likesCount;
                     setIsFavorite(nextLiked);
@@ -539,7 +552,7 @@ export function RecitationPlayer() {
                     setCurrentRecitation((prev) => (prev ? { ...prev, likes: nextLikes } : prev));
                     setAllRecitations((prev) =>
                       prev.map((item) =>
-                        item.id === recitation.id || item.slug === recitation.slug
+                        item.id === favoriteTargetId || item.slug === recitation.slug
                           ? { ...item, likes: nextLikes }
                           : item
                       )
