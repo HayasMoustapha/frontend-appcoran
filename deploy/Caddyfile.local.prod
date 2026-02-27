@@ -2,7 +2,7 @@
   auto_https off
 }
 
-http://appcoran.com, http://localhost, http://127.0.0.1, http://192.168.1.179 {
+http://appcoran.com, http://localhost, http://127.0.0.1, http://192.168.1.200 {
   encode zstd gzip
 
   handle /api/* {

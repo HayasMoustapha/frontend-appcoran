@@ -19,7 +19,7 @@ export default defineConfig({
       'api.appcoran.com',
       'localhost',
       '127.0.0.1',
-      '192.168.1.179'
+      '192.168.1.200'
     ],
     hmr: {
       host: 'appcoran.com',

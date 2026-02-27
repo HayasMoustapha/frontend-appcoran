@@ -11,7 +11,7 @@ Objectif : ouvrir **appcoran** sur le téléphone, **avec les données du backen
 - Le **PC** et le **téléphone** sont sur **le même Wi‑Fi**.
 - Le backend tourne et répond :
 ```bash
-curl -i http://192.168.1.179:4000/health
+curl -i http://192.168.1.200:4000/health
 ```
 - Le frontend tourne (dev ou prod).
 
@@ -35,7 +35,7 @@ sudo caddy run --config /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/de
 ```
 4) Sur le téléphone, ouvrir :
 ```
-http://192.168.1.179
+http://192.168.1.200
 ```
 
 **Résultat attendu :** l’app s’ouvre et les récitations apparaissent.
@@ -48,7 +48,7 @@ Pour garder `appcoran.com` et `api.appcoran.com`, il faut un **DNS local**.
 ### A) Si votre routeur supporte le DNS local (idéal)
 1) Ouvrir l’interface du routeur.
 2) Créer 2 entrées DNS locales :
-   - `appcoran.com` → IP du PC (ex. : `192.168.1.179`)
+   - `appcoran.com` → IP du PC (ex. : `192.168.1.200`)
    - `api.appcoran.com` → IP du PC
 3) Sur le téléphone, laisser le DNS en **Automatique**.
 4) Ouvrir :
@@ -63,12 +63,12 @@ Vous allez forcer le DNS **dans le téléphone** (manuel).
 
 #### Android
 1) Wi‑Fi → Modifier → Options avancées
-2) DNS 1 : `192.168.1.179`
+2) DNS 1 : `192.168.1.200`
 3) DNS 2 : (laisser vide)
 
 #### iPhone
 1) Wi‑Fi → (i) → Configurer DNS → Manuel
-2) Ajouter : `192.168.1.179`
+2) Ajouter : `192.168.1.200`
 
 #### Vérifier
 Ouvrez dans le navigateur :
@@ -107,7 +107,7 @@ Un script peut créer un QR code avec le Wi‑Fi + DNS.
 python3 /home/hbelkassim/dev/isca/app-coran/frontend-appcoran/deploy/generate_wifi_qr.py \
   --ssid "ISCAI 4G" \
   --password "VOTRE_MOT_DE_PASSE_WIFI" \
-  --dns "192.168.1.179"
+  --dns "192.168.1.200"
 ```
 Le QR est créé ici : `frontend-appcoran/deploy/wifi-setup.png`
 

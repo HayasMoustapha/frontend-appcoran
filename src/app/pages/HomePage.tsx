@@ -1270,10 +1270,24 @@ export function HomePage() {
                       </TableCell>
                       <TableCell align="right">
                         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                          <IconButton size="small" onClick={() => handleDownload(recitation)}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDownload(recitation)}
+                            sx={{
+                              color: "rgba(255,255,255,0.88)",
+                              "&:hover": { color: "rgba(255,255,255,0.98)" }
+                            }}
+                          >
                             <Download fontSize="small" />
                           </IconButton>
-                          <IconButton size="small" onClick={() => handleShare(recitation)}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleShare(recitation)}
+                            sx={{
+                              color: "rgba(255,255,255,0.88)",
+                              "&:hover": { color: "rgba(255,255,255,0.98)" }
+                            }}
+                          >
                             <Share fontSize="small" />
                           </IconButton>
                           <IconButton
